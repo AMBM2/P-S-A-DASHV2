@@ -103,7 +103,19 @@ export function NewsManager() {
                 <div className="min-w-0">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
-                    <Badge tone="slate">{catLabel(n.category)}</Badge>
+                    <select
+                      value={n.category}
+                      onChange={(e) => upsert("news", { ...n, category: e.target.value })}
+                      onClick={(e) => e.stopPropagation()}
+                      className="cursor-pointer rounded-full border border-gold-400/25 bg-obsidian-900/80 px-2 py-0.5 text-xs text-gold-200 outline-none focus:border-gold-400/70"
+                      title="تغيير الفئة"
+                    >
+                      {cats.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {lang === "ar" ? c.labelAr : c.label}
+                        </option>
+                      ))}
+                    </select>
                     <Badge tone={n.status === "published" ? "green" : n.status === "draft" ? "slate" : "amber"}>
                       {AR.newsStatus[n.status] || n.status}
                     </Badge>
