@@ -36,6 +36,12 @@ export function NewsManager() {
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<News | null>(null);
   const [form, setForm] = useState(emptyForm());
+  const cats = settings.newsCategories || [];
+
+  const catLabel = (cid: string) => {
+    const c = cats.find((x) => x.id === cid);
+    return lang === "ar" ? c?.labelAr || AR.category[cid] || cid : c?.label || cid;
+  };
 
   const openNew = () => {
     setEditing(null);
@@ -97,7 +103,7 @@ export function NewsManager() {
                 <div className="min-w-0">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
-                    <Badge tone="slate">{AR.category[n.category] || n.category}</Badge>
+                    <Badge tone="slate">{catLabel(n.category)}</Badge>
                     <Badge tone={n.status === "published" ? "green" : n.status === "draft" ? "slate" : "amber"}>
                       {AR.newsStatus[n.status] || n.status}
                     </Badge>
@@ -144,10 +150,11 @@ export function NewsManager() {
           </Field>
           <Field label="الفئة">
             <Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as any })}>
-              <option value="general">عام</option>
-              <option value="operational">عملياتي</option>
-              <option value="urgent">عاجل</option>
-              <option value="internal">داخلي</option>
+              {cats.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {lang === "ar" ? c.labelAr : c.label}
+                </option>
+              ))}
             </Select>
           </Field>
           <Field label="الأولوية">

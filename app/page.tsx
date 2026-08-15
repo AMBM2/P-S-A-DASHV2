@@ -1,21 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck } from "lucide-react";
+import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, ProgressBar, EmptyState } from "@/components/ui";
 import { timeAgo, number } from "@/lib/format";
 import { AR } from "@/lib/ar";
 import { RANKS } from "@/lib/seed";
-
-const CATS = [
-  { id: "all", labelAr: "الكل", label: "All" },
-  { id: "urgent", labelAr: "عاجل", label: "Urgent" },
-  { id: "operational", labelAr: "عملياتي", label: "Operational" },
-  { id: "general", labelAr: "عام", label: "General" },
-  { id: "internal", labelAr: "داخلي", label: "Internal" },
-];
 
 const PRIORITY_TONE: Record<string, any> = {
   critical: "rose",
@@ -31,6 +24,12 @@ export default function HomePage() {
 
   const lang = settings.language;
   const onDuty = officers.filter((o) => o.status === "on-duty").length;
+  const cats = settings.newsCategories || [];
+
+  const catLabel = (cid: string) => {
+    const c = cats.find((x) => x.id === cid);
+    return lang === "ar" ? c?.labelAr || AR.category[cid] || cid : c?.label || cid;
+  };
 
   const filtered = useMemo(() => {
     return news
@@ -42,7 +41,7 @@ export default function HomePage() {
         return s.includes(q.toLowerCase());
       })
       .sort((a, b) => Number(b.pinned) - Number(a.pinned) || +new Date(b.publishedAt) - +new Date(a.publishedAt));
-  }, [news, cat, q]);
+  }, [news, cat, q, cats]);
 
   const totalRanked = RANKS.reduce((sum, r) => sum + officers.filter((o) => o.rankId === r.id).length, 0) || 1;
 
@@ -132,7 +131,7 @@ export default function HomePage() {
                 />
               </div>
               <div className="flex flex-wrap gap-2">
-                {CATS.map((c) => (
+                {[{ id: "all", labelAr: "الكل", label: "All" }, ...cats].map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setCat(c.id)}
@@ -160,41 +159,66 @@ export default function HomePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                 >
-                  <Card hover className="flex gap-5">
-                    {n.image && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={n.image}
-                        alt=""
-                        className="hidden h-28 w-28 shrink-0 rounded-xl border border-gold-400/15 object-cover sm:block"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
-                        <Badge tone="slate">{AR.category[n.category] || n.category}</Badge>
-                        {n.pinned && (
-                          <span className="flex items-center gap-1 text-xs text-gold-300">
-                            <Pin size={12} /> {lang === "ar" ? "مثبت" : "Pinned"}
-                          </span>
+                  <Link href={`/news/${n.id}`} className="block group">
+                    <Card hover className="overflow-hidden">
+                      {n.image && (
+                        <div className="relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={n.image}
+                            alt=""
+                            className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-48"
+                          />
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-900 via-obsidian-900/30 to-transparent" />
+                          <div className="absolute right-3 top-3 flex gap-2">
+                            <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
+                            <Badge tone="slate">{catLabel(n.category)}</Badge>
+                          </div>
+                          {n.pinned && (
+                            <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-gold-400/40 bg-black/50 px-2 py-1 text-[11px] text-gold-200 backdrop-blur">
+                              <Pin size={11} /> {lang === "ar" ? "مثبت" : "Pinned"}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="p-5">
+                        {!n.image && (
+                          <div className="mb-2 flex flex-wrap items-center gap-2">
+                            <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
+                            <Badge tone="slate">{catLabel(n.category)}</Badge>
+                            {n.pinned && (
+                              <span className="flex items-center gap-1 text-xs text-gold-300">
+                                <Pin size={12} /> {lang === "ar" ? "مثبت" : "Pinned"}
+                              </span>
+                            )}
+                          </div>
                         )}
+                        <h3 className="mb-2 font-display text-lg font-bold leading-snug text-white transition-colors group-hover:text-gold-200">
+                          {lang === "ar" ? n.titleAr : n.title}
+                        </h3>
+                        <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-zinc-400">
+                          {lang === "ar" ? n.bodyAr : n.body}
+                        </p>
+                        <div className="flex items-center justify-between border-t border-gold-400/10 pt-3 text-xs text-zinc-500">
+                          <span>
+                            {timeAgo(n.publishedAt)} · {n.author}
+                          </span>
+                          <span className="flex items-center gap-3">
+                            <span className="flex items-center gap-1">
+                              <Eye size={13} /> {number(n.views)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MessageSquare size={13} />
+                            </span>
+                            <span className="flex items-center gap-1 text-gold-300 transition-transform group-hover:translate-x-[-3px]">
+                              {lang === "ar" ? "اقرأ الخبر" : "Read"}
+                              <ChevronLeft size={14} className="rtl:rotate-180" />
+                            </span>
+                          </span>
+                        </div>
                       </div>
-                      <h3 className="mb-1 font-display text-lg font-bold leading-snug text-white">
-                        {lang === "ar" ? n.titleAr : n.title}
-                      </h3>
-                      <p className="mb-2 line-clamp-3 text-sm leading-relaxed text-zinc-400">
-                        {lang === "ar" ? n.bodyAr : n.body}
-                      </p>
-                      <div className="flex items-center justify-between border-t border-gold-400/10 pt-2 text-xs text-zinc-500">
-                        <span>
-                          {timeAgo(n.publishedAt)} · {n.author}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Eye size={13} /> {number(n.views)}
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 </motion.div>
               ))}
             </div>

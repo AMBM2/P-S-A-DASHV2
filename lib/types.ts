@@ -59,7 +59,7 @@ export type News = {
   titleAr: string;
   body: string;
   bodyAr: string;
-  category: "general" | "operational" | "urgent" | "internal";
+  category: string;
   priority: "low" | "normal" | "high" | "critical";
   author: string;
   publishedAt: string;
@@ -68,6 +68,20 @@ export type News = {
   image?: string;
   views: number;
   commentsEnabled: boolean;
+};
+
+export type NewsComment = {
+  id: string;
+  newsId: string;
+  author: string;
+  text: string;
+  createdAt: string;
+};
+
+export type NewsCategory = {
+  id: string;
+  labelAr: string;
+  label: string;
 };
 
 export type MilitaryCode = {
@@ -110,4 +124,5 @@ export type Settings = {
     text: string;
     videoUrl: string;
   };
+  newsCategories?: NewsCategory[];
 };

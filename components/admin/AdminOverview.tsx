@@ -15,6 +15,9 @@ import {
   KeyRound,
   Music2,
   MonitorPlay,
+  Tags,
+  Plus,
+  X,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Button, Card, Stat, Badge } from "@/components/ui";
@@ -66,6 +69,7 @@ function MediaToggle({
 export function AdminOverview() {
   const { news, officers, codes, leaders, audit, settings, updateSettings, exportJSON, resetData } = useStore();
   const router = useRouter();
+  const lang = settings.language;
   const [confirmReset, setConfirmReset] = useState(false);
   const [newKey, setNewKey] = useState("");
   const [keyMsg, setKeyMsg] = useState("");
@@ -79,6 +83,26 @@ export function AdminOverview() {
   const [welcomeMode, setWelcomeMode] = useState<"url" | "upload">(
     isYoutubeUrl(settings.welcome?.videoUrl) ? "url" : "upload"
   );
+  const [newCatAr, setNewCatAr] = useState("");
+  const [newCatEn, setNewCatEn] = useState("");
+
+  const addCategory = () => {
+    const labelAr = newCatAr.trim();
+    const label = newCatEn.trim() || newCatAr.trim();
+    if (!labelAr) return;
+    const id = labelAr.replace(/\s+/g, "-").toLowerCase() || `cat-${Date.now()}`;
+    const current = settings.newsCategories || [];
+    if (current.some((c) => c.id === id || c.labelAr === labelAr)) return;
+    updateSettings({ newsCategories: [...current, { id, labelAr, label }] });
+    setNewCatAr("");
+    setNewCatEn("");
+  };
+
+  const removeCategory = (id: string) => {
+    const current = settings.newsCategories || [];
+    if (current.length <= 1) return;
+    updateSettings({ newsCategories: current.filter((c) => c.id !== id) });
+  };
 
   const handleWelcomeVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -225,6 +249,52 @@ export function AdminOverview() {
             </p>
             <Button variant="danger" onClick={logout}>تسجيل الخروج</Button>
           </div>
+        </div>
+      </Card>
+
+      <Card className="mt-4">
+        <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
+          <Tags size={18} /> أقسام الأخبار
+        </h3>
+        <p className="mb-3 text-xs text-zinc-500">
+          أضف أو احذف أقسام الأخبار — تظهر للزوار كفلاتر في الرئيسية.
+        </p>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {(settings.newsCategories || []).map((c) => (
+            <span
+              key={c.id}
+              className="flex items-center gap-1.5 rounded-full border border-gold-400/25 bg-gold-400/5 px-3 py-1 text-xs text-gold-200"
+            >
+              {lang === "ar" ? c.labelAr : c.label}
+              <button
+                onClick={() => removeCategory(c.id)}
+                className="text-zinc-500 transition-colors hover:text-rose-300"
+                aria-label="حذف القسم"
+              >
+                <X size={13} />
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="text"
+            value={newCatAr}
+            onChange={(e) => setNewCatAr(e.target.value)}
+            placeholder="اسم القسم (عربي) — مثال: زيارات القطاعات"
+            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+          />
+          <input
+            type="text"
+            value={newCatEn}
+            onChange={(e) => setNewCatEn(e.target.value)}
+            placeholder="English label (اختياري)"
+            dir="ltr"
+            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+          />
+          <Button onClick={addCategory}>
+            <Plus size={15} /> إضافة
+          </Button>
         </div>
       </Card>
 

@@ -54,6 +54,15 @@ const DEFAULT_SETTINGS: Settings = {
     text: "نرحب بكم في بوابة الأمن العام الرسمية. تفضلوا باستكشاف خدماتنا.",
     videoUrl: "https://www.youtube.com/embed/ecdPScS0MKo",
   },
+  newsCategories: [
+    { id: "general", labelAr: "عام", label: "General" },
+    { id: "ziyarat", labelAr: "زيارات القطاعات", label: "Sector Visits" },
+    { id: "mudamat", labelAr: "مداهمات", label: "Raids" },
+    { id: "tamshit", labelAr: "تمشيط", label: "Sweeps" },
+    { id: "urgent", labelAr: "عاجل", label: "Urgent" },
+    { id: "operational", labelAr: "عملياتي", label: "Operational" },
+    { id: "internal", labelAr: "داخلي", label: "Internal" },
+  ],
 };
 
 const TABLE: Record<keyof Collections, string> = {
