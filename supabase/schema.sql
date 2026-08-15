@@ -17,6 +17,7 @@ create table if not exists public.news (
   pinned boolean not null default false,
   status text not null default 'draft',
   image text,
+  images jsonb default '[]'::jsonb,
   views integer not null default 0,
   "commentsEnabled" boolean not null default true
 );

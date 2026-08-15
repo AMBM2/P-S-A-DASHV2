@@ -182,7 +182,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         : [item, ...list]) as never[];
     });
     addAudit(existing ? "Updated" : "Created", key);
-    supabase.from(TABLE[key]).upsert(item as object).then(() => {});
+    supabase.from(TABLE[key]).upsert(item as object).then(({ error }) => {
+      if (error) console.error(`upsert ${key} failed:`, error.message);
+    });
   };
 
   const remove = <K extends keyof Collections>(key: K, id: string) => {
@@ -196,7 +198,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       (prev as unknown as { id: string }[]).filter((x) => x.id !== id) as never[]
     );
     addAudit("Deleted", key);
-    supabase.from(TABLE[key]).delete().eq("id", id).then(() => {});
+    supabase.from(TABLE[key]).delete().eq("id", id).then(({ error }) => {
+      if (error) console.error(`delete ${key} failed:`, error.message);
+    });
   };
 
   const updateSettings = (patch: Partial<Settings>) => {
