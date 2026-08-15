@@ -154,13 +154,7 @@ export function NewsManager() {
           <Field label="المحتوى (عربي)" className="md:col-span-2">
             <Textarea value={form.bodyAr} onChange={(e) => setForm({ ...form, bodyAr: e.target.value })} />
           </Field>
-          <Field label="Title (EN)">
-            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          </Field>
-          <Field label="Body (EN)">
-            <Textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
-          </Field>
-          <Field label="الفئة">
+          <Field label="الفئة" className="md:col-span-2">
             <Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as any })}>
               {cats.map((c) => (
                 <option key={c.id} value={c.id}>

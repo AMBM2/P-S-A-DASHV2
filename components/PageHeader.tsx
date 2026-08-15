@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { LanguageToggle } from "./LanguageToggle";
 
 export function PageHeader({
   title,
@@ -26,7 +25,6 @@ export function PageHeader({
         {subtitle && <p className="mt-1 max-w-2xl text-sm text-zinc-400">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-3">
-        <LanguageToggle />
         {action}
       </div>
     </div>

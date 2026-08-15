@@ -83,18 +83,14 @@ export function LeadershipManager() {
 
       <Modal open={modal} onClose={() => setModal(false)} title={editing ? "تعديل القائد" : "إضافة قائد"}>
         <div className="grid gap-4">
-          <Field label={lang === "ar" ? "الاسم (إنجليزي)" : "Name (EN)"}><Input value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-          <Field label={lang === "ar" ? "الاسم (عربي)" : "Name (AR)"}><Input value={form.nameAr || ""} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} /></Field>
-          <Field label={lang === "ar" ? "الرتبة / المسمى" : "Rank / Title"}>
-            <Input value={form.rank || ""} onChange={(e) => setForm({ ...form, rank: e.target.value })} placeholder={lang === "ar" ? "مثال: مدير الأمن العام" : "e.g. Director of Public Security"} />
+          <Field label="الاسم"><Input value={form.nameAr || ""} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} /></Field>
+          <Field label="الرتبة / المسمى">
+            <Input value={form.rank || ""} onChange={(e) => setForm({ ...form, rank: e.target.value })} placeholder="مثال: مدير الأمن العام" />
           </Field>
-          <Field label={lang === "ar" ? "المسمى (عربي)" : "Title (AR)"}>
+          <Field label="المسمى (عربي)">
             <Input value={form.titleAr || ""} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} />
           </Field>
-          <Field label={lang === "ar" ? "المسمى (إنجليزي)" : "Title (EN)"}>
-            <Input value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          </Field>
-          <Field label={lang === "ar" ? "الشارة" : "Badge"}>
+          <Field label="الشارة">
             <Input value={form.badge || ""} onChange={(e) => setForm({ ...form, badge: e.target.value })} placeholder="PSA-000" />
           </Field>
           <Field label={lang === "ar" ? "الصورة الشخصية" : "Photo"}>

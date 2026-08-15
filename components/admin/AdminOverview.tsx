@@ -84,18 +84,15 @@ export function AdminOverview() {
     isYoutubeUrl(settings.welcome?.videoUrl) ? "url" : "upload"
   );
   const [newCatAr, setNewCatAr] = useState("");
-  const [newCatEn, setNewCatEn] = useState("");
 
   const addCategory = () => {
     const labelAr = newCatAr.trim();
-    const label = newCatEn.trim() || newCatAr.trim();
     if (!labelAr) return;
     const id = labelAr.replace(/\s+/g, "-").toLowerCase() || `cat-${Date.now()}`;
     const current = settings.newsCategories || [];
     if (current.some((c) => c.id === id || c.labelAr === labelAr)) return;
-    updateSettings({ newsCategories: [...current, { id, labelAr, label }] });
+    updateSettings({ newsCategories: [...current, { id, labelAr, label: labelAr }] });
     setNewCatAr("");
-    setNewCatEn("");
   };
 
   const removeCategory = (id: string) => {
@@ -281,15 +278,7 @@ export function AdminOverview() {
             type="text"
             value={newCatAr}
             onChange={(e) => setNewCatAr(e.target.value)}
-            placeholder="اسم القسم (عربي) — مثال: زيارات القطاعات"
-            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
-          />
-          <input
-            type="text"
-            value={newCatEn}
-            onChange={(e) => setNewCatEn(e.target.value)}
-            placeholder="English label (اختياري)"
-            dir="ltr"
+            placeholder="اسم القسم — مثال: زيارات القطاعات"
             className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
           />
           <Button onClick={addCategory}>

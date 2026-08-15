@@ -81,8 +81,7 @@ export function CodesManager() {
               <option value="callsign">{lang === "ar" ? "نداء" : "Callsign"}</option>
             </Select>
           </Field>
-          <Field label={lang === "ar" ? "المعنى (إنجليزي)" : "Meaning (EN)"}><Input value={form.meaning || ""} onChange={(e) => setForm({ ...form, meaning: e.target.value })} /></Field>
-          <Field label={lang === "ar" ? "المعنى (عربي)" : "Meaning (AR)"}><Input value={form.meaningAr || ""} onChange={(e) => setForm({ ...form, meaningAr: e.target.value })} /></Field>
+          <Field label="المعنى"><Input value={form.meaningAr || ""} onChange={(e) => setForm({ ...form, meaningAr: e.target.value })} /></Field>
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setModal(false)}>إلغاء</Button>

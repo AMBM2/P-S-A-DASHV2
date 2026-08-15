@@ -164,8 +164,7 @@ export function RosterManager() {
 
       <Modal open={modal} onClose={() => setModal(false)} title={editing ? "تعديل الفرد" : "إضافة فرد"}>
         <div className="grid gap-4">
-          <Field label={lang === "ar" ? "الاسم (إنجليزي)" : "Name (EN)"}><Input value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-          <Field label={lang === "ar" ? "الاسم (عربي)" : "Name (AR)"}><Input value={form.nameAr || ""} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} /></Field>
+          <Field label="الاسم"><Input value={form.nameAr || ""} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} /></Field>
           <Field label={lang === "ar" ? "الرتبة" : "Rank"}>
             <Select value={form.rankId || ""} onChange={(e) => setForm({ ...form, rankId: e.target.value })}>
               {RANKS.map((r) => <option key={r.id} value={r.id}>{lang === "ar" ? r.titleAr : r.title}</option>)}

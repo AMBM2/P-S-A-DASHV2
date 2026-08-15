@@ -59,8 +59,6 @@ const DEFAULT_SETTINGS: Settings = {
     { id: "ziyarat", labelAr: "زيارات القطاعات", label: "Sector Visits" },
     { id: "mudamat", labelAr: "مداهمات", label: "Raids" },
     { id: "tamshit", labelAr: "تمشيط", label: "Sweeps" },
-    { id: "urgent", labelAr: "عاجل", label: "Urgent" },
-    { id: "operational", labelAr: "عملياتي", label: "Operational" },
     { id: "internal", labelAr: "داخلي", label: "Internal" },
   ],
 };
@@ -105,7 +103,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (c.data) setCodes(c.data as MilitaryCode[]);
       if (a.data) setAudit(a.data as AuditEntry[]);
       if (s.data) setSessions(s.data as SessionActivity[]);
-      if (st.data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(st.data.value as Partial<Settings>) });
+      if (st.data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(st.data.value as Partial<Settings>), language: "ar" });
       setLoading(false);
     })();
     return () => {
