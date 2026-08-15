@@ -6,6 +6,7 @@ import { Background } from "@/components/Background";
 import { BackgroundMusic } from "@/components/BackgroundMusic";
 import { Navbar } from "@/components/Navbar";
 import { Ticker } from "@/components/Ticker";
+import { WelcomeModal } from "@/components/WelcomeModal";
 import { DirSetter } from "@/components/DirSetter";
 import "./globals.css";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
           <DirSetter />
           <Background />
           <BackgroundMusic />
+          <WelcomeModal />
           <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[3px] bg-gradient-to-r from-gold-600 via-gold-300 to-gold-600 shadow-[0_0_18px_rgba(217,180,91,0.6)]" />
           <Ticker />
           <Navbar />

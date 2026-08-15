@@ -13,6 +13,8 @@ import {
   ShieldAlert,
   Activity,
   KeyRound,
+  Music2,
+  MonitorPlay,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Button, Card, Stat, Badge } from "@/components/ui";
@@ -152,6 +154,79 @@ export function AdminOverview() {
                 : "Key requires: 24+ chars, upper/lowercase, numbers, and symbols"}
             </p>
             <Button variant="danger" onClick={logout}>تسجيل الخروج</Button>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="mt-4">
+        <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
+          <Music2 size={18} /> النشيد الرسمي
+        </h3>
+        <p className="mb-3 text-xs text-zinc-500">
+          ضع رابط فيديو YouTube للنشيد الذي يُشغَّل كخلفية صوتية في الموقع.
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <input
+            type="text"
+            value={settings.anthemUrl || ""}
+            onChange={(e) => updateSettings({ anthemUrl: e.target.value })}
+            placeholder="https://www.youtube.com/watch?v=..."
+            dir="ltr"
+            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+          />
+          <Button variant="outline" onClick={() => updateSettings({ anthemUrl: "https://www.youtube.com/watch?v=ecdPScS0MKo" })}>
+            استعادة الافتراضي
+          </Button>
+        </div>
+      </Card>
+
+      <Card className="mt-4">
+        <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
+          <MonitorPlay size={18} /> النافذة الترحيبية المنبثقة
+        </h3>
+        <p className="mb-3 text-xs text-zinc-500">
+          نافذة تظهر للزائر عند دخول الموقع، تعرض فيديو ونصاً ترحيبياً.
+        </p>
+
+        <label className="mb-3 flex cursor-pointer items-center gap-2 text-sm text-zinc-200">
+          <input
+            type="checkbox"
+            checked={!!settings.welcome?.enabled}
+            onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, enabled: e.target.checked } })}
+            className="h-4 w-4 accent-[#d9b45b]"
+          />
+          تفعيل النافذة المنبثقة
+        </label>
+
+        <div className="grid gap-3">
+          <div>
+            <label className="mb-1 block text-xs text-zinc-400">عنوان النافذة</label>
+            <input
+              type="text"
+              value={settings.welcome?.title || ""}
+              onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, title: e.target.value } })}
+              className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-zinc-400">النص الترحيبي</label>
+            <textarea
+              value={settings.welcome?.text || ""}
+              onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, text: e.target.value } })}
+              rows={3}
+              className="w-full resize-none rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-zinc-400">رابط الفيديو (YouTube embed)</label>
+            <input
+              type="text"
+              value={settings.welcome?.videoUrl || ""}
+              onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, videoUrl: e.target.value } })}
+              placeholder="https://www.youtube.com/embed/..."
+              dir="ltr"
+              className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+            />
           </div>
         </div>
       </Card>

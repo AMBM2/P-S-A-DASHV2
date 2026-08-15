@@ -103,4 +103,11 @@ export type Settings = {
   twoFactor: boolean;
   inactivityMinutes: number;
   discordBotToken?: string;
+  anthemUrl?: string;
+  welcome?: {
+    enabled: boolean;
+    title: string;
+    text: string;
+    videoUrl: string;
+  };
 };

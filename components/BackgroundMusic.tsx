@@ -4,9 +4,6 @@ import { useEffect, useRef } from "react";
 import { useStore } from "@/lib/store";
 import { setController, notify } from "@/lib/audio";
 
-const VIDEO_ID = "ecdPScS0MKo";
-const PLAYLIST_ID = "RDecdPScS0MKo";
-
 declare global {
   interface Window {
     YT?: any;
@@ -14,33 +11,42 @@ declare global {
   }
 }
 
+export function extractVideoId(url?: string): string {
+  if (!url) return "ecdPScS0MKo";
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);
+  return m ? m[1] : "ecdPScS0MKo";
+}
+
 export function BackgroundMusic() {
   const { settings } = useStore();
   const playerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const soundRef = useRef(settings.sound);
   soundRef.current = settings.sound;
 
+  const videoId = extractVideoId(settings.anthemUrl);
+
   useEffect(() => {
     let cancelled = false;
-    let ready = false;
     let tick: ReturnType<typeof setInterval> | null = null;
 
     const startOnInteraction = () => {
       if (soundRef.current && playerRef.current) playerRef.current.playVideo();
     };
 
-    const initPlayer = () => {
+    const buildPlayer = (vid: string) => {
       if (cancelled || !window.YT?.Player) return;
-      ready = true;
-      const div = document.createElement("div");
-      div.id = "psa-bg-player";
-      document.body.appendChild(div);
+      if (!containerRef.current) {
+        const div = document.createElement("div");
+        div.id = "psa-bg-player";
+        document.body.appendChild(div);
+        containerRef.current = div;
+      }
       const p = new window.YT.Player("psa-bg-player", {
         width: "0",
         height: "0",
-        videoId: VIDEO_ID,
+        videoId: vid,
         playerVars: {
-          list: PLAYLIST_ID,
           autoplay: 0,
           controls: 0,
           disablekb: 1,
@@ -62,6 +68,7 @@ export function BackgroundMusic() {
             });
             notify();
             if (soundRef.current) p.playVideo();
+            if (tick) clearInterval(tick);
             tick = setInterval(() => notify(), 500);
           },
         },
@@ -69,14 +76,16 @@ export function BackgroundMusic() {
     };
 
     if (window.YT?.Player) {
-      initPlayer();
+      buildPlayer(videoId);
     } else {
       window.onYouTubeIframeAPIReady = () => {
-        if (!cancelled) initPlayer();
+        if (!cancelled) buildPlayer(videoId);
       };
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      document.body.appendChild(tag);
+      if (!window.YT) {
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(tag);
+      }
     }
 
     window.addEventListener("pointerdown", startOnInteraction);
@@ -88,7 +97,7 @@ export function BackgroundMusic() {
       window.removeEventListener("pointerdown", startOnInteraction);
       window.removeEventListener("keydown", startOnInteraction);
     };
-  }, []);
+  }, [videoId]);
 
   useEffect(() => {
     const p = playerRef.current;

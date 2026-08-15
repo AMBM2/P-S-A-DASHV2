@@ -47,6 +47,13 @@ const DEFAULT_SETTINGS: Settings = {
   twoFactor: true,
   inactivityMinutes: 15,
   discordBotToken: "",
+  anthemUrl: "https://www.youtube.com/watch?v=ecdPScS0MKo",
+  welcome: {
+    enabled: true,
+    title: "مرحباً بكم في الأمن العام",
+    text: "نرحب بكم في بوابة الأمن العام الرسمية. تفضلوا باستكشاف خدماتنا.",
+    videoUrl: "https://www.youtube.com/embed/ecdPScS0MKo",
+  },
 };
 
 const TABLE: Record<keyof Collections, string> = {
