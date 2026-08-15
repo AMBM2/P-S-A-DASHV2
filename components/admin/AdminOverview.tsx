@@ -362,33 +362,6 @@ export function AdminOverview() {
           </div>
         </div>
       </Card>
-
-      <Card className="mt-4">
-        <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
-          <KeyRound size={18} /> إعدادات Discord للاستعلام التلقائي
-        </h3>
-        <p className="mb-3 text-xs text-zinc-500">
-          ألصق رمز بوت Discord هنا ليتم التعرف تلقائياً على الاسم والصورة من معرّف المستخدم.
-          يُحفظ محلياً ولا يُعرض في المتصفح.
-        </p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="password"
-            value={settings.discordBotToken || ""}
-            onChange={(e) => updateSettings({ discordBotToken: e.target.value })}
-            placeholder="Discord Bot Token"
-            dir="ltr"
-            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
-          />
-          <Button variant="outline" onClick={() => updateSettings({ discordBotToken: "" })}>
-            مسح الرمز
-          </Button>
-        </div>
-        <div className="mt-3 rounded-lg border border-gold-400/20 bg-gold-400/5 p-3 text-xs text-gold-200">
-          <KeyRound size={14} className="mr-1 inline" />
-          تحكم الوصول: وزير / مدير / ضابط / مجند
-        </div>
-      </Card>
     </div>
   );
 }
