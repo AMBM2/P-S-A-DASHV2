@@ -20,7 +20,7 @@ import { useStore } from "@/lib/store";
 import { Button, Card, Stat, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { getMasterKey, setMasterKey, setAuthed, meetsPolicy } from "@/lib/security";
-import { uploadMedia } from "@/lib/upload";
+import { uploadMedia, isYoutubeUrl } from "@/lib/upload";
 import { useRouter } from "next/navigation";
 
 const ENTITY_AR: Record<string, string> = {
@@ -36,6 +36,33 @@ const ACTION_AR: Record<string, string> = {
   Deleted: "حذف",
 };
 
+function MediaToggle({
+  value,
+  onChange,
+}: {
+  value: "url" | "upload";
+  onChange: (v: "url" | "upload") => void;
+}) {
+  return (
+    <div className="mb-3 flex gap-2">
+      {(["url", "upload"] as const).map((m) => (
+        <button
+          key={m}
+          type="button"
+          onClick={() => onChange(m)}
+          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+            value === m
+              ? "border-gold-400 bg-gold-400/15 text-gold-200"
+              : "border-gold-400/25 text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          {m === "url" ? "رابط YouTube" : "رفع من الجهاز"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function AdminOverview() {
   const { news, officers, codes, leaders, audit, settings, updateSettings, exportJSON, resetData } = useStore();
   const router = useRouter();
@@ -44,6 +71,14 @@ export function AdminOverview() {
   const [keyMsg, setKeyMsg] = useState("");
   const [uploading, setUploading] = useState(false);
   const [welcomeVideoMsg, setWelcomeVideoMsg] = useState("");
+  const [anthemUploading, setAnthemUploading] = useState(false);
+  const [anthemMsg, setAnthemMsg] = useState("");
+  const [anthemMode, setAnthemMode] = useState<"url" | "upload">(
+    isYoutubeUrl(settings.anthemUrl) ? "url" : "upload"
+  );
+  const [welcomeMode, setWelcomeMode] = useState<"url" | "upload">(
+    isYoutubeUrl(settings.welcome?.videoUrl) ? "url" : "upload"
+  );
 
   const handleWelcomeVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,6 +92,22 @@ export function AdminOverview() {
     } else {
       setWelcomeVideoMsg("تم رفع الفيديو بنجاح ✅");
       updateSettings({ welcome: { ...settings.welcome!, videoUrl: res.url } });
+    }
+    e.target.value = "";
+  };
+
+  const handleAnthemUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAnthemUploading(true);
+    setAnthemMsg("");
+    const res = await uploadMedia(file);
+    setAnthemUploading(false);
+    if (res.error) {
+      setAnthemMsg(`خطأ: ${res.error}`);
+    } else {
+      setAnthemMsg("تم رفع النشيد بنجاح ✅");
+      updateSettings({ anthemUrl: res.url });
     }
     e.target.value = "";
   };
@@ -182,21 +233,46 @@ export function AdminOverview() {
           <Music2 size={18} /> النشيد الرسمي
         </h3>
         <p className="mb-3 text-xs text-zinc-500">
-          ضع رابط فيديو YouTube للنشيد الذي يُشغَّل كخلفية صوتية في الموقع.
+          النشيد الذي يُشغَّل كخلفية صوتية في الموقع — اختر إما رفع ملف صوتي من الجهاز أو رابط YouTube.
         </p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="text"
-            value={settings.anthemUrl || ""}
-            onChange={(e) => updateSettings({ anthemUrl: e.target.value })}
-            placeholder="https://www.youtube.com/watch?v=..."
-            dir="ltr"
-            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
-          />
-          <Button variant="outline" onClick={() => updateSettings({ anthemUrl: "https://www.youtube.com/watch?v=ecdPScS0MKo" })}>
-            استعادة الافتراضي
-          </Button>
-        </div>
+        <MediaToggle value={anthemMode} onChange={setAnthemMode} />
+        {anthemMode === "url" ? (
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              type="text"
+              value={isYoutubeUrl(settings.anthemUrl) ? settings.anthemUrl || "" : ""}
+              onChange={(e) => updateSettings({ anthemUrl: e.target.value })}
+              placeholder="https://www.youtube.com/watch?v=..."
+              dir="ltr"
+              className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+            />
+            <Button variant="outline" onClick={() => updateSettings({ anthemUrl: "https://www.youtube.com/watch?v=ecdPScS0MKo" })}>
+              استعادة الافتراضي
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <input
+              type="file"
+              accept="audio/*,video/*"
+              onChange={handleAnthemUpload}
+              className="block w-full text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-gold-400/20 file:px-3 file:py-2 file:text-gold-200 file:transition-colors hover:file:bg-gold-400/30"
+            />
+            {anthemUploading ? (
+              <p className="text-xs text-gold-200">جارٍ رفع النشيد...</p>
+            ) : anthemMsg ? (
+              <p className={anthemMsg.startsWith("خطأ") ? "text-xs text-rose-300" : "text-xs text-emerald-300"}>
+                {anthemMsg}
+              </p>
+            ) : null}
+            {!isYoutubeUrl(settings.anthemUrl) && settings.anthemUrl && (
+              <audio src={settings.anthemUrl} controls className="h-10 w-full" />
+            )}
+            <Button variant="outline" onClick={() => { setAnthemMode("url"); updateSettings({ anthemUrl: "https://www.youtube.com/watch?v=ecdPScS0MKo" }); }}>
+              العودة إلى النشيد الافتراضي (YouTube)
+            </Button>
+          </div>
+        )}
       </Card>
 
       <Card className="mt-4">
@@ -237,33 +313,52 @@ export function AdminOverview() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-zinc-400">فيديو النافذة (ارفع من الجهاز)</label>
-            <div className="flex flex-col gap-2">
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleWelcomeVideo}
-                className="block w-full text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-gold-400/20 file:px-3 file:py-2 file:text-gold-200 file:transition-colors hover:file:bg-gold-400/30"
-              />
-              {uploading ? (
-                <p className="text-xs text-gold-200">جارٍ رفع الفيديو...</p>
-              ) : welcomeVideoMsg && (
-                <p className={welcomeVideoMsg.startsWith("خطأ") ? "text-xs text-rose-300" : "text-xs text-emerald-300"}>
-                  {welcomeVideoMsg}
-                </p>
-              )}
-              {settings.welcome?.videoUrl && (
-                <div className="flex items-center gap-2">
-                  <video src={settings.welcome.videoUrl} className="h-16 w-28 rounded-lg border border-gold-400/25 bg-black object-cover" controls />
-                  <Button
-                    variant="outline"
-                    onClick={() => updateSettings({ welcome: { ...settings.welcome!, videoUrl: "" } })}
-                  >
+            <label className="mb-1 block text-xs text-zinc-400">فيديو النافذة</label>
+            <MediaToggle value={welcomeMode} onChange={setWelcomeMode} />
+            {welcomeMode === "url" ? (
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  value={isYoutubeUrl(settings.welcome?.videoUrl) ? settings.welcome?.videoUrl || "" : ""}
+                  onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, videoUrl: e.target.value } })}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  dir="ltr"
+                  className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+                />
+                {isYoutubeUrl(settings.welcome?.videoUrl) && (
+                  <Button variant="outline" onClick={() => updateSettings({ welcome: { ...settings.welcome!, videoUrl: "" } })}>
                     إزالة الفيديو
                   </Button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleWelcomeVideo}
+                  className="block w-full text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-gold-400/20 file:px-3 file:py-2 file:text-gold-200 file:transition-colors hover:file:bg-gold-400/30"
+                />
+                {uploading ? (
+                  <p className="text-xs text-gold-200">جارٍ رفع الفيديو...</p>
+                ) : welcomeVideoMsg && (
+                  <p className={welcomeVideoMsg.startsWith("خطأ") ? "text-xs text-rose-300" : "text-xs text-emerald-300"}>
+                    {welcomeVideoMsg}
+                  </p>
+                )}
+                {!isYoutubeUrl(settings.welcome?.videoUrl) && settings.welcome?.videoUrl && (
+                  <div className="flex items-center gap-2">
+                    <video src={settings.welcome.videoUrl} className="h-16 w-28 rounded-lg border border-gold-400/25 bg-black object-cover" controls />
+                    <Button
+                      variant="outline"
+                      onClick={() => updateSettings({ welcome: { ...settings.welcome!, videoUrl: "" } })}
+                    >
+                      إزالة الفيديو
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </Card>
