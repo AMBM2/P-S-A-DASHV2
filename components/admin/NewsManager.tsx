@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Pin, Eye, FileText, ImagePlus } from "lucide-react";
+import { Plus, Pencil, Trash2, Pin, Eye, FileText, ImagePlus, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { News } from "@/lib/types";
 import { Button, Card, Badge, Modal, Field, Input, Textarea, Select, EmptyState } from "@/components/ui";
@@ -28,6 +28,7 @@ const emptyForm = (): Omit<News, "id" | "views"> => ({
   status: "draft",
   commentsEnabled: true,
   image: "",
+  images: [],
 });
 
 export function NewsManager() {
@@ -51,16 +52,28 @@ export function NewsManager() {
   const openEdit = (n: News) => {
     setEditing(n);
     const { id: _id, views: _v, ...rest } = n;
-    setForm({ ...rest });
+    setForm({ ...rest, images: n.images || (n.image ? [n.image] : []) });
     setModal(true);
   };
 
   const onImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, image: String(reader.result) }));
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const url = String(reader.result);
+        setForm((f) => ({ ...f, images: [...(f.images || []), url], image: (f.images?.length ? f.image : url) || url }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (idx: number) => {
+    setForm((f) => {
+      const images = (f.images || []).filter((_, i) => i !== idx);
+      return { ...f, images, image: images[0] || "" };
+    });
   };
 
   const save = () => {
@@ -181,16 +194,38 @@ export function NewsManager() {
           <Field label="الكاتب">
             <Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} />
           </Field>
-          <Field label="صورة المقال" className="md:col-span-2">
-            <div className="flex items-center gap-3">
+          <Field label="صور المقال (يمكن إضافة أكثر من صورة)" className="md:col-span-2">
+            <div className="flex flex-col gap-3">
               <label className="gold-shimmer inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gold-400/40 bg-gold-400/10 px-4 py-2 text-sm text-gold-200 hover:border-gold-400/70">
-                <ImagePlus size={16} /> {lang === "ar" ? "رفع صورة" : "Upload image"}
-                <input type="file" accept="image/*" onChange={onImage} className="hidden" />
+                <ImagePlus size={16} /> إضافة صور
+                <input type="file" accept="image/*" multiple onChange={onImage} className="hidden" />
               </label>
-              {form.image && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={form.image} alt="" className="h-12 w-12 rounded-lg border border-gold-400/20 object-cover" />
+              {(form.images || []).length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {(form.images || []).map((src, i) => (
+                    <div key={i} className="group relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt=""
+                        className={`h-16 w-16 rounded-lg border object-cover transition-all ${
+                          i === 0 ? "border-gold-400/70 ring-1 ring-gold-400/50" : "border-gold-400/20"
+                        }`}
+                      />
+                      <button
+                        onClick={() => removeImage(i)}
+                        className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white transition-transform hover:scale-110"
+                        aria-label="حذف الصورة"
+                      >
+                        <X size={11} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
+              <p className="text-[11px] text-zinc-500">
+                {form.images?.length || 0} صورة — أول صورة تظهر كغلاف في القائمة.
+              </p>
             </div>
           </Field>
         </div>

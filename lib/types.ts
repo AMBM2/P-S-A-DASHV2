@@ -66,6 +66,7 @@ export type News = {
   pinned: boolean;
   status: "draft" | "scheduled" | "published";
   image?: string;
+  images?: string[];
   views: number;
   commentsEnabled: boolean;
 };

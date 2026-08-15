@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowRight, Calendar, Eye, Pin, User } from "lucide-react";
@@ -22,6 +22,7 @@ export default function NewsDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { news, settings } = useStore();
   const lang = settings.language;
+  const [activeImg, setActiveImg] = useState(0);
 
   const item = news.find((n) => n.id === id);
   const cats = settings.newsCategories || [];
@@ -29,6 +30,8 @@ export default function NewsDetailPage() {
     const c = cats.find((x) => x.id === cid);
     return lang === "ar" ? c?.labelAr || AR.category[cid] || cid : c?.label || cid;
   };
+
+  const images = item?.images?.length ? item.images : item?.image ? [item.image] : [];
 
   useEffect(() => {
     if (!id || !item) return;
@@ -38,6 +41,10 @@ export default function NewsDetailPage() {
       .eq("id", id)
       .then(() => {});
   }, [id, item?.views]);
+
+  useEffect(() => {
+    setActiveImg(0);
+  }, [id]);
 
   if (!item) {
     return (
@@ -60,9 +67,35 @@ export default function NewsDetailPage() {
       </Link>
 
       <Card className="overflow-hidden">
-        {item.image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.image} alt="" className="max-h-80 w-full object-cover" />
+        {images.length > 0 && (
+          <div>
+            <div className="relative bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={images[activeImg]}
+                alt=""
+                className="max-h-96 w-full object-contain"
+              />
+            </div>
+            {images.length > 1 && (
+              <div className="flex flex-wrap gap-2 border-t border-gold-400/10 bg-obsidian-900/60 p-3">
+                {images.map((src, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImg(i)}
+                    className={`overflow-hidden rounded-lg border transition-all ${
+                      i === activeImg
+                        ? "border-gold-400/80 ring-2 ring-gold-400/30"
+                        : "border-gold-400/15 opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="h-14 w-20 object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         <div className="p-6 md:p-8">
