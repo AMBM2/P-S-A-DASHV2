@@ -20,6 +20,7 @@ import { useStore } from "@/lib/store";
 import { Button, Card, Stat, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { getMasterKey, setMasterKey, setAuthed, meetsPolicy } from "@/lib/security";
+import { uploadMedia } from "@/lib/upload";
 import { useRouter } from "next/navigation";
 
 const ENTITY_AR: Record<string, string> = {
@@ -41,6 +42,24 @@ export function AdminOverview() {
   const [confirmReset, setConfirmReset] = useState(false);
   const [newKey, setNewKey] = useState("");
   const [keyMsg, setKeyMsg] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [welcomeVideoMsg, setWelcomeVideoMsg] = useState("");
+
+  const handleWelcomeVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setWelcomeVideoMsg("");
+    const res = await uploadMedia(file);
+    setUploading(false);
+    if (res.error) {
+      setWelcomeVideoMsg(`خطأ: ${res.error}`);
+    } else {
+      setWelcomeVideoMsg("تم رفع الفيديو بنجاح ✅");
+      updateSettings({ welcome: { ...settings.welcome!, videoUrl: res.url } });
+    }
+    e.target.value = "";
+  };
 
   const changeKey = () => {
     if (!meetsPolicy(newKey)) {
@@ -218,15 +237,33 @@ export function AdminOverview() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-zinc-400">رابط الفيديو (YouTube embed)</label>
-            <input
-              type="text"
-              value={settings.welcome?.videoUrl || ""}
-              onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, videoUrl: e.target.value } })}
-              placeholder="https://www.youtube.com/embed/..."
-              dir="ltr"
-              className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
-            />
+            <label className="mb-1 block text-xs text-zinc-400">فيديو النافذة (ارفع من الجهاز)</label>
+            <div className="flex flex-col gap-2">
+              <input
+                type="file"
+                accept="video/*"
+                onChange={handleWelcomeVideo}
+                className="block w-full text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-gold-400/20 file:px-3 file:py-2 file:text-gold-200 file:transition-colors hover:file:bg-gold-400/30"
+              />
+              {uploading ? (
+                <p className="text-xs text-gold-200">جارٍ رفع الفيديو...</p>
+              ) : welcomeVideoMsg && (
+                <p className={welcomeVideoMsg.startsWith("خطأ") ? "text-xs text-rose-300" : "text-xs text-emerald-300"}>
+                  {welcomeVideoMsg}
+                </p>
+              )}
+              {settings.welcome?.videoUrl && (
+                <div className="flex items-center gap-2">
+                  <video src={settings.welcome.videoUrl} className="h-16 w-28 rounded-lg border border-gold-400/25 bg-black object-cover" controls />
+                  <Button
+                    variant="outline"
+                    onClick={() => updateSettings({ welcome: { ...settings.welcome!, videoUrl: "" } })}
+                  >
+                    إزالة الفيديو
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </Card>

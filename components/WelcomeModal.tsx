@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Info } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui";
+import { isYoutubeUrl } from "@/lib/upload";
 
 const STORAGE_KEY = "psa_welcome_seen";
 
@@ -63,13 +64,25 @@ export function WelcomeModal() {
 
             {/* Video */}
             <div className="relative aspect-video w-full bg-black">
-              <iframe
-                src={`${welcome.videoUrl}?autoplay=1&mute=1&rel=0&controls=1`}
-                title={welcome.title}
-                className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+              {isYoutubeUrl(welcome.videoUrl) ? (
+                <iframe
+                  src={`${welcome.videoUrl}?autoplay=1&mute=1&rel=0&controls=1`}
+                  title={welcome.title}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={welcome.videoUrl}
+                  className="h-full w-full object-contain"
+                  autoPlay
+                  muted
+                  loop
+                  controls
+                  playsInline
+                />
+              )}
             </div>
 
             {/* Text */}
