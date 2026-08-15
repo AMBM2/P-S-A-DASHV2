@@ -1,0 +1,245 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   IMPERIAL OBSIDIAN & CHAMPAGNE GOLD — Premium Government Design System
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+
+  --accent-100: #f7ecd2;
+  --accent-200: #f0ddab;
+  --accent-300: #e6c97d;
+  --accent-400: #d9b45b;
+  --accent-500: #c29a44;
+  --accent-600: #a37e32;
+  --accent-700: #7d5f26;
+  --accent: #d9b45b;
+  --accent-bright: #f3d489;
+  --accent-rgb: 217, 180, 91;
+  --accent-bright-rgb: 243, 212, 137;
+
+  --foreground: #efe9dc;
+  --muted: #9a9387;
+
+  --glass: 23, 24, 29;
+  --bg: #0a0a0c;
+  --bg-2: #101014;
+  --bg-800: #17181d;
+  --bg-700: #1f2026;
+
+  --line: rgba(217, 180, 91, 0.16);
+  --line-strong: rgba(217, 180, 91, 0.3);
+}
+
+/* ============ GLOBAL ============ */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 70% 46% at 50% -12%, rgba(var(--accent-rgb), 0.12), transparent),
+    radial-gradient(ellipse 34% 24% at 90% 20%, rgba(var(--accent-rgb), 0.05), transparent),
+    radial-gradient(ellipse 42% 32% at 6% 84%, rgba(var(--accent-rgb), 0.045), transparent);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-cairo), var(--font-tajawal), system-ui, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(var(--accent-rgb), 0.28);
+  color: #fff;
+}
+
+/* ============ FINE GRID BACKDROP ============ */
+.grid-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background-image:
+    linear-gradient(rgba(var(--accent-rgb), 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 28%, transparent 76%);
+}
+
+/* ============ AMBIENT GOLD DUST ============ */
+.gold-dust {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.gold-dust span {
+  position: absolute;
+  bottom: -10px;
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.9), rgba(var(--accent-rgb), 0.08));
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.55);
+  animation: dust 13s linear infinite;
+}
+
+/* ============ GLOWING AMBIENT ORBS ============ */
+.cyber-orb {
+  position: fixed;
+  z-index: -1;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+/* ============ ELEGANT EDGE VIGNETTE ============ */
+.lux-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 0%, transparent 52%, rgba(0, 0, 0, 0.6) 100%),
+    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(0, 0, 0, 0.5), transparent 70%);
+}
+
+/* ============ GLASS PANELS ============ */
+.glass {
+  background: rgba(var(--glass), 0.68);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--line);
+}
+
+.glass-strong {
+  background: rgba(var(--glass), 0.84);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  border: 1px solid var(--line-strong);
+}
+
+/* ============ GOLDEN SHIMMER SWEEP ============ */
+.gold-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.gold-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%);
+  background: linear-gradient(
+    105deg,
+    transparent 22%,
+    rgba(var(--accent-bright-rgb), 0.09) 45%,
+    rgba(var(--accent-bright-rgb), 0.16) 50%,
+    rgba(var(--accent-bright-rgb), 0.09) 55%,
+    transparent 78%
+  );
+  transition: transform 0.95s ease;
+  pointer-events: none;
+}
+.gold-shimmer:hover::after {
+  transform: translateX(110%);
+}
+
+/* ============ GOLD TEXT ============ */
+.gold-text {
+  background: linear-gradient(
+    118deg,
+    var(--accent-200) 0%,
+    var(--accent-bright) 38%,
+    var(--accent) 62%,
+    var(--accent-200) 88%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============ BORDER GLOWS ============ */
+.gold-border-glow {
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.15);
+}
+
+.neon-border {
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.14) inset;
+}
+
+/* ============ DECORATIVE ============ */
+.clip-hex {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* ============ SCROLLBARS ============ */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent-rgb), 0.4);
+  border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+input[type="range"].gold-range {
+  accent-color: var(--accent);
+}
+
+/* ============ NATIVE SELECT DROPDOWN ============ */
+select option,
+select optgroup {
+  background-color: #17181d;
+  color: #efe9dc;
+}
+select option:checked {
+  background-color: rgba(217, 180, 91, 0.25);
+  color: #f0ddab;
+}
+
+/* ============ NATIVE FORM CONTROLS (DARK) ============ */
+/* Ensure checkboxes, radios, date/number pickers and selects never render white */
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #17181d inset;
+  -webkit-text-fill-color: #f3f1ea;
+  caret-color: #f3f1ea;
+  border-radius: 0.5rem;
+}
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
+  color-scheme: dark;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--accent);
+  background-color: transparent;
+}
