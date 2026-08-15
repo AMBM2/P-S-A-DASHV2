@@ -50,7 +50,7 @@ export function WelcomeModal() {
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.92, y: 16, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 24 }}
-            className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-gold-300/40 bg-obsidian-900/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
+            className="relative w-3/4 max-w-[1300px] overflow-hidden rounded-2xl border border-gold-300/40 bg-obsidian-900/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-gold-400 to-transparent" />
 
