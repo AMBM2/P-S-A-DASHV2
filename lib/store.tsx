@@ -104,6 +104,48 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const tables = ["news", "officers", "leaders", "codes", "settings"] as const;
+    const channels: { unsubscribe: () => void }[] = [];
+
+    for (const t of tables) {
+      const ch = supabase
+        .channel(`realtime-${t}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: t },
+          async (payload) => {
+            if (t === "settings") {
+              const { data } = await supabase
+                .from("settings")
+                .select("*")
+                .eq("key", "settings")
+                .single();
+              if (data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(data.value as Partial<Settings>) });
+              return;
+            }
+            const query = supabase.from(t).select("*");
+            const ordered =
+              t === "news"
+                ? query.order("publishedAt", { ascending: false })
+                : query;
+            const { data } = await ordered;
+            if (!data) return;
+            if (t === "news") setNews(data as News[]);
+            else if (t === "officers") setOfficers(data as Officer[]);
+            else if (t === "leaders") setLeaders(data as Leader[]);
+            else if (t === "codes") setCodes(data as MilitaryCode[]);
+          }
+        )
+        .subscribe();
+      channels.push(ch);
+    }
+
+    return () => {
+      channels.forEach((c) => c.unsubscribe());
+    };
+  }, []);
+
   const addAudit = (action: string, entity: string) => {
     const entry: AuditEntry = {
       id: crypto.randomUUID(),
