@@ -29,6 +29,7 @@ export const config = {
   serviceKey: serviceKey || anonKey,
   isServiceRole: !!serviceKey,
   patrolChannelId: process.env.PATROL_CHANNEL_ID,
+  loginChannelId: process.env.LOGIN_CHANNEL_ID,
 
   recruitmentRoleId: process.env.RECRUITMENT_ROLE_ID,
   newRecruitRoleId: process.env.NEW_RECRUIT_ROLE_ID,

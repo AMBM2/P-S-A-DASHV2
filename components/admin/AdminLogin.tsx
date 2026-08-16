@@ -12,10 +12,12 @@ export function AdminLogin() {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [sentVia, setSentVia] = useState<"dm" | "channel" | null>(null);
 
   const requestCode = async () => {
     setBusy(true);
     setError("");
+    setSentVia(null);
     try {
       const r = await fetch("/api/login/request", {
         method: "POST",
@@ -26,6 +28,7 @@ export function AdminLogin() {
       if (!d.ok) {
         setError(d.error || "تعذر إرسال الرمز");
       } else {
+        setSentVia(d.via === "channel" ? "channel" : "dm");
         setStep("code");
       }
     } catch {
@@ -98,7 +101,9 @@ export function AdminLogin() {
             <>
               <p className="mb-3 flex items-center gap-2 text-sm text-zinc-300">
                 <MessageSquareText size={15} className="text-gold-300" />
-                وصلتك رسالة خاصة من البوت — أدخل الرمز.
+                {sentVia === "channel"
+                  ? "أُرسل الرمز في قناة السيرفر (منشن لك) — أدخل الرمز."
+                  : "وصلتك رسالة خاصة من البوت — أدخل الرمز."}
               </p>
               <input
                 value={code}
