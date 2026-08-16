@@ -22,9 +22,8 @@ import {
 import { useStore } from "@/lib/store";
 import { Button, Card, Stat, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
-import { getMasterKey, setMasterKey, setAuthed, meetsPolicy } from "@/lib/security";
+import { getMasterKey, setMasterKey, meetsPolicy } from "@/lib/security";
 import { uploadMedia, isYoutubeUrl } from "@/lib/upload";
-import { useRouter } from "next/navigation";
 
 const ENTITY_AR: Record<string, string> = {
   news: "الأخبار",
@@ -67,8 +66,7 @@ function MediaToggle({
 }
 
 export function AdminOverview() {
-  const { news, officers, codes, leaders, audit, settings, updateSettings, exportJSON, resetData } = useStore();
-  const router = useRouter();
+  const { news, officers, codes, leaders, audit, settings, updateSettings, exportJSON, resetData, logout } = useStore();
   const lang = settings.language;
   const [confirmReset, setConfirmReset] = useState(false);
   const [newKey, setNewKey] = useState("");
@@ -141,11 +139,6 @@ export function AdminOverview() {
     setMasterKey(newKey);
     setNewKey("");
     setKeyMsg("تم تحديث مفتاح الوصول بنجاح");
-  };
-
-  const logout = () => {
-    setAuthed(false);
-    router.refresh();
   };
 
   return (

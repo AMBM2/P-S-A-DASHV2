@@ -8,6 +8,7 @@ import {
   Radio,
   Crown,
   Shield,
+  LogOut,
 } from "lucide-react";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { NewsManager } from "@/components/admin/NewsManager";
@@ -15,11 +16,10 @@ import { RosterManager } from "@/components/admin/RosterManager";
 import { CodesManager } from "@/components/admin/CodesManager";
 import { LeadershipManager } from "@/components/admin/LeadershipManager";
 import { RolesManager } from "@/components/admin/RolesManager";
-import { AdminGate } from "@/components/admin/AdminGate";
+import { AdminLogin } from "@/components/admin/AdminLogin";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/format";
-import { isAuthed } from "@/lib/security";
 
 const TABS = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
@@ -31,29 +31,40 @@ const TABS = [
 ];
 
 export default function AdminPage() {
-  const { settings } = useStore();
+  const { settings, session, logout } = useStore();
   const lang = settings.language;
   const [tab, setTab] = useState("overview");
-  const [authed, setAuthed] = useState(false);
 
-  if (!authed && !isAuthed()) {
+  if (!session) {
     return (
       <div>
         <PageHeader
           title={lang === "ar" ? "لوحة التحكم" : "Admin Control Panel"}
           subtitle={
             lang === "ar"
-              ? "منطقة محمية — يتطلب مفتاح وصول سري"
-              : "Protected area — secret access key required"
+              ? "منطقة محمية — الدخول بمعرّف ديسكورد ورمز خاص"
+              : "Protected area — Discord ID + private code required"
           }
         />
-        <AdminGate onUnlock={() => setAuthed(true)} />
+        <AdminLogin />
       </div>
     );
   }
 
   return (
     <div>
+      <div className="mb-4 flex items-center justify-end gap-3">
+        <span className="text-xs text-zinc-400">
+          الداخل: <span className="font-bold text-gold-200">{session.officer?.nameAr || session.discordId}</span>
+        </span>
+        <button
+          onClick={logout}
+          className="flex items-center gap-1.5 rounded-lg border border-gold-400/25 px-3 py-1.5 text-xs font-bold text-zinc-300 transition-colors hover:border-rose-400/40 hover:text-rose-300"
+        >
+          <LogOut size={13} /> تسجيل الخروج
+        </button>
+      </div>
+
       <PageHeader
         title={lang === "ar" ? "لوحة التحكم" : "Admin Control Panel"}
         subtitle={lang === "ar" ? "إدارة الأخبار والأفراد والقيادة والأكواد" : "Manage news, personnel, leadership and codes"}
