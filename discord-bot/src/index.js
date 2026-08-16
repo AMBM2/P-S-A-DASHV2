@@ -74,6 +74,11 @@ http
       });
     }
 
+    // All other endpoints require the shared secret (the portal sends it).
+    if (req.headers["x-bot-secret"] !== config.botSecret) {
+      return send(401, { ok: false, error: "unauthorized" });
+    }
+
     // Live patrol room tracking (feature 6) — consumed by the portal dashboard
     if (req.method === "GET" && url.pathname === "/live") {
       const data = await getLivePatrolDetailed(client);
