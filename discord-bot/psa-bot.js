@@ -295,13 +295,46 @@ onTable("strikes", async (p) => { if (p.eventType === "INSERT") console.log("[إ
 onTable("leave_requests", async (p) => { if (p.eventType === "UPDATE" && ["approved", "denied", "revoked"].includes(p.new?.status)) { const { data: o } = await supabase.from("officers").select("*").eq("id", p.new.officerId).maybeSingle(); if (o) await applyLeave(client, o, p.new); } });
 
 /* ============================ 14) خادم HTTP (تحكم + صحة) ============================ */
+const readBody = (req) => new Promise((resolve) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => { try { resolve(JSON.parse(b || "{}")); } catch { resolve({}); } }); });
+
+const requestLoginCode = async (userId) => {
+  userId = String(userId || "").trim();
+  if (!/^\d{15,20}$/.test(userId)) return { ok: false, error: "معرّف ديسكورد غير صالح" };
+  let member = null;
+  const guild = client.guilds.cache.get(cfg.guildId);
+  if (guild) member = await guild.members.fetch(userId).catch(() => null);
+  if (!member) return { ok: false, error: "المستخدم ليس عضواً في سيرفر الأمن العام" };
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+  await supabase.from("login_codes").delete().eq("userId", userId).then(() => {});
+  await supabase.from("login_codes").insert({ userId, code, expiresAt, used: false }).then(() => {});
+  try {
+    await member.send({ content: `🔐 رمز تسجيل الدخول إلى بوابة الأمن العام:\n**${code}**\nالرمز صالح لمدة 5 دقائق.` });
+  } catch {
+    return { ok: false, error: "تعذر إرسال الرسالة الخاصة — افتح الخاص للبوت" };
+  }
+  return { ok: true };
+};
+
+const verifyLoginCode = async (userId, code) => {
+  userId = String(userId || "").trim(); code = String(code || "").trim();
+  const { data } = await supabase.from("login_codes").select("*").eq("userId", userId).eq("code", code).eq("used", false).maybeSingle();
+  if (!data) return { ok: false, error: "الرمز غير صحيح" };
+  if (new Date(data.expiresAt).getTime() < Date.now()) return { ok: false, error: "انتهت صلاحية الرمز — اطلب رمزاً جديداً" };
+  await supabase.from("login_codes").update({ used: true }).eq("id", data.id).then(() => {});
+  const { data: officer } = await supabase.from("officers").select("*").eq("discordId", userId).maybeSingle();
+  return { ok: true, officer: officer || null };
+};
+
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost"); const send = (c, o) => { res.writeHead(c, { "Content-Type": "application/json" }); res.end(JSON.stringify(o)); };
   if (req.method === "GET" && url.pathname === "/health") return send(200, { ok: true, online: client.isReady(), guilds: client.guilds.cache.size, user: client.user?.tag || null, uptime: Math.round(process.uptime()) });
   if (req.method === "GET" && url.pathname === "/live") return send(200, await getLivePatrolDetailed(client));
   if (req.method === "POST" && url.pathname === "/sync") return send(200, await extractAllMembers(client));
+  if (req.method === "POST" && url.pathname === "/login/request") { const { userId } = await readBody(req); return send(200, await requestLoginCode(userId)); }
+  if (req.method === "POST" && url.pathname === "/login/verify") { const { userId, code } = await readBody(req); return send(200, await verifyLoginCode(userId, code)); }
   return send(404, { ok: false, error: "not found" });
-}).listen(cfg.port, () => console.log(`[HTTP] المنفذ ${cfg.port}: /health  /live  /sync`));
+}).listen(cfg.port, () => console.log(`[HTTP] المنفذ ${cfg.port}: /health  /live  /sync  /login/*`));
 
 client.login(cfg.token).catch((e) => console.error("[x] فشل الدخول:", e.message));
 

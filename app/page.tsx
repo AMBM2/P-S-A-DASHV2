@@ -160,32 +160,41 @@ export default function HomePage() {
                   transition={{ delay: i * 0.05 }}
                 >
                   <Link href={`/news/${n.id}`} className="block group">
-                    <Card hover className="overflow-hidden">
+                    <Card hover className="relative overflow-hidden">
+                      <span className="pointer-events-none absolute inset-y-0 right-0 w-[3px] origin-top scale-y-0 bg-gradient-to-b from-gold-300 via-gold-400 to-gold-600 transition-transform duration-300 group-hover:scale-y-100" />
                       {(n.images?.[0] || n.image) && (
                         <div className="relative">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={n.images?.[0] || n.image}
                             alt=""
-                            className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-48"
+                            className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-44"
                           />
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-900 via-obsidian-900/30 to-transparent" />
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-900 via-obsidian-900/20 to-transparent" />
                           <div className="absolute right-3 top-3 flex gap-2">
+                            <Badge tone="gold">{catLabel(n.category)}</Badge>
                             <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
-                            <Badge tone="slate">{catLabel(n.category)}</Badge>
                           </div>
                           {n.pinned && (
                             <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-gold-400/40 bg-black/50 px-2 py-1 text-[11px] text-gold-200 backdrop-blur">
                               <Pin size={11} /> {lang === "ar" ? "مثبت" : "Pinned"}
                             </span>
                           )}
+                          <div className="absolute bottom-3 right-3 flex items-center gap-2 text-[11px] text-zinc-300">
+                            <span className="flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur">
+                              <Eye size={11} /> {number(n.views)}
+                            </span>
+                            <span className="flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur">
+                              <MessageSquare size={11} /> تعليقات
+                            </span>
+                          </div>
                         </div>
                       )}
                       <div className="p-5">
-                        {!n.image && (
-                          <div className="mb-2 flex flex-wrap items-center gap-2">
+                        {!n.images?.[0] && !n.image && (
+                          <div className="mb-3 flex flex-wrap items-center gap-2">
+                            <Badge tone="gold">{catLabel(n.category)}</Badge>
                             <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
-                            <Badge tone="slate">{catLabel(n.category)}</Badge>
                             {n.pinned && (
                               <span className="flex items-center gap-1 text-xs text-gold-300">
                                 <Pin size={12} /> {lang === "ar" ? "مثبت" : "Pinned"}
@@ -193,27 +202,30 @@ export default function HomePage() {
                             )}
                           </div>
                         )}
+
+                        <div className="mb-1.5 flex items-center gap-2 text-[11px] text-zinc-500">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 text-[9px] font-bold text-gold-300">
+                            {n.author.slice(0, 1)}
+                          </span>
+                          <span className="font-semibold text-zinc-400">{n.author}</span>
+                          <span>·</span>
+                          <span>{timeAgo(n.publishedAt)}</span>
+                        </div>
+
                         <h3 className="mb-2 font-display text-lg font-bold leading-snug text-white transition-colors group-hover:text-gold-200">
                           {lang === "ar" ? n.titleAr : n.title}
                         </h3>
-                        <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-zinc-400">
+                        <p className="line-clamp-2 text-sm leading-relaxed text-zinc-400">
                           {lang === "ar" ? n.bodyAr : n.body}
                         </p>
-                        <div className="flex items-center justify-between border-t border-gold-400/10 pt-3 text-xs text-zinc-500">
-                          <span>
-                            {timeAgo(n.publishedAt)} · {n.author}
+
+                        <div className="mt-4 flex items-center justify-between border-t border-gold-400/10 pt-3">
+                          <span className="flex items-center gap-1 rounded-full border border-gold-400/25 bg-gold-400/5 px-3 py-1 text-xs font-semibold text-gold-200 transition-all group-hover:border-gold-400/60 group-hover:bg-gold-400/15">
+                            {lang === "ar" ? "اقرأ الخبر" : "Read"}
+                            <ChevronLeft size={13} className="rtl:rotate-180 transition-transform group-hover:translate-x-[-2px] group-hover:rtl:translate-x-[2px]" />
                           </span>
-                          <span className="flex items-center gap-3">
-                            <span className="flex items-center gap-1">
-                              <Eye size={13} /> {number(n.views)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MessageSquare size={13} />
-                            </span>
-                            <span className="flex items-center gap-1 text-gold-300 transition-transform group-hover:translate-x-[-3px]">
-                              {lang === "ar" ? "اقرأ الخبر" : "Read"}
-                              <ChevronLeft size={14} className="rtl:rotate-180" />
-                            </span>
+                          <span className="text-xs text-zinc-500">
+                            {lang === "ar" ? "مشاهدة" : "views"}: {number(n.views)}
                           </span>
                         </div>
                       </div>

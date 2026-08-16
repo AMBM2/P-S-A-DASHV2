@@ -13,9 +13,14 @@ import {
   Fingerprint,
   ShieldCheck,
   Radio,
+  LogIn,
+  LogOut,
+  UserRound,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { LoginModal } from "@/components/LoginModal";
+import { RANKS } from "@/lib/seed";
 import { cn } from "@/lib/format";
 
 const NAV = [
@@ -29,9 +34,10 @@ const NAV = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { officers } = useStore();
+  const { officers, session, logout } = useStore();
   const [now, setNow] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -40,6 +46,9 @@ export function Navbar() {
 
   const onDuty = officers.filter((o) => o.status === "on-duty").length;
   const timeStr = now.toLocaleTimeString("en-GB");
+  const rankTitle = session?.officer?.rankId
+    ? RANKS.find((r) => r.id === session.officer!.rankId)?.titleAr
+    : null;
 
   return (
     <>
@@ -113,6 +122,30 @@ export function Navbar() {
               </span>
               <span className="text-xs font-bold text-gold-200">{onDuty} في الخدمة</span>
             </div>
+            {session ? (
+              <div className="flex items-center gap-2">
+                <div className="hidden flex-col items-end leading-tight sm:flex">
+                  <span className="max-w-[140px] truncate text-xs font-bold text-gold-200">
+                    {session.officer?.nameAr || session.discordId}
+                  </span>
+                  {rankTitle && <span className="text-[10px] text-zinc-500">{rankTitle}</span>}
+                </div>
+                <button
+                  onClick={logout}
+                  className="rounded-lg border border-gold-400/25 p-2 text-zinc-300 transition-colors hover:border-rose-400/40 hover:text-rose-300"
+                  title="تسجيل الخروج"
+                >
+                  <LogOut size={15} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setLoginOpen(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-gold-400/40 bg-gold-400/10 px-3 py-2 text-xs font-bold text-gold-200 transition-colors hover:bg-gold-400/20"
+              >
+                <LogIn size={14} /> تسجيل الدخول
+              </button>
+            )}
             <AudioPlayer />
             <button
               onClick={() => setOpen(!open)}
@@ -142,10 +175,21 @@ export function Navbar() {
                   {item.label}
                 </Link>
               ))}
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  session ? logout() : setLoginOpen(true);
+                }}
+                className="col-span-2 flex items-center justify-center gap-2 rounded-lg border border-gold-400/30 px-3 py-2.5 text-sm font-bold text-gold-200"
+              >
+                {session ? <LogOut size={16} /> : <UserRound size={16} />}
+                {session ? (session.officer?.nameAr || "تسجيل الخروج") : "تسجيل الدخول"}
+              </button>
             </nav>
           </div>
         )}
       </div>
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
 }

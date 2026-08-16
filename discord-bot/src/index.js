@@ -6,6 +6,7 @@ import { registerGuildListeners } from "./listeners/guild.js";
 import { getLivePatrolDetailed } from "./services/patrolLive.js";
 import { expireLeaves } from "./services/leave.js";
 import { extractAllMembers } from "./services/members.js";
+import { requestLoginCode, verifyLoginCode } from "./services/login.js";
 
 const client = new Client({
   intents: [
@@ -47,6 +48,18 @@ http
       res.writeHead(code, { "Content-Type": "application/json" });
       res.end(JSON.stringify(obj));
     };
+    const readBody = () =>
+      new Promise((resolve) => {
+        let b = "";
+        req.on("data", (c) => (b += c));
+        req.on("end", () => {
+          try {
+            resolve(JSON.parse(b || "{}"));
+          } catch {
+            resolve({});
+          }
+        });
+      });
 
     if (req.method === "GET" && url.pathname === "/health") {
       return send(200, {
@@ -68,6 +81,20 @@ http
     // Full sync: pull all Discord roles + members into the site
     if (req.method === "POST" && url.pathname === "/sync") {
       const data = await extractAllMembers(client);
+      return send(200, data);
+    }
+
+    // Login: send a one-time code to the user's Discord DM
+    if (req.method === "POST" && url.pathname === "/login/request") {
+      const { userId } = await readBody();
+      const data = await requestLoginCode(client, userId);
+      return send(200, data);
+    }
+
+    // Login: verify the code the user received in DM
+    if (req.method === "POST" && url.pathname === "/login/verify") {
+      const { userId, code } = await readBody();
+      const data = await verifyLoginCode(userId, code);
       return send(200, data);
     }
 

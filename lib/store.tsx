@@ -29,6 +29,9 @@ type Store = Collections & {
   audit: AuditEntry[];
   sessions: SessionActivity[];
   loading: boolean;
+  session: { discordId: string; officer: Officer | null } | null;
+  login: (discordId: string, officer: Officer | null) => void;
+  logout: () => void;
   addAudit: (action: string, entity: string) => void;
   upsert: <K extends keyof Collections>(key: K, item: Collections[K][number]) => void;
   remove: <K extends keyof Collections>(key: K, id: string) => void;
@@ -83,6 +86,29 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [sessions, setSessions] = useState<SessionActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Store["session"]>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("psa_session");
+      if (raw) setSession(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  const login = (discordId: string, officer: Officer | null) => {
+    const s = { discordId, officer };
+    setSession(s);
+    try {
+      localStorage.setItem("psa_session", JSON.stringify(s));
+    } catch {}
+  };
+
+  const logout = () => {
+    setSession(null);
+    try {
+      localStorage.removeItem("psa_session");
+    } catch {}
+  };
 
   useEffect(() => {
     let active = true;
@@ -255,6 +281,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     audit,
     sessions,
     loading,
+    session,
+    login,
+    logout,
     addAudit,
     upsert,
     remove,
