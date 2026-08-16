@@ -2,9 +2,14 @@ import { supabase } from "../supabase.js";
 import { getGuild } from "./nickname.js";
 import { getHighestRank, isOnDuty } from "../ranks.js";
 import { nextBadge } from "./badge.js";
+import { config } from "../config.js";
 
 // ---- member → officer record ----
 async function upsertOfficerFromMember(member) {
+  if (member.user.bot) return { ok: false, reason: "bot" };
+  if (config.memberRoleId && !member.roles.cache.has(config.memberRoleId)) {
+    return { ok: false, reason: "no-role" };
+  }
   const rank = getHighestRank(member);
   const status = isOnDuty(member) ? "on-duty" : "off-duty";
   const name = member.user.username;
@@ -95,23 +100,42 @@ export async function extractAllMembers(client) {
   if (!guild) return { ok: false, error: "no-guild" };
 
   const rolesSynced = await syncRoles(guild);
-
+  console.log("[sync] rolesSynced:", rolesSynced, "guild:", guild.name);
   const members = await guild.members.fetch();
+  console.log("[sync] members fetched:", members.size);
+
   let created = 0;
   let updated = 0;
   let skippedBots = 0;
+  let skippedNoRole = 0;
+  let failed = 0;
 
+  let i = 0;
   for (const member of members.values()) {
+    i++;
     if (member.user.bot) {
       skippedBots++;
       continue;
     }
-    const res = await upsertOfficerFromMember(member);
-    if (res.created) created++;
-    else updated++;
+    if (config.memberRoleId && !member.roles.cache.has(config.memberRoleId)) {
+      skippedNoRole++;
+      continue;
+    }
+    try {
+      const res = await upsertOfficerFromMember(member);
+      if (res.created) created++;
+      else if (res.reason === "no-role") skippedNoRole++;
+      else if (res.reason === "bot") skippedBots++;
+      else updated++;
+    } catch (e) {
+      failed++;
+      console.warn(`[sync] member ${member.user.tag} error:`, e.message);
+    }
+    if (i % 100 === 0) console.log(`[sync] progress ${i}/${members.size} created=${created}`);
   }
 
-  return { ok: true, rolesSynced, membersTotal: members.size, created, updated, skippedBots };
+  console.log(`[sync] done: created=${created} updated=${updated} skippedBots=${skippedBots} skippedNoRole=${skippedNoRole} failed=${failed}`);
+  return { ok: true, rolesSynced, membersTotal: members.size, created, updated, skippedBots, skippedNoRole, failed };
 }
 
 // Extract a single member (on guildMemberAdd / update)

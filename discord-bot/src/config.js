@@ -43,5 +43,8 @@ export const config = {
     .map((s) => s.trim())
     .filter(Boolean),
 
+  // Only sync members who hold this role (empty = sync everyone)
+  memberRoleId: process.env.MEMBER_ROLE_ID || null,
+
   portalUrl: process.env.PORTAL_URL || "http://localhost:3001",
 };
