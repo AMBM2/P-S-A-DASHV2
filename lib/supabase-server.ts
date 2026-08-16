@@ -1,8 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
-let instance: ReturnType<typeof createClient> | null = null;
+// Returns `any` on purpose: the project has no generated database types, so a
+// strictly-typed client makes every `.from().insert({...})` fail to compile.
+let instance: any | null = null;
 
-export function getSupabase() {
+export function getSupabase(): any {
   if (instance) return instance;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
