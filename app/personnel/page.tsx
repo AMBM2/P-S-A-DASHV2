@@ -91,7 +91,12 @@ export default function PersonnelPage() {
                         {o.name || "—"}
                       </td>
                       <td className="px-5 py-3.5 text-zinc-300">
-                        {o.nameAr || "—"}
+                        <div>{o.nameAr || "—"}</div>
+                        {o.discordId && (
+                          <div className="mt-0.5 font-mono text-[11px] text-zinc-500" dir="ltr">
+                            ID: {o.discordId}
+                          </div>
+                        )}
                       </td>
                       <td className="px-5 py-3.5 text-zinc-300">
                         {rank ? (lang === "ar" ? rank.titleAr : rank.title) : "—"}
