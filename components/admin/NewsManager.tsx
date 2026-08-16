@@ -25,7 +25,7 @@ const emptyForm = (): Omit<News, "id" | "views"> => ({
   author: "Admin",
   publishedAt: new Date().toISOString(),
   pinned: false,
-  status: "draft",
+  status: "published",
   commentsEnabled: true,
   image: "",
   images: [],
