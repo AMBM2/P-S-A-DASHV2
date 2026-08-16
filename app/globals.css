@@ -237,6 +237,75 @@ body {
   background: rgba(var(--accent-rgb), 0.12);
 }
 
+/* ============ SPACE BACKGROUND ACCESSORIES ============ */
+.space-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Twinkling stars */
+.space-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  animation: twinkle 3.5s ease-in-out infinite;
+}
+.space-star.gold-star {
+  background: rgba(var(--accent-bright-rgb), 0.95);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.8);
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.18; transform: scale(0.75); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Shooting star */
+.space-shooting {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(var(--accent-bright-rgb), 1);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.9);
+  animation: shoot 9s linear infinite;
+  opacity: 0;
+}
+@keyframes shoot {
+  0% { transform: translate(0, 0) rotate(-45deg); opacity: 0; }
+  3% { opacity: 1; }
+  12% { transform: translate(-260px, 260px) rotate(-45deg); opacity: 0; }
+  100% { transform: translate(-260px, 260px) rotate(-45deg); opacity: 0; }
+}
+
+/* Nebula clouds */
+.space-nebula {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(85px);
+  opacity: 0.6;
+}
+
+/* Planet with ring */
+.space-planet {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 32% 28%, #34343f, #14141c 52%, #07070a 100%);
+  box-shadow:
+    inset -18px -14px 50px rgba(0, 0, 0, 0.9),
+    0 0 70px rgba(var(--accent-rgb), 0.16);
+}
+.space-planet .planet-ring {
+  position: absolute;
+  inset: -34% -70%;
+  border: 1px solid rgba(var(--accent-rgb), 0.32);
+  border-radius: 50%;
+  transform: rotate(-16deg);
+  box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.18), inset 0 0 30px rgba(var(--accent-rgb), 0.1);
+}
+
 /* ============ DECORATIVE ============ */
 .clip-hex {
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
