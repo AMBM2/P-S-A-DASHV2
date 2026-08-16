@@ -34,7 +34,11 @@ export async function POST(req: Request) {
           participants: participantIds,
         }),
       });
-      botResult = await r.json();
+      try {
+        botResult = await r.json();
+      } catch {
+        botResult = { ok: false, error: "استجابة غير متوقعة من البوت", count: 0 };
+      }
     } catch (e: any) {
       botResult = { ok: false, error: e?.message || "bot unreachable", count: 0 };
     }

@@ -41,10 +41,15 @@ client.once(Events.ClientReady, (c) => {
 
 client.on(Events.Error, (e) => console.error("[bot] error:", e.message));
 
+// Never let a single rejected promise / thrown error kill the whole bot.
+process.on("unhandledRejection", (e) => console.error("[bot] unhandledRejection:", e));
+process.on("uncaughtException", (e) => console.error("[bot] uncaughtException:", e));
+
 // HTTP control/health endpoints
 const PORT = Number(process.env.PATROL_BOT_PORT || 4000);
 http
   .createServer(async (req, res) => {
+    try {
     const url = new URL(req.url, "http://localhost");
     const send = (code, obj) => {
       res.writeHead(code, { "Content-Type": "application/json" });
@@ -158,6 +163,13 @@ http
     }
 
     return send(404, { ok: false, error: "not found" });
+    } catch (e) {
+      console.error("[bot][http] error:", e);
+      try {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false, error: "internal error" }));
+      } catch {}
+    }
   })
   .listen(PORT, () => {
     console.log(`[bot] HTTP endpoints: http://localhost:${PORT}/health, /live`);

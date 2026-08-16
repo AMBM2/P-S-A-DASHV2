@@ -21,7 +21,12 @@ export async function POST(req: Request) {
       body: JSON.stringify({ userId, code }),
       cache: "no-store",
     });
-    const data = await r.json();
+    let data: any;
+    try {
+      data = await r.json();
+    } catch {
+      data = { ok: false, error: "استجابة غير متوقعة من البوت — تأكد أنه متصل" };
+    }
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {
     return NextResponse.json(
