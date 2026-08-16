@@ -90,7 +90,7 @@ export default function HomePage() {
           <div className="relative shrink-0">
             <div className="absolute -inset-3 rounded-full border border-gold-400/20" />
             <div className="absolute -inset-3 rounded-full border border-dashed border-gold-400/20 animate-[spin_40s_linear_infinite]" />
-            <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-gold-400/25 bg-gold-400/5 backdrop-blur-md shadow-[0_0_32px_rgba(217,180,91,0.28)]">
+            <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-gold-400/25 bg-gold-400/5 backdrop-blur-md gold-glow-strong animate-[goldPulse_4s_ease-in-out_infinite]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/psa-logo.png"
@@ -120,6 +120,9 @@ export default function HomePage() {
             <h2 className="flex items-center gap-2 font-display text-xl font-bold gold-text">
               <Newspaper size={20} /> {lang === "ar" ? "أخبار الأمن العام" : "Directives & News"}
             </h2>
+            <div className="gold-flourish mt-2 w-full">
+              <span className="diamond" />
+            </div>
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-zinc-500 ltr:left-3 rtl:right-3" />
@@ -240,7 +243,7 @@ export default function HomePage() {
         {/* Module 2 + 3: On-Duty Counter & Rank Distribution */}
         <div className="space-y-6">
           <Card className="text-center">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 gold-pulse">
               <ShieldCheck className="h-7 w-7 text-gold-300" />
             </div>
             <div className="font-display text-5xl font-bold gold-text">{onDuty}</div>

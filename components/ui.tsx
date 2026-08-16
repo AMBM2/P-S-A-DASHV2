@@ -56,10 +56,13 @@ export function Card({
         "before:pointer-events-none before:absolute before:left-2 before:top-2 before:h-3.5 before:w-3.5 before:border-l-2 before:border-t-2 before:border-gold-300/70 before:rounded-tl",
         "after:pointer-events-none after:absolute after:right-2 after:bottom-2 after:h-3.5 after:w-3.5 after:border-r-2 after:border-b-2 after:border-gold-300/70 after:rounded-br",
         hover &&
-          "transition-all duration-300 hover:-translate-y-1 hover:border-gold-300/45 hover:shadow-[0_16px_50px_-18px_rgba(var(--accent-rgb),0.5)]",
+          "transition-all duration-300 hover:-translate-y-1 hover:border-gold-300/50 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25),0_18px_55px_-18px_rgba(var(--accent-rgb),0.55),0_0_45px_-10px_rgba(var(--accent-rgb),0.35)]",
         className
       )}
     >
+      {/* corner ornaments */}
+      <span className="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5 rounded-tr border-r-2 border-t-2 border-gold-300/70" />
+      <span className="pointer-events-none absolute bottom-2 left-2 h-3.5 w-3.5 rounded-bl border-b-2 border-l-2 border-gold-300/70" />
       {children}
     </div>
   );
