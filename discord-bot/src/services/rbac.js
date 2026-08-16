@@ -4,6 +4,13 @@ import { getGuild } from "./nickname.js";
 
 const LEVEL_ORDER = { none: 0, recruitment: 1, admin: 2, master: 3 };
 
+export const masterIds = () =>
+  config.masterAdminIds.length
+    ? config.masterAdminIds
+    : config.masterAdminId
+      ? [config.masterAdminId]
+      : [];
+
 // Resolve the access level for a Discord user ID:
 //  1. Explicit grant in the `admins` table (master > admin > recruitment)
 //  2. Recruitment Officer Discord role -> recruitment
@@ -27,6 +34,10 @@ export async function resolveAccessLevel(client, discordId) {
     return { level: admin.role, role: admin.role, admin };
   }
 
+  if (masterIds().includes(discordId)) {
+    return { level: "master", role: "master", admin: null };
+  }
+
   const guild = getGuild(client);
   if (guild && config.recruitmentRoleId) {
     try {
@@ -39,23 +50,23 @@ export async function resolveAccessLevel(client, discordId) {
     }
   }
 
-  if (config.masterAdminId && discordId === config.masterAdminId) {
-    return { level: "master", role: "master", admin: null };
-  }
-
   return { level: "none", role: null, admin: null };
 }
 
-// Ensure the configured master admin has an admins row (idempotent bootstrap).
+// Ensure the configured master admins have admins rows (idempotent bootstrap).
 export async function bootstrapMaster(discordId) {
-  if (!discordId || !config.masterAdminId || discordId !== config.masterAdminId) return;
-  try {
-    await supabase.from("admins").upsert(
-      { userId: discordId, role: "master", note: "Master Super Admin" },
-      { onConflict: "userId" }
-    );
-  } catch (e) {
-    console.warn("[rbac] bootstrap master failed:", e.message);
+  if (!discordId) return;
+  const masters = masterIds();
+  if (!masters.includes(discordId)) return;
+  for (const id of masters) {
+    try {
+      await supabase.from("admins").upsert(
+        { userId: id, role: "master", note: "Master Super Admin" },
+        { onConflict: "userId" }
+      );
+    } catch (e) {
+      console.warn("[rbac] bootstrap master failed:", e.message);
+    }
   }
 }
 

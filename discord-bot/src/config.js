@@ -33,6 +33,10 @@ export const config = {
   collegeChannelId: process.env.COLLEGE_CHANNEL_ID,
   botSecret: process.env.PATROL_BOT_SECRET || "",
   masterAdminId: process.env.MASTER_ADMIN_ID || "",
+  masterAdminIds: (process.env.MASTER_ADMIN_IDS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
 
   recruitmentRoleId: process.env.RECRUITMENT_ROLE_ID,
   newRecruitRoleId: process.env.NEW_RECRUIT_ROLE_ID,

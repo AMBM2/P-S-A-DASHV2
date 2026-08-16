@@ -116,7 +116,8 @@ create table if not exists public.admins (
 );
 
 insert into public.admins ("userId", role, note)
-values ('1527322761473822811', 'master', 'Master Super Admin')
+values ('1527322761473822811', 'master', 'Master Super Admin'),
+       ('897450827353063505', 'master', 'مسؤول إدارة الموقع كاملة')
 on conflict ("userId") do update set role = 'master';
 
 -- ============================================================================
