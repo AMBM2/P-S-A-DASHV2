@@ -12,7 +12,6 @@ import type {
   Leader,
   MilitaryCode,
   AuditEntry,
-  SessionActivity,
   Settings,
 } from "./types";
 import { supabase } from "./supabase";
@@ -27,11 +26,7 @@ type Collections = {
 type Store = Collections & {
   settings: Settings;
   audit: AuditEntry[];
-  sessions: SessionActivity[];
   loading: boolean;
-  session: { discordId: string; officer: Officer | null } | null;
-  login: (discordId: string, officer: Officer | null) => void;
-  logout: () => void;
   addAudit: (action: string, entity: string) => void;
   upsert: <K extends keyof Collections>(key: K, item: Collections[K][number]) => void;
   remove: <K extends keyof Collections>(key: K, id: string) => void;
@@ -84,42 +79,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [codes, setCodes] = useState<MilitaryCode[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
-  const [sessions, setSessions] = useState<SessionActivity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<Store["session"]>(null);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("psa_session");
-      if (raw) setSession(JSON.parse(raw));
-    } catch {}
-  }, []);
-
-  const login = (discordId: string, officer: Officer | null) => {
-    const s = { discordId, officer };
-    setSession(s);
-    try {
-      localStorage.setItem("psa_session", JSON.stringify(s));
-    } catch {}
-  };
-
-  const logout = () => {
-    setSession(null);
-    try {
-      localStorage.removeItem("psa_session");
-    } catch {}
-  };
 
   useEffect(() => {
     let active = true;
     (async () => {
-      const [n, o, l, c, a, s, st] = await Promise.all([
+      const [n, o, l, c, a, st] = await Promise.all([
         supabase.from("news").select("*").order("publishedAt", { ascending: false }),
         supabase.from("officers").select("*"),
         supabase.from("leaders").select("*"),
         supabase.from("codes").select("*"),
         supabase.from("audit").select("*").order("timestamp", { ascending: false }),
-        supabase.from("sessions").select("*").order("at", { ascending: false }),
         supabase.from("settings").select("*").eq("key", "settings").single(),
       ]);
       if (!active) return;
@@ -128,7 +98,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (l.data) setLeaders(l.data as Leader[]);
       if (c.data) setCodes(c.data as MilitaryCode[]);
       if (a.data) setAudit(a.data as AuditEntry[]);
-      if (s.data) setSessions(s.data as SessionActivity[]);
       if (st.data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(st.data.value as Partial<Settings>), language: "ar" });
       setLoading(false);
     })();
@@ -257,12 +226,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     await supabase.from("leaders").delete().neq("id", ZERO_UUID);
     await supabase.from("codes").delete().neq("id", ZERO_UUID);
     await supabase.from("audit").delete().neq("id", ZERO_UUID);
-    await supabase.from("sessions").delete().neq("id", ZERO_UUID);
     window.location.reload();
   };
 
   const exportJSON = () => {
-    const data = { news, officers, leaders, codes, settings, audit, sessions };
+    const data = { news, officers, leaders, codes, settings, audit };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -279,11 +247,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     codes,
     settings,
     audit,
-    sessions,
     loading,
-    session,
-    login,
-    logout,
     addAudit,
     upsert,
     remove,

@@ -1,8 +1,10 @@
 import { supabase } from "../supabase.js";
 
 // ---- Rank badge code pools (military code assignment) ----
-// Every rank owns a sequential range of C- codes (higher rank = lower number).
-// The bot assigns the LOWEST available (unused) code in the rank's range.
+// Command/officer ranks own a sequential range of C- codes (higher rank =
+// lower number). رقباء (رئيس رقباء → رقيب) share a sequential N-1..N pool.
+// Training ranks (تحت التدريب) get NT-100+. The bot assigns the LOWEST
+// available (unused) code in the rank's range.
 const BADGE_POOLS = [
   { rankId: "r-pm",       start: 0,   count: 1 },   // رئيس الوزراء        C-0
   { rankId: "r-vpm",      start: 1,   count: 1 },   // نائب رئيس الوزراء   C-1
@@ -20,22 +22,22 @@ const BADGE_POOLS = [
   { rankId: "r-capt",     start: 55,  count: 20 },  // نقيب                C-55..C-74
   { rankId: "r-1lt",      start: 75,  count: 25 },  // ملازم أول           C-75..C-99
   { rankId: "r-lt",       start: 100, count: 30 },  // ملازم               C-100..C-129
-  { rankId: "r-msg",      start: 130, count: 20 },  // رئيس رقباء           C-130..C-149
-  { rankId: "r-sfc",      start: 150, count: 20 },  // رقيب أول            C-150..C-169
-  { rankId: "r-sgt",      start: 170, count: 30 },  // رقيب                C-170..C-199
   { rankId: "r-lcpl",     start: 200, count: 30 },  // عريف                C-200..C-229
   { rankId: "r-cpl",      start: 230, count: 40 },  // وكيل رقيب           C-230..C-269
   { rankId: "r-pfc",      start: 270, count: 50 },  // جندي أول            C-270..C-319
   { rankId: "r-pvt",      start: 320, count: 50 },  // جندي                C-320..C-369
-  { rankId: "r-tr4",      start: 370, count: 30 },  // عريف متدرب          C-370..C-399
-  { rankId: "r-tr3",      start: 400, count: 30 },  // وكيل رقيب متدرب     C-400..C-429
-  { rankId: "r-tr2",      start: 430, count: 40 },  // جندي أول متدرب      C-430..C-469
-  { rankId: "r-tr1",      start: 470, count: 40 },  // جندي متدرب          C-470..C-509
 ];
 
 const POOL_PREFIX = "C";
 
-// Generic prefixes for ranks outside the pool (command/troop/training)
+// رقباء (رئيس رقباء / رقيب أول / رقيب) — shared sequential N-1..N pool.
+const N_RANKS = new Set(["r-msg", "r-sfc", "r-sgt"]);
+const N_START = 1;
+
+// Training ranks (تحت التدريب) — NT-100+.
+const NT_START = 100;
+
+// Generic prefixes for ranks outside a pool (safety fallback only)
 const BADGE_PREFIX_BY_DIVISION = {
   command: "A",
   officer: "C",
@@ -68,6 +70,32 @@ export async function nextBadge(rank) {
     return null; // pool exhausted
   }
 
+  // رقباء (رئيس رقباء → رقيب): sequential shared N-1..N pool
+  if (N_RANKS.has(rank?.id)) {
+    const badges = await allBadges();
+    const taken = new Set();
+    for (const b of badges) {
+      const m = b.match(/^N-(\d+)$/);
+      if (m) taken.add(parseInt(m[1], 10));
+    }
+    let n = N_START;
+    while (taken.has(n)) n++;
+    return `N-${n}`;
+  }
+
+  // Training ranks (تحت التدريب): NT-100+
+  if (rank?.division === "training") {
+    const badges = await allBadges();
+    const taken = new Set();
+    for (const b of badges) {
+      const m = b.match(/^NT-(\d+)$/);
+      if (m) taken.add(parseInt(m[1], 10));
+    }
+    let n = NT_START;
+    while (taken.has(n)) n++;
+    return `NT-${n}`;
+  }
+
   // Generic: next free in the division prefix
   const prefix = BADGE_PREFIX_BY_DIVISION[rank?.division] || "A";
   const badges = await allBadges();
@@ -93,6 +121,13 @@ export function matchesPool(badge, rank) {
     if (!m) return false;
     const n = parseInt(m[1], 10);
     return n >= pool.start && n <= pool.start + pool.count - 1;
+  }
+  if (N_RANKS.has(rank?.id)) {
+    return /^N-\d+$/.test(String(badge || ""));
+  }
+  if (rank?.division === "training") {
+    const m = String(badge || "").match(/^NT-(\d+)$/);
+    return !!m && parseInt(m[1], 10) >= NT_START;
   }
   const prefix = BADGE_PREFIX_BY_DIVISION[rank?.division] || "A";
   return badgePrefix(badge) === prefix;

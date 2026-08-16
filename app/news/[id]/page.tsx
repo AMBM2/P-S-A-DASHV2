@@ -9,7 +9,6 @@ import { Card, Badge, EmptyState } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { AR } from "@/lib/ar";
 import { supabase } from "@/lib/supabase";
-import { NewsComments } from "@/components/NewsComments";
 
 const PRIORITY_TONE: Record<string, any> = {
   critical: "rose",
@@ -130,8 +129,6 @@ export default function NewsDetailPage() {
           </div>
         </div>
       </Card>
-
-      <NewsComments newsId={item.id} enabled={item.commentsEnabled} />
     </div>
   );
 }

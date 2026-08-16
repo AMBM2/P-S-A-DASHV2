@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, ArrowUp, Search, Calendar, RefreshCw, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, Search, Calendar, RefreshCw, Loader2, CheckCircle2, Power } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Officer } from "@/lib/types";
 import { Button, Card, Badge, Modal, Field, Input, Select, EmptyState } from "@/components/ui";
@@ -186,8 +186,11 @@ export function RosterManager() {
                         }}>
                           <ArrowUp size={14} />
                         </Button>
-                        <Button variant="outline" className="px-2 py-1" title="تبديل الحالة" onClick={() => changeStatus(o, o.status === "on-duty" ? "off-duty" : "on-duty")}>
+                        <Button variant="outline" className="px-2 py-1" title="تعديل الفرد" onClick={() => openEdit(o)}>
                           <Pencil size={14} />
+                        </Button>
+                        <Button variant="outline" className="px-2 py-1" title="تبديل الحالة" onClick={() => changeStatus(o, o.status === "on-duty" ? "off-duty" : "on-duty")}>
+                          <Power size={14} />
                         </Button>
                         <Button variant="danger" className="px-2 py-1" title="حذف" onClick={() => remove("officers", o.id)}>
                           <Trash2 size={14} />
@@ -204,7 +207,12 @@ export function RosterManager() {
 
       <Modal open={modal} onClose={() => setModal(false)} title={editing ? "تعديل الفرد" : "إضافة فرد"}>
         <div className="grid gap-4">
-          <Field label="الاسم"><Input value={form.nameAr || ""} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} /></Field>
+          <Field label="الاسم (عربي)">
+            <Input value={form.nameAr || ""} onChange={(e) => setForm({ ...form, nameAr: e.target.value })} />
+          </Field>
+          <Field label="الاسم (إنجليزي)">
+            <Input value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} dir="ltr" />
+          </Field>
           <Field label={lang === "ar" ? "الرتبة" : "Rank"}>
             <Select value={form.rankId || ""} onChange={(e) => setForm({ ...form, rankId: e.target.value })}>
               {RANKS.map((r) => <option key={r.id} value={r.id}>{lang === "ar" ? r.titleAr : r.title}</option>)}

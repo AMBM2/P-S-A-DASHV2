@@ -26,7 +26,6 @@ const emptyForm = (): Omit<News, "id" | "views"> => ({
   publishedAt: new Date().toISOString(),
   pinned: false,
   status: "published",
-  commentsEnabled: true,
   image: "",
   images: [],
 });
@@ -233,10 +232,6 @@ export function NewsManager() {
           <label className="flex items-center gap-2 text-sm text-zinc-300">
             <input type="checkbox" checked={form.pinned} onChange={(e) => setForm({ ...form, pinned: e.target.checked })} className="accent-gold-400" />
             تثبيت في الأعلى
-          </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
-            <input type="checkbox" checked={form.commentsEnabled} onChange={(e) => setForm({ ...form, commentsEnabled: e.target.checked })} className="accent-gold-400" />
-            تفعيل التعليقات
           </label>
         </div>
         <div className="mt-6 flex justify-end gap-2">

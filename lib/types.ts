@@ -68,15 +68,6 @@ export type News = {
   image?: string;
   images?: string[];
   views: number;
-  commentsEnabled: boolean;
-};
-
-export type NewsComment = {
-  id: string;
-  newsId: string;
-  author: string;
-  text: string;
-  createdAt: string;
 };
 
 export type NewsCategory = {

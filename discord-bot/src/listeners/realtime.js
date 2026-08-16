@@ -54,7 +54,7 @@ export function startRealtime(client) {
     const res = await dispatchPatrol(client, payload.new);
     console.log(
       res.ok
-        ? `[patrol] dispatched: ${res.count} participants, ${res.awarded} points`
+        ? `[patrol] dispatched: ${res.count} participants -> channel ${res.sentTo}`
         : `[patrol] failed: ${res.error}`
     );
   });

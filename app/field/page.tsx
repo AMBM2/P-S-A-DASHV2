@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Send, Image as ImageIcon, Radio, Trophy, Loader2, CheckCircle2, AlertTriangle, Users } from "lucide-react";
-import { Button, Card, Field, Input } from "@/components/ui";
+import { Send, Image as ImageIcon, Radio, Loader2, CheckCircle2, AlertTriangle, Users, Check } from "lucide-react";
+import { Button, Card, Field, Input, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
+import { RANKS } from "@/lib/seed";
+import { cn } from "@/lib/format";
 
 export default function FieldPage() {
-  const { addAudit } = useStore();
+  const { addAudit, officers } = useStore();
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [roomId, setRoomId] = useState("");
-  const [points, setPoints] = useState("10");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<null | { ok: boolean; bot: boolean; count: number; awarded: number; botError?: string }>(null);
+  const [result, setResult] = useState<null | { ok: boolean; count: number; error?: string }>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const preview = imageUrl.trim();
@@ -27,9 +28,22 @@ export default function FieldPage() {
     setImageUrl(base);
   };
 
+  const toggle = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const submit = async () => {
-    if (!name.trim() || !roomId.trim()) {
-      setResult({ ok: false, bot: false, count: 0, awarded: 0, botError: "يرجى تعبئة اسم السيناريو وآيدي الروم الصوتية" });
+    if (!name.trim()) {
+      setResult({ ok: false, count: 0, error: "يرجى تعبئة اسم السيناريو" });
+      return;
+    }
+    if (selected.size === 0) {
+      setResult({ ok: false, count: 0, error: "يرجى اختيار المشاركين من القسم أدناه" });
       return;
     }
     setLoading(true);
@@ -42,25 +56,24 @@ export default function FieldPage() {
           name: name.trim(),
           nameAr: name.trim(),
           image: imageUrl.trim() || null,
-          roomId: roomId.trim(),
-          points: Number(points) || 0,
+          participants: [...selected],
         }),
       });
       const data = await res.json();
       setResult({
         ok: data.ok,
-        bot: data.bot,
         count: data.count ?? 0,
-        awarded: data.awarded ?? 0,
-        botError: data.botError || data.error,
+        error: data.error,
       });
-      if (data.ok) addAudit("field", `إرسال تنبيه ميداني: ${name.trim()}`);
+      if (data.ok) addAudit("field", `إرسال تنبيه ميداني: ${name.trim()} (${data.count ?? 0} مشارك)`);
     } catch {
-      setResult({ ok: false, bot: false, count: 0, awarded: 0, botError: "تعذر الاتصال بالخادم" });
+      setResult({ ok: false, count: 0, error: "تعذر الاتصال بالخادم" });
     } finally {
       setLoading(false);
     }
   };
+
+  const participants = officers.filter((o) => o.discordId && o.status !== "discharged");
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10">
@@ -72,7 +85,7 @@ export default function FieldPage() {
           </div>
           <div>
             <h1 className="text-xl font-extrabold text-white">جدول الميدان</h1>
-            <p className="text-sm text-zinc-400">جدولة السيناريو الميداني وتنبيه المشاركين عبر Discord</p>
+            <p className="text-sm text-zinc-400">اختيار المشاركين وتنبيههم عبر Discord برتبهم العسكرية</p>
           </div>
         </div>
 
@@ -115,33 +128,70 @@ export default function FieldPage() {
             )}
           </Field>
 
-          <Field label="آيدي الروم الصوتية (Voice Channel ID)">
-            <Input
-              value={roomId}
-              onChange={(e) => setRoomId(e.target.value)}
-              placeholder="ضع معرف القناة الصوتية هنا"
-              dir="ltr"
-              className="text-left"
-            />
-          </Field>
-
-          <Field label="النقاط الممنوحة لكل مشارك">
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={0}
-                value={points}
-                onChange={(e) => setPoints(e.target.value)}
-                className="max-w-40 text-left"
-                dir="ltr"
-              />
-              <span className="text-sm text-zinc-400">نقطة</span>
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
+                <Users size={15} className="text-gold-300" />
+                المشاركون
+              </span>
+              <span className="text-xs text-zinc-400">
+                المحددون: <span className="font-bold text-gold-200">{selected.size}</span>
+              </span>
             </div>
-          </Field>
+            {participants.length === 0 ? (
+              <EmptyState message="لا يوجد أفراد مسجلون — قم بمزامنة ديسكورد أولاً" />
+            ) : (
+              <div className="grid max-h-80 gap-2 overflow-y-auto pr-1 scrollbar-thin sm:grid-cols-2">
+                {participants.map((o) => {
+                  const rank = RANKS.find((r) => r.id === o.rankId);
+                  const active = selected.has(o.discordId as string);
+                  return (
+                    <button
+                      key={o.id}
+                      onClick={() => toggle(o.discordId as string)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl border p-2.5 text-right transition-all",
+                        active
+                          ? "border-gold-300/70 bg-gold-400/15"
+                          : "border-gold-400/15 bg-obsidian-900/50 hover:border-gold-400/40"
+                      )}
+                    >
+                      {o.discordAvatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={`https://cdn.discordapp.com/avatars/${o.discordId}/${o.discordAvatar}.png?size=64`}
+                          alt=""
+                          className="h-9 w-9 shrink-0 rounded-full border border-gold-400/30 object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 text-xs font-bold text-gold-300">
+                          {(o.nameAr || o.name || "?").slice(0, 2)}
+                        </span>
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-white">{o.nameAr || o.name}</span>
+                        <span className="block text-xs text-zinc-400">
+                          {rank ? rank.titleAr : "—"} · <span className="font-mono text-gold-300/80">{o.badge}</span>
+                        </span>
+                      </span>
+                      <span
+                        className={cn(
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all",
+                          active ? "border-gold-300 bg-gold-300 text-obsidian-900" : "border-zinc-600 text-transparent"
+                        )}
+                      >
+                        <Check size={12} />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <Button
             onClick={submit}
-            disabled={loading}
+            disabled={loading || selected.size === 0}
             className="mt-2 w-full py-3 text-base font-bold"
           >
             {loading ? <Loader2 size={18} className="ml-2 animate-spin" /> : <Send size={18} className="ml-2" />}
@@ -157,23 +207,17 @@ export default function FieldPage() {
                   : "border-red-400/30 bg-red-500/10 text-red-200")
               }
             >
-              {result.ok ? (
-                <CheckCircle2 size={20} className="mt-0.5 shrink-0" />
-              ) : (
-                <AlertTriangle size={20} className="mt-0.5 shrink-0" />
-              )}
+              {result.ok ? <CheckCircle2 size={20} className="mt-0.5 shrink-0" /> : <AlertTriangle size={20} className="mt-0.5 shrink-0" />}
               <div className="space-y-1">
                 {result.ok ? (
                   <>
                     <div className="font-bold">تم إرسال تنبيه الميدان بنجاح</div>
-                    <div className="flex flex-wrap gap-3 text-xs text-zinc-300">
-                      <span className="inline-flex items-center gap-1"><Users size={13} /> المشاركون المكتشفون: {result.count}</span>
-                      <span className="inline-flex items-center gap-1"><Trophy size={13} /> ضباط حصلوا على النقاط: {result.awarded}</span>
-                      {!result.bot && <span className="text-amber-300">⚠️ البوت غير متصل ({result.botError})</span>}
+                    <div className="text-xs text-zinc-300">
+                      <span className="inline-flex items-center gap-1"><Users size={13} /> تم تنبيه {result.count} مشارك في قناة الميدان مع رتبهم العسكرية</span>
                     </div>
                   </>
                 ) : (
-                  <div className="font-bold">فشل التنبيه: {result.botError}</div>
+                  <div className="font-bold">فشل التنبيه: {result.error}</div>
                 )}
               </div>
             </div>

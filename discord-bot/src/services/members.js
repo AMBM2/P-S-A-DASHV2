@@ -1,6 +1,6 @@
 import { supabase } from "../supabase.js";
 import { getGuild } from "./nickname.js";
-import { getHighestRank, isOnDuty } from "../ranks.js";
+import { getHighestRank, isOnDuty, findDepartment } from "../ranks.js";
 import { nextBadge, matchesPool } from "./badge.js";
 import { config } from "../config.js";
 
@@ -14,6 +14,7 @@ async function upsertOfficerFromMember(member) {
   const status = isOnDuty(member) ? "on-duty" : "off-duty";
   const username = member.user.username; // الاسم (username)
   const nameAr = member.displayName || member.user.username; // النيك نيم (server nickname)
+  const department = findDepartment(member);
 
   const { data: existing } = await supabase
     .from("officers")
@@ -35,8 +36,9 @@ async function upsertOfficerFromMember(member) {
   if (existing) {
     // Keep manual portal data; sync rank/profile/status, and assign a badge that
     // matches the member's CURRENT rank (fixes stale codes from older syncs).
-    const cur = await supabase.from("officers").select("badge").eq("id", existing.id).maybeSingle();
+    const cur = await supabase.from("officers").select("badge, departmentId").eq("id", existing.id).maybeSingle();
     const patch = { ...base };
+    if (department) patch.departmentId = department.id;
     const effectiveRank = rank || (await import("../ranks.js")).findRankByLevel(0);
     if (!cur?.badge || !matchesPool(cur.badge, effectiveRank)) {
       patch.badge = await nextBadge(effectiveRank);
@@ -59,7 +61,7 @@ async function upsertOfficerFromMember(member) {
       discordName: username,
       discordAvatar: member.user.displayAvatarURL?.({ extension: "png", size: 256 }) || null,
       rankId: rank?.id || "r-tr1",
-      departmentId: "d-hq",
+      departmentId: department?.id || "d-hq",
       status,
       specialization: [],
       medals: [],

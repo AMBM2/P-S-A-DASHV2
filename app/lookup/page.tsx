@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, UserRound, ShieldCheck, BadgeCheck, ExternalLink, Fingerprint, Loader2, AlertTriangle } from "lucide-react";
+import { Search, UserRound, ShieldCheck, BadgeCheck, ExternalLink, Fingerprint, Loader2, AlertTriangle, Layers } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, Badge, EmptyState } from "@/components/ui";
@@ -32,6 +32,40 @@ type LiveUser = {
   avatar: string | null;
 };
 
+type MemberRoles = {
+  ok: boolean;
+  found: boolean;
+  nickname?: string | null;
+  roles?: { id: string; name: string; position: number; color: string }[];
+};
+
+function normalize(name: string) {
+  return String(name || "")
+    .toLowerCase()
+    .replace(/[\u0640]/g, "")
+    .replace(/[\u0610-\u061a\u064b-\u065f\u0670]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\u0600-\u06ff\u0660-\u0669]+/g, " ")
+    .trim();
+}
+
+function matchRank(name: string) {
+  const norm = normalize(name);
+  if (!norm) return null;
+  let exact: any = null;
+  for (const r of RANKS) {
+    const names = [r.id, r.title, r.titleAr].map(normalize).filter(Boolean);
+    if (names.includes(norm) && (!exact || r.level > exact.level)) exact = r;
+  }
+  if (exact) return exact;
+  let best: any = null;
+  for (const r of RANKS) {
+    const names = [r.id, r.title, r.titleAr].map(normalize).filter(Boolean);
+    if (names.some((n) => n.length >= 4 && norm.includes(n)) && (!best || r.level > best.level)) best = r;
+  }
+  return best;
+}
+
 export default function LookupPage() {
   const { officers, settings } = useStore();
   const lang = settings.language;
@@ -40,6 +74,7 @@ export default function LookupPage() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [live, setLive] = useState<LiveUser | null>(null);
+  const [member, setMember] = useState<MemberRoles | null>(null);
   const [error, setError] = useState("");
 
   const officer = query ? officers.find((o) => o.discordId === query) : null;
@@ -50,6 +85,7 @@ export default function LookupPage() {
     setSearched(true);
     setError("");
     setLive(null);
+    setMember(null);
 
     if (!id) return;
 
@@ -58,13 +94,16 @@ export default function LookupPage() {
       const tokenParam = settings.discordBotToken
         ? `?token=${encodeURIComponent(settings.discordBotToken)}`
         : "";
-      const res = await fetch(`/api/discord/${id}${tokenParam}`);
-      const data = await res.json();
-      if (res.ok) {
-        setLive(data);
+      const [u, m] = await Promise.all([
+        fetch(`/api/discord/${id}${tokenParam}`).then((r) => r.json()),
+        fetch(`/api/discord/member/${id}`).then((r) => r.json()).catch(() => ({ ok: false })),
+      ]);
+      if (u && !u.error && (u.id || u.username)) {
+        setLive(u);
       } else {
-        setError(data.error || "discord_error");
+        setError(u?.error || "discord_error");
       }
+      setMember(m);
     } catch {
       setError("network_error");
     } finally {
@@ -231,6 +270,52 @@ export default function LookupPage() {
                 </p>
               </div>
             )}
+
+            {member?.ok && member.found && member.roles?.length ? (
+              <div className="mt-5 border-t border-gold-400/15 pt-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Layers size={16} className="text-gold-300" />
+                  <h3 className="text-sm font-bold text-zinc-200">
+                    {lang === "ar" ? "الرتب التي يحملها هذا العضو" : "Ranks held by this member"}
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {member.roles
+                    .map((r) => {
+                      const rank = matchRank(r.name);
+                      return { r, rank };
+                    })
+                    .filter((x) => x.rank)
+                    .sort((a, b) => b.rank!.level - a.rank!.level)
+                    .map(({ r, rank }) => (
+                      <span
+                        key={r.id}
+                        className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold"
+                        style={{
+                          borderColor: r.color === "#000000" ? "rgba(217,180,91,.35)" : `${r.color}88`,
+                          color: r.color === "#000000" ? "#e4e4e7" : r.color,
+                          background: `${r.color}14`,
+                        }}
+                      >
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ background: r.color === "#000000" ? "#d9b45b" : r.color }}
+                        />
+                        {rank!.titleAr}
+                      </span>
+                    ))}
+                  {member.roles.filter((r) => !matchRank(r.name)).map((r) => (
+                    <span
+                      key={r.id}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-gold-400/20 px-2.5 py-1 text-xs text-zinc-400"
+                    >
+                      <span className="h-2 w-2 rounded-full" style={{ background: r.color === "#000000" ? "#71717a" : r.color }} />
+                      {r.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </Card>
         </motion.div>
       )}
