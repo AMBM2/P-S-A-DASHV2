@@ -9,6 +9,11 @@ import { expireLeaves } from "./services/leave.js";
 import { extractAllMembers } from "./services/members.js";
 import { requestLoginCode, verifyLoginCode } from "./services/login.js";
 import { dispatchPatrol } from "./services/patrol.js";
+import { resolveAccessLevel, bootstrapMaster } from "./services/rbac.js";
+import { dischargeMember } from "./services/discharge.js";
+import { notifyCollege, enrollCadet } from "./services/college.js";
+import { reconcileMemberRoles } from "./services/rolesync.js";
+import { supabase } from "./supabase.js";
 
 const client = new Client({
   intents: [
@@ -159,6 +164,77 @@ http
     if (req.method === "POST" && url.pathname === "/login/verify") {
       const { userId, code } = await readBody();
       const data = await verifyLoginCode(userId, code);
+      return send(200, data);
+    }
+
+    // RBAC: resolve a user's access level (master / admin / recruitment / none)
+    if (req.method === "POST" && url.pathname === "/auth/level") {
+      const { discordId } = await readBody();
+      await bootstrapMaster(discordId);
+      const data = await resolveAccessLevel(client, discordId);
+      return send(200, { ok: true, ...data });
+    }
+
+    // RBAC: grant or update an admin entry (master only)
+    if (req.method === "POST" && url.pathname === "/admins/upsert") {
+      const { discordId, role, note, active } = await readBody();
+      const actor = await resolveAccessLevel(client, req.headers["x-bot-actor"] || "");
+      if (actor.level !== "master") {
+        return send(200, { ok: false, error: "forbidden" });
+      }
+      if (!["master", "admin", "recruitment"].includes(role)) {
+        return send(200, { ok: false, error: "invalid role" });
+      }
+      const { data, error } = await supabase
+        .from("admins")
+        .upsert(
+          { userId: discordId, role, note: note || "", active: active !== false },
+          { onConflict: "userId" }
+        )
+        .select("*")
+        .single();
+      if (error) return send(200, { ok: false, error: error.message });
+      return send(200, { ok: true, admin: data });
+    }
+
+    // RBAC: remove an admin entry
+    if (req.method === "POST" && url.pathname === "/admins/remove") {
+      const { discordId } = await readBody();
+      const actor = await resolveAccessLevel(client, req.headers["x-bot-actor"] || "");
+      if (actor.level !== "master") return send(200, { ok: false, error: "forbidden" });
+      await supabase.from("admins").delete().eq("userId", discordId);
+      return send(200, { ok: true });
+    }
+
+    // Reconcile a member's Discord roles with their portal record (rank change)
+    if (req.method === "POST" && url.pathname === "/roles-sync") {
+      const { discordId } = await readBody();
+      const { data: officer } = await supabase
+        .from("officers")
+        .select("*")
+        .eq("discordId", discordId)
+        .maybeSingle();
+      if (!officer) return send(200, { ok: false, error: "not-linked" });
+      const data = await reconcileMemberRoles(client, officer);
+      return send(200, { ok: true, ...data });
+    }
+
+    // Discharge an officer: strip ranks/roles, mark record discharged
+    if (req.method === "POST" && url.pathname === "/discharge") {
+      const { officerId, reason, issuer } = await readBody();
+      const data = await dischargeMember(client, officerId, reason, issuer);
+      return send(200, data);
+    }
+
+    // Military College notification (new application / approval)
+    if (req.method === "POST" && url.pathname === "/recruit") {
+      const data = await notifyCollege(client, await readBody());
+      return send(200, data);
+    }
+
+    // Military College cadet enrollment (approval): assign role + notify
+    if (req.method === "POST" && url.pathname === "/cadet/enroll") {
+      const data = await enrollCadet(client, await readBody());
       return send(200, data);
     }
 

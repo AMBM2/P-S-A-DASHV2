@@ -5,6 +5,8 @@ import { onboardRecruit, shouldOnboard } from "../services/recruitment.js";
 import { handlePromotion } from "../services/promotion.js";
 import { applyLeave } from "../services/leave.js";
 import { handleStrike } from "../services/strikes.js";
+import { notifyCollege } from "../services/college.js";
+import { dischargeMember } from "../services/discharge.js";
 
 // Listens to Supabase Realtime across all bot tables.
 export function startRealtime(client) {
@@ -46,6 +48,27 @@ export function startRealtime(client) {
       const res = await applyLeave(client, rec, { status: rec.status === "leave" ? "approved" : "revoked" });
       console.log("[leave] status-change result:", res);
     }
+
+    // 5. Discharge (defense in depth) — strip roles when marked discharged
+    if (
+      payload.eventType === "UPDATE" &&
+      rec.status === "discharged" &&
+      old.status !== "discharged"
+    ) {
+      const res = await dischargeMember(client, rec.id, "Marked discharged via portal", null);
+      console.log("[discharge] realtime result:", res);
+    }
+  });
+
+  // ---- applications: Military College notifications (feature 12) ----
+  onTable("applications", async (payload) => {
+    if (payload.eventType !== "INSERT") return;
+    const res = await notifyCollege(client, payload.new);
+    console.log(
+      res.ok
+        ? `[college] notified channel ${res.channelId} for ${payload.new.nameAr || payload.new.name}`
+        : `[college] notify failed: ${res.reason}`
+    );
   });
 
   // ---- patrols: field patrol dispatch (feature 6) ----

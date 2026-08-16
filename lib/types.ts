@@ -84,6 +84,55 @@ export type MilitaryCode = {
   type: "10-code" | "signal" | "channel" | "protocol" | "callsign";
 };
 
+export type AdminUser = {
+  id: string;
+  userId: string;
+  role: "master" | "admin" | "recruitment";
+  note: string;
+  active: boolean;
+  createdAt: string;
+};
+
+export type Application = {
+  id: string;
+  name: string;
+  nameAr: string;
+  discordId: string;
+  unit: string;
+  ranks: string[];
+  status: "pending" | "approved" | "denied";
+  examScore: number;
+  examAnswers: number[];
+  reviewedBy: string | null;
+  createdAt: string;
+};
+
+export type Cadet = {
+  id: string;
+  applicationId: string | null;
+  discordId: string;
+  name: string;
+  nameAr: string;
+  rankId: string;
+  unit: string;
+  status: "pending" | "enrolled" | "graduated" | "discharged";
+  examScore: number;
+  officerId: string | null;
+  createdAt: string;
+};
+
+export type ExamQuestion = {
+  id: string;
+  prompt: string;
+  choices: string[];
+  correctIndex: number;
+  points: number;
+  active: boolean;
+  createdAt: string;
+};
+
+export type AccessLevel = "none" | "recruitment" | "admin" | "master";
+
 export type AuditEntry = {
   id: string;
   actor: string;

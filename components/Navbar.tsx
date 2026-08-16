@@ -13,6 +13,7 @@ import {
   Fingerprint,
   ShieldCheck,
   Radio,
+  UserPlus,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { AudioPlayer } from "@/components/AudioPlayer";
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/personnel", label: "الأفراد", icon: Users },
   { href: "/lookup", label: "الاستعلام", icon: Fingerprint },
   { href: "/field", label: "الميدان", icon: Radio },
+  { href: "/recruit", label: "التجنيد", icon: UserPlus },
   { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
 ];
 
