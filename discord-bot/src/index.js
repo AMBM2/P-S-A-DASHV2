@@ -4,6 +4,7 @@ import { config } from "./config.js";
 import { startRealtime } from "./listeners/realtime.js";
 import { registerGuildListeners } from "./listeners/guild.js";
 import { getLivePatrolDetailed } from "./services/patrolLive.js";
+import { getGuild } from "./services/nickname.js";
 import { expireLeaves } from "./services/leave.js";
 import { extractAllMembers } from "./services/members.js";
 import { requestLoginCode, verifyLoginCode } from "./services/login.js";
@@ -82,6 +83,17 @@ http
     if (req.method === "POST" && url.pathname === "/sync") {
       const data = await extractAllMembers(client);
       return send(200, data);
+    }
+
+    // Debug: list the guild's roles (id / name / position / color)
+    if (req.method === "GET" && url.pathname === "/roles") {
+      const guild = getGuild(client);
+      if (!guild) return send(200, { ok: false, error: "no-guild" });
+      const roles = guild.roles.cache
+        .filter((r) => !r.managed)
+        .map((r) => ({ id: r.id, name: r.name, position: r.position, color: r.hexColor }))
+        .sort((a, b) => b.position - a.position);
+      return send(200, { ok: true, guild: guild.name, count: roles.length, roles });
     }
 
     // Login: send a one-time code to the user's Discord DM

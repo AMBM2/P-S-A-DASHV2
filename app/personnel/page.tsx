@@ -27,8 +27,8 @@ export default function PersonnelPage() {
         title={lang === "ar" ? "صفحة الأفراد والضباط" : "Officers & Personnel"}
         subtitle={
           lang === "ar"
-            ? "سجل الضباط — الاسم، الرتبة، الكود العسكري، وتاريخ الانضمام"
-            : "Officer roster — name, rank, badge/callsign and date joined"
+            ? "سجل الضباط — الافتار، الاسم، النيك نيم، الرتبة، الكود العسكري، وتاريخ الانضمام"
+            : "Officer roster — avatar, name, nickname, rank, badge/callsign and date joined"
         }
       />
 
@@ -52,10 +52,12 @@ export default function PersonnelPage() {
       ) : (
         <Card className="p-0 overflow-hidden">
           <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-[760px] text-sm">
               <thead>
                 <tr className="border-b border-gold-400/20 bg-obsidian-900/60 text-xs uppercase tracking-wider text-zinc-400">
+                  <th className="px-5 py-4 text-right">{lang === "ar" ? "الافتار" : "Avatar"}</th>
                   <th className="px-5 py-4 text-right">{lang === "ar" ? "الاسم" : "Name"}</th>
+                  <th className="px-5 py-4 text-right">{lang === "ar" ? "النيك نيم" : "Nickname"}</th>
                   <th className="px-5 py-4 text-right">{lang === "ar" ? "الرتبة" : "Rank"}</th>
                   <th className="px-5 py-4 text-right">{lang === "ar" ? "الكود العسكري" : "Badge / Call Sign"}</th>
                   <th className="px-5 py-4 text-right">{lang === "ar" ? "نقاط الميدان" : "Field Points"}</th>
@@ -65,10 +67,31 @@ export default function PersonnelPage() {
               <tbody className="divide-y divide-gold-400/15">
                 {filtered.map((o) => {
                   const rank = RANKS.find((r) => r.id === o.rankId);
+                  const avatar = o.discordAvatar || "";
+                  const initials = (o.nameAr || o.name || "؟").trim().slice(0, 2);
+                  const joined = o.joinedAt.includes("T")
+                    ? o.joinedAt
+                    : o.joinedAt + "T00:00:00";
                   return (
                     <tr key={o.id} className="transition-colors hover:bg-gold-400/5">
-                      <td className="px-5 py-3.5 font-semibold text-white">
-                        {lang === "ar" ? o.nameAr : o.name}
+                      <td className="px-5 py-3">
+                        {avatar ? (
+                          <img
+                            src={avatar}
+                            alt={o.nameAr || o.name}
+                            className="h-10 w-10 rounded-full border border-gold-400/40 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gold-400/40 bg-obsidian-900 text-xs font-bold text-gold-300">
+                            {initials}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 font-semibold text-white" dir="ltr">
+                        {o.name || "—"}
+                      </td>
+                      <td className="px-5 py-3.5 text-zinc-300">
+                        {o.nameAr || "—"}
                       </td>
                       <td className="px-5 py-3.5 text-zinc-300">
                         {rank ? (lang === "ar" ? rank.titleAr : rank.title) : "—"}
@@ -83,7 +106,7 @@ export default function PersonnelPage() {
                           {o.fieldPoints ?? 0}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-zinc-400">{formatDate(o.joinedAt + "T00:00:00", lang)}</td>
+                      <td className="px-5 py-3.5 text-zinc-400">{formatDate(joined, lang)}</td>
                     </tr>
                   );
                 })}

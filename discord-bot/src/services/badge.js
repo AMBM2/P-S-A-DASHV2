@@ -1,16 +1,36 @@
 import { supabase } from "../supabase.js";
 
 // ---- Rank badge code pools (military code assignment) ----
-// Each rank owns a sequential range of codes starting from C-0.
+// Every rank owns a sequential range of C- codes (higher rank = lower number).
 // The bot assigns the LOWEST available (unused) code in the rank's range.
 const BADGE_POOLS = [
-  { rankId: "r-brig", start: 0, count: 5 },   // عميد:  C-0 .. C-4
-  { rankId: "r-col", start: 5, count: 5 },    // عقيد:  C-5 .. C-9
-  { rankId: "r-ltcol", start: 10, count: 7 }, // مقدم:  C-10 .. C-16
-  { rankId: "r-major", start: 17, count: 8 }, // رائد:  C-17 .. C-24
-  { rankId: "r-capt", start: 25, count: 10 }, // نقيب:  C-25 .. C-34
-  { rankId: "r-1lt", start: 35, count: 20 },  // ملازم أول: C-35 .. C-54
-  { rankId: "r-lt", start: 55, count: 30 },   // ملازم: C-55 .. C-84
+  { rankId: "r-pm",       start: 0,   count: 1 },   // رئيس الوزراء        C-0
+  { rankId: "r-vpm",      start: 1,   count: 1 },   // نائب رئيس الوزراء   C-1
+  { rankId: "r-pmadv",    start: 2,   count: 2 },   // مستشار رئاسة الوزراء C-2..C-3
+  { rankId: "r-minister", start: 4,   count: 1 },   // وزير الداخلية       C-4
+  { rankId: "r-vminister",start: 5,   count: 1 },   // نائب وزير الداخلية  C-5
+  { rankId: "r-dir",      start: 6,   count: 2 },   // مدير الأمن العام    C-6..C-7
+  { rankId: "r-dirdep",   start: 8,   count: 2 },   // نائب المدير         C-8..C-9
+  { rankId: "r-lgen",     start: 10,  count: 3 },   // فريق أول            C-10..C-12
+  { rankId: "r-mgen",     start: 13,  count: 4 },   // لواء                C-13..C-16
+  { rankId: "r-brig",     start: 17,  count: 5 },   // عميد                C-17..C-21
+  { rankId: "r-col",      start: 22,  count: 8 },   // عقيد                C-22..C-29
+  { rankId: "r-ltcol",    start: 30,  count: 10 },  // مقدم                C-30..C-39
+  { rankId: "r-major",    start: 40,  count: 15 },  // رائد                C-40..C-54
+  { rankId: "r-capt",     start: 55,  count: 20 },  // نقيب                C-55..C-74
+  { rankId: "r-1lt",      start: 75,  count: 25 },  // ملازم أول           C-75..C-99
+  { rankId: "r-lt",       start: 100, count: 30 },  // ملازم               C-100..C-129
+  { rankId: "r-msg",      start: 130, count: 20 },  // رئيس رقباء           C-130..C-149
+  { rankId: "r-sfc",      start: 150, count: 20 },  // رقيب أول            C-150..C-169
+  { rankId: "r-sgt",      start: 170, count: 30 },  // رقيب                C-170..C-199
+  { rankId: "r-lcpl",     start: 200, count: 30 },  // عريف                C-200..C-229
+  { rankId: "r-cpl",      start: 230, count: 40 },  // وكيل رقيب           C-230..C-269
+  { rankId: "r-pfc",      start: 270, count: 50 },  // جندي أول            C-270..C-319
+  { rankId: "r-pvt",      start: 320, count: 50 },  // جندي                C-320..C-369
+  { rankId: "r-tr4",      start: 370, count: 30 },  // عريف متدرب          C-370..C-399
+  { rankId: "r-tr3",      start: 400, count: 30 },  // وكيل رقيب متدرب     C-400..C-429
+  { rankId: "r-tr2",      start: 430, count: 40 },  // جندي أول متدرب      C-430..C-469
+  { rankId: "r-tr1",      start: 470, count: 40 },  // جندي متدرب          C-470..C-509
 ];
 
 const POOL_PREFIX = "C";

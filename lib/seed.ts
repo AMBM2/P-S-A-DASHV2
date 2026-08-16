@@ -16,7 +16,7 @@ export const RANKS: Rank[] = [
   { id: "r-dir", title: "Director of Public Security", titleAr: "مدير الأمن العام", level: 21, division: "command" },
   { id: "r-dirdep", title: "Deputy Director of Public Security", titleAr: "نائب مدير الأمن العام", level: 20, division: "command" },
   { id: "r-lgen", title: "Lieutenant General", titleAr: "فريق أول", level: 19, division: "officer" },
-  { id: "r-mgen", title: "Major General", titleAr: "فريق", level: 18, division: "officer" },
+  { id: "r-mgen", title: "Major General", titleAr: "لواء", level: 18, division: "officer" },
   { id: "r-brig", title: "Brigadier", titleAr: "عميد", level: 17, division: "officer" },
   { id: "r-col", title: "Colonel", titleAr: "عقيد", level: 16, division: "officer" },
   { id: "r-ltcol", title: "Lieutenant Colonel", titleAr: "مقدم", level: 15, division: "officer" },

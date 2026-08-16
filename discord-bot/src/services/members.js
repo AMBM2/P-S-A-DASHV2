@@ -12,8 +12,8 @@ async function upsertOfficerFromMember(member) {
   }
   const rank = getHighestRank(member);
   const status = isOnDuty(member) ? "on-duty" : "off-duty";
-  const name = member.user.username;
-  const nameAr = member.displayName || member.user.username;
+  const username = member.user.username; // الاسم (username)
+  const nameAr = member.displayName || member.user.username; // النيك نيم (server nickname)
 
   const { data: existing } = await supabase
     .from("officers")
@@ -23,10 +23,13 @@ async function upsertOfficerFromMember(member) {
 
   const base = {
     discordId: member.id,
-    discordName: member.displayName || member.user.username,
-    discordAvatar: member.user.displayAvatarURL?.({ extension: "png" }) || null,
+    name: username,
+    nameAr,
+    discordName: username,
+    discordAvatar: member.user.displayAvatarURL?.({ extension: "png", size: 256 }) || null,
     rankId: rank?.id || "r-tr1",
     status,
+    joinedAt: member.joinedAt?.toISOString() || new Date().toISOString(),
   };
 
   if (existing) {
@@ -45,12 +48,12 @@ async function upsertOfficerFromMember(member) {
     .from("officers")
     .insert({
       badge,
-      name,
+      name: username,
       nameAr,
       callsign: "",
       discordId: member.id,
-      discordName: member.displayName || member.user.username,
-      discordAvatar: member.user.displayAvatarURL?.({ extension: "png" }) || null,
+      discordName: username,
+      discordAvatar: member.user.displayAvatarURL?.({ extension: "png", size: 256 }) || null,
       rankId: rank?.id || "r-tr1",
       departmentId: "d-hq",
       status,
