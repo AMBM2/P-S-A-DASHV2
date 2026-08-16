@@ -15,16 +15,36 @@ function findRoleForLevel(guild, level) {
   return null;
 }
 
-// Assign a cadet/recruit role + notify the college channel when an application
-// is approved and the applicant becomes a Military College cadet.
+// Assign a cadet/recruit role + the selected military rank roles + notify the
+// college channel when an application is approved and the applicant becomes a
+// Military College cadet. `ranks` is an array of Discord role IDs (selected on
+// the recruitment form) — they are granted to the member immediately.
 export async function enrollCadet(client, cadet) {
   const guild = getGuild(client);
   if (!guild || !cadet?.discordId) return { ok: false, reason: "no-guild-or-discord" };
 
-  const results = { roleAssigned: false, notified: false, dmSent: false };
+  const results = { roleAssigned: false, ranksGranted: 0, notified: false, dmSent: false };
+  const selectedRoleIds = Array.isArray(cadet.ranks) ? cadet.ranks : [];
 
   try {
     const member = await guild.members.fetch(cadet.discordId);
+
+    // 1. Grant the selected rank roles immediately.
+    for (const roleId of selectedRoleIds) {
+      const role = guild.roles.cache.get(roleId);
+      if (!role) continue;
+      if (member.roles.cache.has(roleId)) continue;
+      try {
+        if (member.manageable) {
+          await member.roles.add(roleId, "Military College enrollment");
+          results.ranksGranted++;
+        }
+      } catch (e) {
+        console.warn(`[college] rank role add failed for ${roleId}:`, e.message);
+      }
+    }
+
+    // 2. Recruit role (fallback: level-0 rank role).
     const recruitRole =
       guild.roles.cache.get(config.newRecruitRoleId || "") || findRoleForLevel(guild, 0);
     if (recruitRole && !member.roles.cache.has(recruitRole.id)) {

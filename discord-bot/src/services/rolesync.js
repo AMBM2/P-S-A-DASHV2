@@ -10,9 +10,11 @@ function rankRoleIds(guild) {
 }
 
 // Reconcile a member's Discord roles against their portal record:
-//  - removes every military rank role that does not match officer.rankId
-//  - ensures the matching rank role is present
-export async function reconcileMemberRoles(client, officer) {
+//  - when strip=true: remove every military rank role that does not match
+//    officer.rankId (rank changed), then ensure the matching role is present
+//  - when strip=false: only ensure the matching rank role is present, keep all
+//    other rank roles (used when graduating a cadet who holds several ranks)
+export async function reconcileMemberRoles(client, officer, { strip = true } = {}) {
   const guild = getGuild(client);
   if (!guild || !officer?.discordId) return { ok: false, reason: "no-guild-or-discord" };
 
@@ -29,16 +31,18 @@ export async function reconcileMemberRoles(client, officer) {
 
   const results = { removed: 0, added: 0 };
 
-  for (const roleId of member.roles.cache.keys()) {
-    if (!military.has(roleId)) continue;
-    if (targetRole && roleId === targetRole.id) continue;
-    try {
-      if (member.manageable) {
-        await member.roles.remove(roleId, "Role reconciliation via portal");
-        results.removed++;
+  if (strip) {
+    for (const roleId of member.roles.cache.keys()) {
+      if (!military.has(roleId)) continue;
+      if (targetRole && roleId === targetRole.id) continue;
+      try {
+        if (member.manageable) {
+          await member.roles.remove(roleId, "Role reconciliation via portal");
+          results.removed++;
+        }
+      } catch {
+        // not manageable — skip
       }
-    } catch {
-      // not manageable — skip
     }
   }
 

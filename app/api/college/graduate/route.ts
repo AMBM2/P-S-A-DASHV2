@@ -52,7 +52,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
 
-    // Assign the rank role in Discord (realtime onboarding handles badge/DM).
+    // Assign the rank role in Discord (keep any other rank roles the cadet
+    // already holds; realtime onboarding handles badge/DM).
     if (cadet.discordId) {
       const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");
       try {
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
             "x-bot-secret": process.env.PATROL_BOT_SECRET || "",
           },
-          body: JSON.stringify({ discordId: cadet.discordId }),
+          body: JSON.stringify({ discordId: cadet.discordId, strip: false }),
           cache: "no-store",
         });
       } catch {

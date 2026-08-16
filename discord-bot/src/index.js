@@ -5,6 +5,7 @@ import { startRealtime } from "./listeners/realtime.js";
 import { registerGuildListeners } from "./listeners/guild.js";
 import { getLivePatrolDetailed } from "./services/patrolLive.js";
 import { getGuild } from "./services/nickname.js";
+import { findRankByRoleName } from "./ranks.js";
 import { expireLeaves } from "./services/leave.js";
 import { extractAllMembers } from "./services/members.js";
 import { requestLoginCode, verifyLoginCode } from "./services/login.js";
@@ -108,19 +109,24 @@ http
       return send(200, data);
     }
 
-    // Debug: list the guild's roles (id / name / position / color / members)
+    // Debug: list the guild's roles (id / name / position / color / members / rank)
     if (req.method === "GET" && url.pathname === "/roles") {
       const guild = getGuild(client);
       if (!guild) return send(200, { ok: false, error: "no-guild" });
       const roles = guild.roles.cache
         .filter((r) => !r.managed)
-        .map((r) => ({
-          id: r.id,
-          name: r.name,
-          position: r.position,
-          color: r.hexColor,
-          members: r.members.size,
-        }))
+        .map((r) => {
+          const rank = findRankByRoleName(r.name);
+          return {
+            id: r.id,
+            name: r.name,
+            position: r.position,
+            color: r.hexColor,
+            members: r.members.size,
+            rankId: rank?.id || null,
+            rankAr: rank?.titleAr || null,
+          };
+        })
         .sort((a, b) => b.position - a.position);
       return send(200, { ok: true, guild: guild.name, count: roles.length, roles });
     }
@@ -206,16 +212,17 @@ http
       return send(200, { ok: true });
     }
 
-    // Reconcile a member's Discord roles with their portal record (rank change)
+    // Reconcile a member's Discord roles with their portal record (rank change).
+// strip=false only ensures the target rank role is present, never removes others.
     if (req.method === "POST" && url.pathname === "/roles-sync") {
-      const { discordId } = await readBody();
+      const { discordId, strip } = await readBody();
       const { data: officer } = await supabase
         .from("officers")
         .select("*")
         .eq("discordId", discordId)
         .maybeSingle();
       if (!officer) return send(200, { ok: false, error: "not-linked" });
-      const data = await reconcileMemberRoles(client, officer);
+      const data = await reconcileMemberRoles(client, officer, { strip: strip !== false });
       return send(200, { ok: true, ...data });
     }
 

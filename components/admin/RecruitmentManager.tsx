@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Button, Card, Badge, Modal, Field, EmptyState } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
-import { RANKS, DEPARTMENTS } from "@/lib/seed";
+import { DEPARTMENTS } from "@/lib/seed";
 import { ExamPanel } from "./ExamPanel";
 import { cn } from "@/lib/format";
 import type { Application } from "@/lib/types";
@@ -26,6 +26,7 @@ const STATUS_TONE: Record<string, any> = {
 
 export function RecruitmentManager() {
   const [applications, setApplications] = useState<Application[]>([]);
+  const [roles, setRoles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "denied">("pending");
   const [q, setQ] = useState("");
@@ -34,11 +35,21 @@ export function RecruitmentManager() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("applications")
-      .select("*")
-      .order("createdAt", { ascending: false });
-    if (data) setApplications(data as Application[]);
+    const [appsRes, rolesRes] = await Promise.all([
+      supabase.from("applications").select("*").order("createdAt", { ascending: false }),
+      fetch("/api/discord/roles", { cache: "no-store" }),
+    ]);
+    if (appsRes.data) setApplications(appsRes.data as Application[]);
+    try {
+      const d = await rolesRes.json();
+      if (d.ok && Array.isArray(d.roles)) {
+        const map: Record<string, string> = {};
+        for (const r of d.roles) map[r.id] = r.rankAr || r.name;
+        setRoles(map);
+      }
+    } catch {
+      // roles map stays empty — fall back to raw IDs
+    }
     setLoading(false);
   }, []);
 
@@ -77,9 +88,7 @@ export function RecruitmentManager() {
   });
 
   const rankTitles = (app: Application) =>
-    (app.ranks || [])
-      .map((id) => RANKS.find((r) => r.id === id)?.titleAr || id)
-      .join("، ") || "—";
+    (app.ranks || []).map((id) => roles[id] || id).join("، ") || "—";
 
   return (
     <div>

@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase-server";
 
 // Public recruitment survey submit. Creates a pending application + a Military
-// College cadet record. The bot's realtime listener posts the college embed.
+// College cadet record. `ranks` = Discord role IDs selected on the form; the
+// bot grants them to the member on approval. The bot's realtime listener posts
+// the college embed.
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -10,6 +12,7 @@ export async function POST(req: Request) {
     const nameAr = String(body?.nameAr || "").trim();
     const discordId = String(body?.discordId || "").trim();
     const unit = String(body?.unit || "").trim();
+    const primaryRankId = String(body?.primaryRankId || "").trim();
     const ranks: string[] = Array.isArray(body?.ranks)
       ? body.ranks.filter((r: unknown) => typeof r === "string")
       : [];
@@ -51,7 +54,7 @@ export async function POST(req: Request) {
         discordId,
         name,
         nameAr,
-        rankId: ranks[0] || "r-tr1",
+        rankId: primaryRankId || "r-tr1",
         unit,
         status: "pending",
         examScore: 0,

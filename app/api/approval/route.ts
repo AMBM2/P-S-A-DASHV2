@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       .select("*")
       .single();
 
-    // Notify the Military College channel on approval.
+    // Notify the Military College channel + grant the selected rank roles.
     if (decision === "approved" && cadet) {
       const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");
       try {
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
             "x-bot-secret": process.env.PATROL_BOT_SECRET || "",
           },
-          body: JSON.stringify(cadet),
+          body: JSON.stringify({ ...cadet, ranks: app.ranks || [] }),
           cache: "no-store",
         });
       } catch {
