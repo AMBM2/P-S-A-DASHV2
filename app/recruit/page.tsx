@@ -41,10 +41,10 @@ export default function RecruitPage() {
         const d = await r.json();
         if (!active) return;
         if (d.ok && Array.isArray(d.roles)) {
-          const rankRoles = (d.roles as DiscordRole[])
-            .filter((x) => x.rankId)
+          const all = (d.roles as DiscordRole[])
+            .filter((x) => x.name !== "@everyone")
             .sort((a, b) => b.position - a.position);
-          setRoles(rankRoles);
+          setRoles(all);
         } else {
           setRolesError(d.error || "تعذر جلب الرتب من ديسكورد");
         }
@@ -170,7 +170,7 @@ export default function RecruitPage() {
             <div className="mb-2 flex items-center justify-between">
               <span className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
                 <ClipboardList size={15} className="text-gold-300" />
-                الرتب المطلوبة (من ديسكورد مباشرة)
+                الرتب المطلوبة (جميع رولات ديسكورد)
               </span>
               <span className="text-xs text-zinc-400">
                 المحددة: <span className="font-bold text-gold-200">{selected.size}</span>
@@ -213,8 +213,12 @@ export default function RecruitPage() {
                         <Check size={12} />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-white">{r.rankAr || r.name}</span>
-                        <span className="block truncate text-xs text-zinc-400">{r.name}</span>
+                        <span className="block truncate text-sm font-semibold text-white">
+                          {r.rankAr || r.name}
+                        </span>
+                        {r.rankAr && r.rankAr !== r.name && (
+                          <span className="block truncate text-xs text-zinc-400">{r.name}</span>
+                        )}
                       </span>
                     </button>
                   );
