@@ -1,7 +1,7 @@
 import { supabase } from "../supabase.js";
 import { getGuild } from "./nickname.js";
 import { getHighestRank, isOnDuty } from "../ranks.js";
-import { nextBadge } from "./badge.js";
+import { nextBadge, matchesPool } from "./badge.js";
 import { config } from "../config.js";
 
 // ---- member → officer record ----
@@ -33,10 +33,14 @@ async function upsertOfficerFromMember(member) {
   };
 
   if (existing) {
-    // Keep manual portal data; only sync rank/profile/status + ensure a badge exists
+    // Keep manual portal data; sync rank/profile/status, and assign a badge that
+    // matches the member's CURRENT rank (fixes stale codes from older syncs).
     const cur = await supabase.from("officers").select("badge").eq("id", existing.id).maybeSingle();
     const patch = { ...base };
-    if (!cur?.badge) patch.badge = await nextBadge(rank || (await import("../ranks.js")).findRankByLevel(0));
+    const effectiveRank = rank || (await import("../ranks.js")).findRankByLevel(0);
+    if (!cur?.badge || !matchesPool(cur.badge, effectiveRank)) {
+      patch.badge = await nextBadge(effectiveRank);
+    }
     await supabase.from("officers").update(patch).eq("id", existing.id);
     return { officerId: existing.id, created: false };
   }
@@ -138,7 +142,22 @@ export async function extractAllMembers(client) {
   }
 
   console.log(`[sync] done: created=${created} updated=${updated} skippedBots=${skippedBots} skippedNoRole=${skippedNoRole} failed=${failed}`);
-  return { ok: true, rolesSynced, membersTotal: members.size, created, updated, skippedBots, skippedNoRole, failed };
+
+  // Purge officers who are guild members but no longer hold the sync role
+  // (removes stale records created before the role filter was added).
+  let purged = 0;
+  if (config.memberRoleId) {
+    for (const member of members.values()) {
+      if (member.user.bot) continue;
+      if (!member.roles.cache.has(config.memberRoleId)) {
+        const { error } = await supabase.from("officers").delete().eq("discordId", member.id);
+        if (!error) purged++;
+      }
+    }
+    console.log(`[sync] purged ${purged} officers without the role`);
+  }
+
+  return { ok: true, rolesSynced, membersTotal: members.size, created, updated, skippedBots, skippedNoRole, failed, purged };
 }
 
 // Extract a single member (on guildMemberAdd / update)
