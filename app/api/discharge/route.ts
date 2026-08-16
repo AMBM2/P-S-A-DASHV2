@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 // the record discharged (defense in depth also exists via realtime).
 export async function POST(req: Request) {
   try {
-    const { officerId, reason, issuer } = await req.json();
+    const { officerId, reason, issuer, roleIds } = await req.json();
     if (!officerId) {
       return NextResponse.json({ ok: false, error: "officerId مطلوب" }, { status: 400 });
     }
@@ -16,7 +16,12 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
         "x-bot-secret": process.env.PATROL_BOT_SECRET || "",
       },
-      body: JSON.stringify({ officerId, reason: reason || "", issuer: issuer || null }),
+      body: JSON.stringify({
+        officerId,
+        reason: reason || "",
+        issuer: issuer || null,
+        roleIds: Array.isArray(roleIds) ? roleIds : undefined,
+      }),
       cache: "no-store",
     });
 

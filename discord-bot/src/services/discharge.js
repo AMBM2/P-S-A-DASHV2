@@ -12,8 +12,10 @@ function rankRoleIds(guild) {
   return ids;
 }
 
-// Strip every military/recruit role from a member and mark the record discharged.
-export async function dischargeMember(client, officerId, reason, issuer) {
+// Strip military/recruit roles from a member and mark the record discharged.
+// If `roleIds` is provided, only those exact Discord roles are removed;
+// otherwise every military/recruit role the member holds is stripped.
+export async function dischargeMember(client, officerId, reason, issuer, roleIds) {
   let officer;
   try {
     const { data, error } = await supabase
@@ -33,17 +35,9 @@ export async function dischargeMember(client, officerId, reason, issuer) {
   if (guild && officer.discordId) {
     try {
       const member = await guild.members.fetch(officer.discordId);
-      const military = rankRoleIds(guild);
-      const extra = [
-        config.recruitmentRoleId,
-        config.newRecruitRoleId,
-        config.onLeaveRoleId,
-        config.suspensionRoleId,
-        config.strikeWarningRoleId,
-      ].filter(Boolean);
-
-      for (const roleId of member.roles.cache.keys()) {
-        if (military.has(roleId) || extra.includes(roleId)) {
+      if (Array.isArray(roleIds) && roleIds.length) {
+        for (const roleId of roleIds) {
+          if (!member.roles.cache.has(roleId)) continue;
           try {
             if (member.manageable) {
               await member.roles.remove(roleId, `Discharged${reason ? `: ${reason}` : ""}`);
@@ -51,6 +45,28 @@ export async function dischargeMember(client, officerId, reason, issuer) {
             }
           } catch {
             // role removal failed — continue with the rest
+          }
+        }
+      } else {
+        const military = rankRoleIds(guild);
+        const extra = [
+          config.recruitmentRoleId,
+          config.newRecruitRoleId,
+          config.onLeaveRoleId,
+          config.suspensionRoleId,
+          config.strikeWarningRoleId,
+        ].filter(Boolean);
+
+        for (const roleId of member.roles.cache.keys()) {
+          if (military.has(roleId) || extra.includes(roleId)) {
+            try {
+              if (member.manageable) {
+                await member.roles.remove(roleId, `Discharged${reason ? `: ${reason}` : ""}`);
+                results.rolesRemoved++;
+              }
+            } catch {
+              // role removal failed — continue with the rest
+            }
           }
         }
       }

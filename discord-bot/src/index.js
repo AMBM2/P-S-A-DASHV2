@@ -140,12 +140,17 @@ http
         const member = await guild.members.fetch(userId);
         const roles = member.roles.cache
           .filter((r) => r.id !== guild.id && !r.managed)
-          .map((r) => ({
-            id: r.id,
-            name: r.name,
-            position: r.position,
-            color: r.hexColor,
-          }))
+          .map((r) => {
+            const rank = findRankByRoleName(r.name);
+            return {
+              id: r.id,
+              name: r.name,
+              position: r.position,
+              color: r.hexColor,
+              rankId: rank?.id || null,
+              rankAr: rank?.titleAr || null,
+            };
+          })
           .sort((a, b) => b.position - a.position);
         return send(200, {
           ok: true,
@@ -228,8 +233,8 @@ http
 
     // Discharge an officer: strip ranks/roles, mark record discharged
     if (req.method === "POST" && url.pathname === "/discharge") {
-      const { officerId, reason, issuer } = await readBody();
-      const data = await dischargeMember(client, officerId, reason, issuer);
+      const { officerId, reason, issuer, roleIds } = await readBody();
+      const data = await dischargeMember(client, officerId, reason, issuer, roleIds);
       return send(200, data);
     }
 

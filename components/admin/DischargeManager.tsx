@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { UserX, Loader2, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { UserX, Loader2, Search, ShieldAlert, Loader } from "lucide-react";
 import { Button, Badge, Modal, Field, Textarea, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { RANKS, DEPARTMENTS } from "@/lib/seed";
 import { cn } from "@/lib/format";
+
+type MemberRole = { id: string; name: string; rankAr?: string | null };
 
 export function DischargeManager() {
   const { officers, session } = useStore();
@@ -14,8 +16,55 @@ export function DischargeManager() {
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<null | { ok: boolean; text: string }>(null);
+  const [memberRoles, setMemberRoles] = useState<MemberRole[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [loadingRoles, setLoadingRoles] = useState(false);
 
   const target = officers.find((o) => o.id === discharging) || null;
+
+  useEffect(() => {
+    if (!target?.discordId) {
+      setMemberRoles([]);
+      setSelected(new Set());
+      return;
+    }
+    let cancelled = false;
+    setLoadingRoles(true);
+    fetch(`/api/discord/member/${target.discordId}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        if (d.ok && d.found && Array.isArray(d.roles)) {
+          const roles = d.roles as MemberRole[];
+          setMemberRoles(roles);
+          setSelected(new Set(roles.map((x) => x.id)));
+        } else {
+          setMemberRoles([]);
+          setSelected(new Set());
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMemberRoles([]);
+          setSelected(new Set());
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingRoles(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [discharging, target?.discordId]);
+
+  const toggle = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filtered = officers.filter((o) => {
     if (o.status === "discharged") return false;
@@ -36,6 +85,7 @@ export function DischargeManager() {
           officerId: target.id,
           reason,
           issuer: session?.discordId || null,
+          roleIds: Array.from(selected),
         }),
       });
       const d = await r.json();
@@ -139,11 +189,66 @@ export function DischargeManager() {
             <Field label="سبب الفصل">
               <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="اختياري — يُسجل في سجل الفرد" dir="rtl" />
             </Field>
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2 font-semibold text-zinc-300">
+                  <ShieldAlert size={15} className="text-rose-300" />
+                  الرتب/الرولات المسحوبة من ديسكورد
+                </span>
+                <span className="text-xs text-zinc-400">
+                  المحددة: <span className="font-bold text-rose-200">{selected.size}</span>
+                </span>
+              </div>
+              {loadingRoles ? (
+                <div className="flex items-center gap-2 rounded-xl border border-gold-400/15 bg-obsidian-900/40 px-4 py-3 text-sm text-zinc-400">
+                  <Loader size={15} className="animate-spin" /> جلب رولات العضو من ديسكورد...
+                </div>
+              ) : memberRoles.length === 0 ? (
+                <div className="rounded-xl border border-gold-400/15 bg-obsidian-900/40 px-4 py-3 text-sm text-zinc-400">
+                  لم يتم العثور على رولات للعضو في ديسكورد (قد يكون خارج السيرفر) — سيتم الاكتفاء بتحديث السجل.
+                </div>
+              ) : (
+                <div className="max-h-56 space-y-1 overflow-y-auto rounded-xl border border-rose-400/20 bg-obsidian-900/40 p-2">
+                  {memberRoles.map((r) => {
+                    const on = selected.has(r.id);
+                    return (
+                      <label
+                        key={r.id}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                          on ? "bg-rose-500/15 text-rose-100" : "bg-transparent text-zinc-400 hover:bg-obsidian-800/60"
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={on}
+                          onChange={() => toggle(r.id)}
+                          className="h-4 w-4 accent-rose-500"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold">
+                            {r.rankAr || r.name}
+                          </span>
+                          {r.rankAr && r.rankAr !== r.name && (
+                            <span className="block truncate text-xs text-zinc-500">{r.name}</span>
+                          )}
+                        </span>
+                        {r.rankAr && (
+                          <Badge tone="rose" className="shrink-0">
+                            رتبة
+                          </Badge>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setDischarging(null)}>إلغاء</Button>
               <Button variant="danger" onClick={doDischarge} disabled={busy}>
                 {busy ? <Loader2 size={16} className="ml-2 animate-spin" /> : <UserX size={16} className="ml-2" />}
-                تأكيد الفصل
+                تأكيد الفصل وسحب الرولات
               </Button>
             </div>
           </div>
