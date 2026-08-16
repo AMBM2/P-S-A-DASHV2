@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, ArrowUp, Search, Calendar } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, Search, Calendar, RefreshCw, Loader2, CheckCircle2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Officer } from "@/lib/types";
 import { Button, Card, Badge, Modal, Field, Input, Select, EmptyState } from "@/components/ui";
 import { RANKS } from "@/lib/seed";
 import { AR } from "@/lib/ar";
+import { cn } from "@/lib/format";
 
 const STATUS_TONE: Record<string, any> = {
   "on-duty": "green",
@@ -23,6 +24,27 @@ export function RosterManager() {
   const [editing, setEditing] = useState<Officer | null>(null);
   const [q, setQ] = useState("");
   const [form, setForm] = useState<Partial<Officer>>({});
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<null | { ok: boolean; text: string }>(null);
+
+  const syncDiscord = async () => {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      const r = await fetch("/api/sync", { method: "POST" });
+      const d = await r.json();
+      setSyncMsg({
+        ok: d.ok,
+        text: d.ok
+          ? `تمت المزامنة: ${d.created ?? 0} فرد جديد، ${d.updated ?? 0} محدّث، ${d.rolesSynced ?? 0} رول`
+          : `فشلت المزامنة: ${d.error || "البوت غير متصل"}`,
+      });
+    } catch {
+      setSyncMsg({ ok: false, text: "تعذر الوصول للبوت" });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const openNew = () => {
     setEditing(null);
@@ -105,9 +127,27 @@ export function RosterManager() {
               className="w-44 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
             />
           </div>
+          <Button variant="outline" onClick={syncDiscord} disabled={syncing} title="سحب الأفراد من سيرفر ديسكورد">
+            {syncing ? <Loader2 size={16} className="ml-2 animate-spin" /> : <RefreshCw size={16} className="ml-2" />}
+            {lang === "ar" ? "مزامنة ديسكورد" : "Sync Discord"}
+          </Button>
           <Button onClick={openNew}><Plus size={16} /> {lang === "ar" ? "إضافة فرد" : "Add Officer"}</Button>
         </div>
       </div>
+
+      {syncMsg && (
+        <div
+          className={cn(
+            "mb-4 flex items-center gap-2 rounded-lg border p-3 text-sm",
+            syncMsg.ok
+              ? "border-gold-300/40 bg-gold-400/10 text-gold-100"
+              : "border-red-400/30 bg-red-500/10 text-red-200"
+          )}
+        >
+          {syncMsg.ok ? <CheckCircle2 size={16} /> : null}
+          {syncMsg.text}
+        </div>
+      )}
 
       {filtered.length === 0 ? (
         <EmptyState message={lang === "ar" ? "لا يوجد أفراد" : "No personnel"} />
