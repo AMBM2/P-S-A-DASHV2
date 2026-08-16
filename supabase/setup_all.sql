@@ -73,6 +73,31 @@ alter table public.leave_requests enable row level security;
 alter table public.news_comments enable row level security;
 alter table public.login_codes enable row level security;
 
+-- 7) Field patrols (جدول الميدان) + officers.fieldPoints
+alter table public.officers add column if not exists "fieldPoints" integer not null default 0;
+
+create table if not exists public.patrols (
+  id uuid primary key default gen_random_uuid(),
+  name text not null default '',
+  "nameAr" text not null default '',
+  image text,
+  "roomId" text not null default '',
+  points integer not null default 0,
+  participants jsonb not null default '[]'::jsonb,
+  "participantCount" integer not null default 0,
+  status text not null default 'dispatched',
+  "createdAt" timestamptz not null default now()
+);
+
+alter table public.patrols enable row level security;
+
+do $$
+begin
+  if not exists (select from pg_policies where schemaname='public' and tablename='patrols' and policyname='anon_all_patrols') then
+    create policy "anon_all_patrols" on public.patrols for all to anon using (true) with check (true);
+  end if;
+end $$;
+
 do $$
 begin
   if not exists (select from pg_policies where schemaname='public' and tablename='roles' and policyname='anon_all_roles') then

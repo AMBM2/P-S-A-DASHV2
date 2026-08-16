@@ -8,7 +8,10 @@ import { RANKS } from "../ranks.js";
 // Posts to the patrol alert channel (config.patrolChannelId) with the scenario
 // image + mentions of the participants labeled with their military ranks.
 // No points are awarded — participation only.
-export async function dispatchPatrol(client, patrol) {
+//
+// `payload` may come from Realtime (a full patrol row) or from the portal
+// HTTP /dispatch endpoint ({ name, nameAr, image, participants, roomId }).
+export async function dispatchPatrol(client, payload) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
 
@@ -20,11 +23,11 @@ export async function dispatchPatrol(client, patrol) {
     return { ok: false, error: "text-channel-not-found" };
   }
 
-  // Participants: the ones selected on the portal (fallback: voice channel).
-  let memberIds = Array.isArray(patrol.participants) ? patrol.participants : [];
+  // Participants: selected on the portal (fallback: voice channel).
+  let memberIds = Array.isArray(payload.participants) ? payload.participants : [];
   let fromVoice = false;
-  if (!memberIds.length && patrol.roomId) {
-    const vc = guild.channels.cache.get(patrol.roomId);
+  if (!memberIds.length && payload.roomId) {
+    const vc = guild.channels.cache.get(payload.roomId);
     if (vc && vc.isVoiceBased()) {
       memberIds = [...vc.members.keys()];
       fromVoice = true;
@@ -52,11 +55,11 @@ export async function dispatchPatrol(client, patrol) {
     .setColor(0xd9b45b)
     .setTitle("🚨 تنبيه ميداني — الأمن العام")
     .setDescription(
-      `**اسم السيناريو:** ${patrol.nameAr || patrol.name || "—"}\n**عدد المشاركين:** ${count}`
+      `**اسم السيناريو:** ${payload.nameAr || payload.name || "—"}\n**عدد المشاركين:** ${count}`
     )
     .setTimestamp()
     .setFooter({ text: "Field Patrol Dispatch" });
-  if (patrol.image) embed.setImage(patrol.image);
+  if (payload.image) embed.setImage(payload.image);
 
   // Mentions labeled with each participant's military rank (e.g. @عقيد / @عميد).
   const mentions = memberIds.map((id) => {
@@ -70,11 +73,24 @@ export async function dispatchPatrol(client, patrol) {
 
   await target.send({ content: body, embeds: [embed] });
 
-  // Persist detected participants on the patrol record
-  await supabase
-    .from("patrols")
-    .update({ participants: memberIds, participantCount: count, status: "dispatched" })
-    .eq("id", patrol.id);
+  // Best-effort persistence for HTTP dispatches (no-op if the patrols table
+  // doesn't exist yet; skipped for Realtime rows which already exist).
+  if (!payload.id) {
+    try {
+      await supabase.from("patrols").insert({
+        name: payload.name || "",
+        nameAr: payload.nameAr || payload.name || "",
+        image: payload.image || null,
+        roomId: payload.roomId || "",
+        points: 0,
+        participants: memberIds,
+        participantCount: count,
+        status: "dispatched",
+      });
+    } catch {
+      // table missing — the alert was still delivered
+    }
+  }
 
   return { ok: true, count, sentTo: target.id, memberIds, fromVoice };
 }

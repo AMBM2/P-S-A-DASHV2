@@ -8,6 +8,7 @@ import { getGuild } from "./services/nickname.js";
 import { expireLeaves } from "./services/leave.js";
 import { extractAllMembers } from "./services/members.js";
 import { requestLoginCode, verifyLoginCode } from "./services/login.js";
+import { dispatchPatrol } from "./services/patrol.js";
 
 const client = new Client({
   intents: [
@@ -82,6 +83,13 @@ http
     // Full sync: pull all Discord roles + members into the site
     if (req.method === "POST" && url.pathname === "/sync") {
       const data = await extractAllMembers(client);
+      return send(200, data);
+    }
+
+    // Field patrol dispatch (direct HTTP — no DB table required)
+    if (req.method === "POST" && url.pathname === "/dispatch") {
+      const body = await readBody();
+      const data = await dispatchPatrol(client, body);
       return send(200, data);
     }
 
