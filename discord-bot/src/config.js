@@ -46,6 +46,12 @@ export const config = {
   adminRoleId: process.env.ADMIN_ROLE_ID,
   commandRoleId: process.env.COMMAND_ROLE_ID,
 
+  // Categorized admin permissions (Discord role IDs → capability grants).
+  executiveRoleId: process.env.EXECUTIVE_ROLE_ID || process.env.COMMAND_ROLE_ID,
+  fieldRoleId: process.env.FIELD_ROLE_ID,
+  hrRoleId: process.env.HR_ROLE_ID || process.env.RECRUITMENT_ROLE_ID,
+  personnelRoleId: process.env.PERSONNEL_ROLE_ID,
+
   voiceRoomIds: (process.env.VOICE_ROOM_IDS || "")
     .split(",")
     .map((s) => s.trim())

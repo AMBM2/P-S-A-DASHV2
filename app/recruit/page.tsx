@@ -10,8 +10,7 @@ import {
   UserPlus,
   Check,
 } from "lucide-react";
-import { Button, Card, Field, Input, Select } from "@/components/ui";
-import { DEPARTMENTS } from "@/lib/seed";
+import { Button, Card, Field, Input } from "@/components/ui";
 import { cn } from "@/lib/format";
 
 type DiscordRole = {
@@ -25,7 +24,6 @@ type DiscordRole = {
 export default function RecruitPage() {
   const [nameAr, setNameAr] = useState("");
   const [discordId, setDiscordId] = useState("");
-  const [unit, setUnit] = useState("");
   const [roles, setRoles] = useState<DiscordRole[]>([]);
   const [rolesError, setRolesError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -83,10 +81,6 @@ export default function RecruitPage() {
       setResult({ ok: false, error: "يرجى إدخال معرّف ديسكورد صحيح" });
       return;
     }
-    if (!unit) {
-      setResult({ ok: false, error: "يرجى اختيار الوحدة" });
-      return;
-    }
     if (selected.size === 0) {
       setResult({ ok: false, error: "يرجى اختيار رتبة واحدة على الأقل من قائمة ديسكورد" });
       return;
@@ -100,7 +94,6 @@ export default function RecruitPage() {
           nameAr: nameAr.trim(),
           name: nameAr.trim(),
           discordId: discordId.trim(),
-          unit,
           ranks: [...selected],
           primaryRankId,
         }),
@@ -110,7 +103,6 @@ export default function RecruitPage() {
       if (data.ok) {
         setNameAr("");
         setDiscordId("");
-        setUnit("");
         setSelected(new Set());
         setPrimaryRankId("");
       }
@@ -153,17 +145,6 @@ export default function RecruitPage() {
               dir="ltr"
               className="text-left"
             />
-          </Field>
-
-          <Field label="الوحدة">
-            <Select value={unit} onChange={(e) => setUnit(e.target.value)}>
-              <option value="">اختر الوحدة</option>
-              {DEPARTMENTS.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.nameAr}
-                </option>
-              ))}
-            </Select>
           </Field>
 
           <div>

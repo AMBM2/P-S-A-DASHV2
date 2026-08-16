@@ -2,16 +2,15 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase-server";
 
 // Public recruitment survey submit. Creates a pending application + a Military
-// College cadet record. `ranks` = Discord role IDs selected on the form; the
-// bot grants them to the member on approval. The bot's realtime listener posts
-// the college embed.
+// College cadet record assigned to the main military department (d-hq).
+// `ranks` = Discord role IDs selected on the form; the bot grants them to the
+// member on approval. Blacklisted users are rejected automatically.
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const name = String(body?.name || "").trim();
     const nameAr = String(body?.nameAr || "").trim();
     const discordId = String(body?.discordId || "").trim();
-    const unit = String(body?.unit || "").trim();
     const primaryRankId = String(body?.primaryRankId || "").trim();
     const ranks: string[] = Array.isArray(body?.ranks)
       ? body.ranks.filter((r: unknown) => typeof r === "string")
@@ -23,18 +22,28 @@ export async function POST(req: Request) {
     if (!/^\d{15,20}$/.test(discordId)) {
       return NextResponse.json({ ok: false, error: "معرّف ديسكورد غير صالح" }, { status: 400 });
     }
-    if (!unit) {
-      return NextResponse.json({ ok: false, error: "الوحدة مطلوبة" }, { status: 400 });
-    }
 
     const supabase = getSupabase();
+
+    // Reject applicants on the blacklist (القائمة السوداء).
+    const { data: blocked } = await supabase
+      .from("blacklist")
+      .select("id")
+      .eq("discordId", discordId)
+      .maybeSingle();
+    if (blocked) {
+      return NextResponse.json(
+        { ok: false, error: "لا يمكنك التقديم — حسابك مدرج في القائمة السوداء" },
+        { status: 200 }
+      );
+    }
+
     const { data: app, error } = await supabase
       .from("applications")
       .insert({
         name,
         nameAr,
         discordId,
-        unit,
         ranks,
         status: "pending",
         examScore: 0,
@@ -55,7 +64,6 @@ export async function POST(req: Request) {
         name,
         nameAr,
         rankId: primaryRankId || "r-tr1",
-        unit,
         status: "pending",
         examScore: 0,
       })

@@ -1,21 +1,62 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { KeyRound, Plus, Trash2, Loader2, UserCheck } from "lucide-react";
+import { KeyRound, Plus, Trash2, Loader2, UserCheck, Crown, Radio, UserPlus, Users } from "lucide-react";
 import { Button, Badge, Modal, Field, Input, Select } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/format";
-import type { AdminUser } from "@/lib/types";
+import type { AdminUser, AdminRole } from "@/lib/types";
 
-const ROLE_TONE: Record<string, any> = {
-  master: "rose",
-  admin: "gold",
-  recruitment: "indigo",
-};
+// Categorized admin permissions (Discord role IDs). A user may hold several.
+const CATEGORIES: {
+  role: AdminRole;
+  title: string;
+  desc: string;
+  features: string[];
+  icon: any;
+  tone: string;
+}[] = [
+  {
+    role: "executive",
+    title: "القيادة العليا (Executive Command)",
+    desc: "تحكم كامل في الإعدادات، إعادة تعيين البيانات، اعتماد الفصل، ومنح الصلاحيات.",
+    features: ["الإعدادات وإعادة تعيين البيانات", "اعتماد قرارات الفصل", "إدارة الصلاحيات"],
+    icon: Crown,
+    tone: "rose",
+  },
+  {
+    role: "field",
+    title: "قيادة الميدان (Field Command)",
+    desc: "متابعة الغرف المباشرة، إرسال التنبيهات الميدانية، وتسجيل النقاط.",
+    features: ["تتبع الغرف المباشرة", "إرسال تنبيهات الميدان", "تسجيل نقاط الميدان"],
+    icon: Radio,
+    tone: "amber",
+  },
+  {
+    role: "hr",
+    title: "التوظيف والرقابة (HR & Recruitment)",
+    desc: "مراجعة طلبات المتقدمين، توزيع الأكواد العسكرية، الإجازات، وسجل الإنذارات.",
+    features: ["مراجعة طلبات التوظيف", "توزيع الأكواد العسكرية", "الإجازات (LOA) وسجل الإنذارات"],
+    icon: UserPlus,
+    tone: "indigo",
+  },
+  {
+    role: "personnel",
+    title: "الأفراد والضباط (Personnel)",
+    desc: "عرض السجلات العسكرية والجداول الميدانية والإحصائيات الشخصية للاطلاع فقط.",
+    features: ["سجلات الأفراد للاطلاع", "الجداول الميدانية", "الإحصائيات الشخصية"],
+    icon: Users,
+    tone: "slate",
+  },
+];
 
 const ROLE_LABEL: Record<string, string> = {
   master: "سوبر أدمن",
+  executive: "القيادة العليا",
+  field: "قيادة الميدان",
+  hr: "التوظيف والرقابة",
+  personnel: "الأفراد",
   admin: "أدمن",
   recruitment: "توظيف فقط",
 };
@@ -26,7 +67,7 @@ export function AdminsManager() {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [userId, setUserId] = useState("");
-  const [role, setRole] = useState<AdminUser["role"]>("recruitment");
+  const [role, setRole] = useState<AdminRole>("executive");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<null | { ok: boolean; text: string }>(null);
@@ -91,16 +132,18 @@ export function AdminsManager() {
   };
 
   const toggleActive = async (a: AdminUser) => {
-    await upsertRow(a.userId, a.role, a.note, !a.active);
-  };
-
-  const upsertRow = async (id: string, r: AdminUser["role"], n: string, active: boolean) => {
     setBusy(true);
     try {
       await fetch("/api/admins/upsert", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ discordId: id, role: r, note: n, active, actor: session?.discordId }),
+        body: JSON.stringify({
+          discordId: a.userId,
+          role: a.role,
+          note: a.note,
+          active: !a.active,
+          actor: session?.discordId,
+        }),
       });
       await load();
     } finally {
@@ -108,10 +151,13 @@ export function AdminsManager() {
     }
   };
 
+  const masters = admins.filter((a) => a.role === "master" && a.active);
+  const byCategory = (role: AdminRole) => admins.filter((a) => a.role === role && a.active);
+
   return (
     <div>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="font-display text-lg font-bold gold-text">صلاحيات الوصول (RBAC)</h3>
+        <h3 className="font-display text-lg font-bold gold-text">الصلاحيات المصنّفة</h3>
         <Button onClick={() => setModal(true)} disabled={busy}>
           <Plus size={16} /> منح صلاحية
         </Button>
@@ -119,7 +165,7 @@ export function AdminsManager() {
 
       <div className="mb-4 flex items-center gap-2 rounded-lg border border-gold-400/15 bg-obsidian-900/40 p-3 text-xs text-zinc-400">
         <UserCheck size={14} className="text-gold-300" />
-        السوبر أدمن فقط يمكنه إدارة الصلاحيات. حاملو رول التوظيف (Recruitment Officer) على ديسكورد يحصلون تلقائياً على صلاحية التوظيف.
+        الصلاحيات تُصنّف حسب رولات ديسكورد المحددة في البوت (EXECUTIVE / FIELD / HR / PERSONNEL). السوبر أدمن فقط يملك إدارة هذا القسم.
       </div>
 
       {msg && (
@@ -140,50 +186,80 @@ export function AdminsManager() {
           <Loader2 size={18} className="animate-spin" /> جارٍ التحميل...
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-gold-400/15">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-obsidian-800/60 text-left text-xs uppercase tracking-wider text-zinc-400">
-              <tr>
-                <th className="px-4 py-3">Discord ID</th>
-                <th className="px-4 py-3">الصلاحية</th>
-                <th className="px-4 py-3">ملاحظة</th>
-                <th className="px-4 py-3">الحالة</th>
-                <th className="px-4 py-3 text-right">إجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gold-400/15">
-              {admins.map((a) => (
-                <tr key={a.id} className="bg-obsidian-900/30 transition-colors hover:bg-gold-400/5">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 font-mono text-zinc-100">
-                      <KeyRound size={14} className="text-gold-300" />
-                      {a.userId}
-                      {a.role === "master" && <Badge tone="rose">السوبر أدمن</Badge>}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge tone={ROLE_TONE[a.role]}>{ROLE_LABEL[a.role] || a.role}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-400">{a.note || "—"}</td>
-                  <td className="px-4 py-3">
-                    <Badge tone={a.active ? "green" : "slate"}>{a.active ? "نشط" : "موقوف"}</Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="outline" className="px-2 py-1 text-xs" disabled={busy} onClick={() => toggleActive(a)}>
-                        {a.active ? "إيقاف" : "تفعيل"}
-                      </Button>
-                      {a.role !== "master" && (
-                        <Button variant="danger" className="px-2 py-1 text-xs" disabled={busy} onClick={() => remove(a)}>
-                          <Trash2 size={14} />
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
+        <div className="space-y-6">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-sm font-bold text-zinc-200">
+              <KeyRound size={15} className="text-rose-300" />
+              السوبر أدمن (تحكم كامل)
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {masters.length === 0 && <span className="text-xs text-zinc-500">لا يوجد — يجب أن يكون هناك سوبر أدمن واحد على الأقل</span>}
+              {masters.map((a) => (
+                <div key={a.id} className="flex items-center gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2">
+                  <span className="font-mono text-xs text-rose-100">{a.userId}</span>
+                  <Badge tone="rose">السوبر أدمن</Badge>
+                  <button onClick={() => toggleActive(a)} className="text-[11px] text-zinc-400 hover:text-white" disabled={busy}>
+                    {a.active ? "إيقاف" : "تفعيل"}
+                  </button>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {CATEGORIES.map((cat) => {
+              const Icon = cat.icon;
+              const members = byCategory(cat.role);
+              return (
+                <div
+                  key={cat.role}
+                  className={cn(
+                    "rounded-2xl border p-4",
+                    cat.tone === "rose"
+                      ? "border-rose-400/25"
+                      : cat.tone === "amber"
+                        ? "border-amber-400/25"
+                        : cat.tone === "indigo"
+                          ? "border-indigo-400/25"
+                          : "border-zinc-500/25"
+                  )}
+                >
+                  <div className="mb-2 flex items-center gap-2">
+                    <Icon size={18} className={cn("shrink-0", cat.tone === "rose" ? "text-rose-300" : cat.tone === "amber" ? "text-amber-300" : cat.tone === "indigo" ? "text-indigo-300" : "text-zinc-300")} />
+                    <span className="font-bold text-white">{cat.title}</span>
+                    <Badge tone={cat.tone as any}>{members.length}</Badge>
+                  </div>
+                  <p className="mb-3 text-xs text-zinc-400">{cat.desc}</p>
+                  <ul className="mb-4 space-y-1">
+                    {cat.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2 text-xs text-zinc-400">
+                        <span className="h-1 w-1 rounded-full bg-gold-300" /> {f}
+                      </li>
+                    ))}
+                  </ul>
+                  {members.length === 0 ? (
+                    <p className="text-xs text-zinc-600">لا يوجد أعضاء بهذه الصلاحية — حاملو رول ديسكورد المطابق يتحصلون عليها تلقائياً.</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {members.map((a) => (
+                        <div key={a.id} className="flex items-center justify-between gap-2 rounded-lg border border-gold-400/10 bg-obsidian-900/40 px-2.5 py-1.5">
+                          <span className="truncate font-mono text-xs text-zinc-200">{a.userId}</span>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <button onClick={() => toggleActive(a)} className="text-[11px] text-zinc-400 hover:text-white" disabled={busy}>
+                              {a.active ? "إيقاف" : "تفعيل"}
+                            </button>
+                            <button onClick={() => remove(a)} className="text-[11px] text-rose-300 hover:text-rose-200" disabled={busy}>
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -198,9 +274,11 @@ export function AdminsManager() {
             />
           </Field>
           <Field label="الصلاحية">
-            <Select value={role} onChange={(e) => setRole(e.target.value as AdminUser["role"])}>
-              <option value="admin">أدمن (كل اللوحات عدا إدارة الصلاحيات)</option>
-              <option value="recruitment">توظيف فقط (قسم التوظيف والكلية العسكرية)</option>
+            <Select value={role} onChange={(e) => setRole(e.target.value as AdminRole)}>
+              <option value="executive">القيادة العليا (Executive Command)</option>
+              <option value="field">قيادة الميدان (Field Command)</option>
+              <option value="hr">التوظيف والرقابة (HR & Recruitment)</option>
+              <option value="personnel">الأفراد والضباط (Personnel)</option>
             </Select>
           </Field>
           <Field label="ملاحظة">

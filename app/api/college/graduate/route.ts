@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase-server";
 
-// Graduate a Military College cadet: promote to a full officer record (realtime
-// onboarding gives badge/nickname/DM; roles-sync assigns the rank role).
+// Graduate a Military College cadet: promote to a full officer record assigned
+// to the main military department (realtime onboarding gives badge/nickname/DM;
+// roles-sync assigns the rank role).
 export async function POST(req: Request) {
   try {
     const { cadetId, rankId } = await req.json();
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
         callsign: "",
         discordId: cadet.discordId || "",
         rankId: finalRank,
-        departmentId: cadet.unit || "d-hq",
+        departmentId: "d-hq", // main military department
         status: "on-duty",
         specialization: [],
         medals: [],

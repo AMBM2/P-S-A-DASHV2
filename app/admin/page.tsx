@@ -19,6 +19,7 @@ import { AdminOverview } from "@/components/admin/AdminOverview";
 import { NewsManager } from "@/components/admin/NewsManager";
 import { RosterManager } from "@/components/admin/RosterManager";
 import { CodesManager } from "@/components/admin/CodesManager";
+import { BadgeCodesManager } from "@/components/admin/BadgeCodesManager";
 import { LeadershipManager } from "@/components/admin/LeadershipManager";
 import { RolesManager } from "@/components/admin/RolesManager";
 import { RecruitmentManager } from "@/components/admin/RecruitmentManager";
@@ -29,24 +30,24 @@ import { AdminLogin } from "@/components/admin/AdminLogin";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/format";
-import type { AccessLevel } from "@/lib/types";
+import type { AccessLevel, Grant } from "@/lib/types";
 
 const TABS: {
   id: string;
   label: string;
   icon: any;
-  levels: AccessLevel[];
+  cats: Grant[];
 }[] = [
-  { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, levels: ["master", "admin"] },
-  { id: "news", label: "الأخبار", icon: Newspaper, levels: ["master", "admin"] },
-  { id: "roster", label: "الأفراد", icon: Users, levels: ["master", "admin"] },
-  { id: "roles", label: "الرتب العسكرية", icon: Shield, levels: ["master", "admin"] },
-  { id: "leadership", label: "القيادة", icon: Crown, levels: ["master", "admin"] },
-  { id: "codes", label: "الأكواد", icon: Radio, levels: ["master", "admin"] },
-  { id: "recruit", label: "التوظيف", icon: UserPlus, levels: ["master", "admin", "recruitment"] },
-  { id: "college", label: "الكلية العسكرية", icon: GraduationCap, levels: ["master", "admin", "recruitment"] },
-  { id: "discharge", label: "الفصل", icon: UserX, levels: ["master", "admin"] },
-  { id: "admins", label: "الصلاحيات", icon: ShieldCheck, levels: ["master"] },
+  { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, cats: ["master", "executive"] },
+  { id: "news", label: "الأخبار", icon: Newspaper, cats: ["master", "executive"] },
+  { id: "roster", label: "الأفراد", icon: Users, cats: ["master", "executive", "personnel"] },
+  { id: "roles", label: "الرتب العسكرية", icon: Shield, cats: ["master", "executive"] },
+  { id: "leadership", label: "القيادة", icon: Crown, cats: ["master", "executive"] },
+  { id: "codes", label: "الأكواد", icon: Radio, cats: ["master", "executive", "hr"] },
+  { id: "recruit", label: "التوظيف", icon: UserPlus, cats: ["master", "executive", "hr"] },
+  { id: "college", label: "الكلية العسكرية", icon: GraduationCap, cats: ["master", "executive", "hr"] },
+  { id: "discharge", label: "الفصل", icon: UserX, cats: ["master", "executive"] },
+  { id: "admins", label: "الصلاحيات", icon: ShieldCheck, cats: ["master"] },
 ];
 
 export default function AdminPage() {
@@ -54,6 +55,7 @@ export default function AdminPage() {
   const lang = settings.language;
   const [tab, setTab] = useState("overview");
   const [level, setLevel] = useState<AccessLevel | null>(null);
+  const [grants, setGrants] = useState<Grant[]>([]);
   const [resolving, setResolving] = useState(false);
   const [levelError, setLevelError] = useState<string | null>(null);
 
@@ -73,6 +75,7 @@ export default function AdminPage() {
         const d = await r.json();
         if (!active) return;
         setLevel(d.level || "none");
+        setGrants(d.grants || []);
       } catch {
         if (!active) return;
         setLevel("none");
@@ -86,14 +89,14 @@ export default function AdminPage() {
     };
   }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Jump to the first tab the user may see once their level resolves.
+  // Jump to the first tab the user may see once their grants resolve.
   useEffect(() => {
-    if (!level || level === "none") return;
-    const allowed = TABS.filter((t) => t.levels.includes(level));
+    if (!grants.length) return;
+    const allowed = TABS.filter((t) => t.cats.some((c) => grants.includes(c)));
     if (allowed.length === 0) return;
     if (!allowed.some((t) => t.id === tab)) setTab(allowed[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level]);
+  }, [grants]);
 
   if (!session) {
     return (
@@ -111,7 +114,7 @@ export default function AdminPage() {
     );
   }
 
-  const allowed = TABS.filter((t) => level && t.levels.includes(level));
+  const allowed = TABS.filter((t) => t.cats.some((c) => grants.includes(c)));
 
   return (
     <div>
@@ -187,7 +190,12 @@ export default function AdminPage() {
             {tab === "roster" && <RosterManager />}
             {tab === "roles" && <RolesManager />}
             {tab === "leadership" && <LeadershipManager />}
-            {tab === "codes" && <CodesManager />}
+            {tab === "codes" && (
+              <>
+                <BadgeCodesManager />
+                <CodesManager />
+              </>
+            )}
             {tab === "recruit" && <RecruitmentManager />}
             {tab === "college" && <CollegeManager />}
             {tab === "discharge" && <DischargeManager />}

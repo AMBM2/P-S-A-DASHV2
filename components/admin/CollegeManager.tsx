@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button, Badge, Modal, Field, Select, EmptyState } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
-import { RANKS, DEPARTMENTS } from "@/lib/seed";
+import { RANKS } from "@/lib/seed";
 import { cn } from "@/lib/format";
 import type { Cadet } from "@/lib/types";
 
@@ -144,7 +144,6 @@ export function CollegeManager() {
             <thead className="bg-obsidian-800/60 text-left text-xs uppercase tracking-wider text-zinc-400">
               <tr>
                 <th className="px-4 py-3">الاسم</th>
-                <th className="px-4 py-3">الوحدة</th>
                 <th className="px-4 py-3">الرتبة</th>
                 <th className="px-4 py-3">الاختبار</th>
                 <th className="px-4 py-3">الحالة</th>
@@ -159,9 +158,6 @@ export function CollegeManager() {
                     <td className="px-4 py-3">
                       <div className="font-semibold text-white">{c.nameAr || c.name}</div>
                       <div className="font-mono text-xs text-zinc-400">{c.discordId}</div>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-300">
-                      {DEPARTMENTS.find((d) => d.id === c.unit)?.nameAr || c.unit}
                     </td>
                     <td className="px-4 py-3 text-zinc-300">{rank?.titleAr || "—"}</td>
                     <td className="px-4 py-3 font-bold text-gold-200">{c.examScore || 0}</td>

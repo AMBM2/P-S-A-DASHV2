@@ -55,7 +55,11 @@ export function startRealtime(client) {
       rec.status === "discharged" &&
       old.status !== "discharged"
     ) {
-      const res = await dischargeMember(client, rec.id, "Marked discharged via portal", null);
+      const res = await dischargeMember(client, rec.id, {
+        reason: old.dischargeReason || "Marked discharged via portal",
+        type: old.dischargeType || "",
+        blacklist: false,
+      });
       console.log("[discharge] realtime result:", res);
     }
   });

@@ -7,13 +7,11 @@ import {
   X,
   Loader2,
   Search,
-  GraduationCap,
   RefreshCw,
   ClipboardCheck,
 } from "lucide-react";
 import { Button, Card, Badge, Modal, Field, EmptyState } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
-import { DEPARTMENTS } from "@/lib/seed";
 import { ExamPanel } from "./ExamPanel";
 import { cn } from "@/lib/format";
 import type { Application } from "@/lib/types";
@@ -140,11 +138,6 @@ export function RecruitmentManager() {
                 </Badge>
               </div>
               <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                <span className="inline-flex items-center gap-1">
-                  <GraduationCap size={13} className="text-gold-300" />
-                  {DEPARTMENTS.find((d) => d.id === a.unit)?.nameAr || a.unit}
-                </span>
-                <span className="text-zinc-600">•</span>
                 <span className="truncate">{rankTitles(a)}</span>
               </div>
               <div className="mb-1 text-xs text-zinc-500">
@@ -182,11 +175,6 @@ export function RecruitmentManager() {
               <Field label="Discord ID">
                 <div className="rounded-lg border border-gold-400/15 bg-obsidian-900/60 px-3 py-2 font-mono text-sm text-white">
                   {viewing.discordId}
-                </div>
-              </Field>
-              <Field label="الوحدة">
-                <div className="rounded-lg border border-gold-400/15 bg-obsidian-900/60 px-3 py-2 text-sm text-white">
-                  {DEPARTMENTS.find((d) => d.id === viewing.unit)?.nameAr || viewing.unit}
                 </div>
               </Field>
               <Field label="الرتب المطلوبة">

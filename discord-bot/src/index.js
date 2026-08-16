@@ -12,6 +12,7 @@ import { requestLoginCode, verifyLoginCode } from "./services/login.js";
 import { dispatchPatrol } from "./services/patrol.js";
 import { resolveAccessLevel, bootstrapMaster } from "./services/rbac.js";
 import { dischargeMember } from "./services/discharge.js";
+import { badgePoolStats } from "./services/badge.js";
 import { notifyCollege, enrollCadet } from "./services/college.js";
 import { reconcileMemberRoles } from "./services/rolesync.js";
 import { supabase } from "./supabase.js";
@@ -193,7 +194,7 @@ http
       if (actor.level !== "master") {
         return send(200, { ok: false, error: "forbidden" });
       }
-      if (!["master", "admin", "recruitment"].includes(role)) {
+      if (!["master", "executive", "field", "hr", "personnel", "admin", "recruitment"].includes(role)) {
         return send(200, { ok: false, error: "invalid role" });
       }
       const { data, error } = await supabase
@@ -233,9 +234,22 @@ http
 
     // Discharge an officer: strip ranks/roles, mark record discharged
     if (req.method === "POST" && url.pathname === "/discharge") {
-      const { officerId, reason, issuer, roleIds } = await readBody();
-      const data = await dischargeMember(client, officerId, reason, issuer, roleIds);
+      const { officerId, reason, type, evidence, blacklist, issuer, roleIds } = await readBody();
+      const data = await dischargeMember(client, officerId, {
+        reason,
+        type,
+        evidence,
+        blacklist: blacklist === true,
+        issuer,
+        roleIds,
+      });
       return send(200, data);
+    }
+
+    // Badge code pool statistics (إدارة الأكواد العسكرية)
+    if (req.method === "GET" && url.pathname === "/badges") {
+      const data = await badgePoolStats();
+      return send(200, { ok: true, ...data });
     }
 
     // Military College notification (new application / approval)

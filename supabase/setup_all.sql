@@ -242,7 +242,56 @@ begin
   end loop;
 end $$;
 
--- ===== Storage bucket "psa-media" (public) for anthem / welcome / news media =====
+-- ============================================================================
+-- 16) Recruitment streamlining — remove the Unit field entirely
+--     (applicants are assigned to the main military department on approval).
+-- ============================================================================
+alter table public.applications drop column if exists unit;
+alter table public.cadets drop column if exists unit;
+
+-- ============================================================================
+-- 17) Advanced discharge — type, evidence, blacklist + discharge audit log
+-- ============================================================================
+alter table public.officers add column if not exists "dischargeType" text;
+alter table public.officers add column if not exists "dischargeReason" text;
+
+create table if not exists public.blacklist (
+  id uuid primary key default gen_random_uuid(),
+  "discordId" text unique not null default '',
+  reason text not null default '',
+  "addedBy" text,
+  "createdAt" timestamptz not null default now()
+);
+
+create table if not exists public.discharges (
+  id uuid primary key default gen_random_uuid(),
+  "officerId" uuid references public.officers(id) on delete cascade,
+  "discordId" text,
+  name text not null default '',
+  type text not null default '',
+  reason text not null default '',
+  evidence text not null default '',
+  blacklisted boolean not null default false,
+  "dischargedBy" text,
+  "createdAt" timestamptz not null default now()
+);
+
+alter table public.blacklist enable row level security;
+alter table public.discharges enable row level security;
+
+do $$
+begin
+  if not exists (select from pg_policies where schemaname='public' and tablename='blacklist' and policyname='anon_all_blacklist') then
+    create policy "anon_all_blacklist" on public.blacklist for all to anon using (true) with check (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='discharges' and policyname='anon_all_discharges') then
+    create policy "anon_all_discharges" on public.discharges for all to anon using (true) with check (true);
+  end if;
+end $$;
+
+-- ============================================================================
+-- Storage bucket "psa-media" (public) for anthem / welcome / news media
+-- ============================================================================
 insert into storage.buckets (id, name, public)
 values ('psa-media', 'psa-media', true)
 on conflict (id) do update set public = true;

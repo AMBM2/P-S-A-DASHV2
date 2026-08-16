@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 
-// Discharge an officer: the bot strips rank/recruit roles in Discord and marks
-// the record discharged (defense in depth also exists via realtime).
+// Discharge an officer: the bot strips rank/recruit roles in Discord, marks the
+// record discharged, optionally blacklists, and logs the discharge (defense in
+// depth also exists via realtime).
 export async function POST(req: Request) {
   try {
-    const { officerId, reason, issuer, roleIds } = await req.json();
+    const { officerId, type, reason, evidence, blacklist, issuer, roleIds } = await req.json();
     if (!officerId) {
       return NextResponse.json({ ok: false, error: "officerId مطلوب" }, { status: 400 });
+    }
+    if (!type || !["honorary", "dishonorable", "inactivity", "administrative"].includes(type)) {
+      return NextResponse.json({ ok: false, error: "نوع الفصل مطلوب" }, { status: 400 });
+    }
+    if (!reason) {
+      return NextResponse.json({ ok: false, error: "تفاصيل الفصل إلزامية" }, { status: 400 });
     }
 
     const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");
@@ -18,7 +25,10 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         officerId,
+        type,
         reason: reason || "",
+        evidence: evidence || "",
+        blacklist: blacklist === true,
         issuer: issuer || null,
         roleIds: Array.isArray(roleIds) ? roleIds : undefined,
       }),

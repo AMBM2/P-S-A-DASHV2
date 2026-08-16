@@ -26,6 +26,8 @@ export type Officer = {
   rankId: string;
   departmentId: string;
   status: "on-duty" | "off-duty" | "suspended" | "leave" | "discharged";
+  dischargeType?: string;
+  dischargeReason?: string;
   specialization: string[];
   squad?: string;
   joinedAt: string;
@@ -84,12 +86,24 @@ export type MilitaryCode = {
   type: "10-code" | "signal" | "channel" | "protocol" | "callsign";
 };
 
+export type AdminRole = "master" | "executive" | "field" | "hr" | "personnel" | "admin" | "recruitment";
+
 export type AdminUser = {
   id: string;
   userId: string;
-  role: "master" | "admin" | "recruitment";
+  role: AdminRole;
   note: string;
   active: boolean;
+  createdAt: string;
+};
+
+export type Grant = "master" | "executive" | "field" | "hr" | "personnel";
+
+export type BlacklistEntry = {
+  id: string;
+  discordId: string;
+  reason: string;
+  addedBy: string | null;
   createdAt: string;
 };
 
@@ -98,7 +112,6 @@ export type Application = {
   name: string;
   nameAr: string;
   discordId: string;
-  unit: string;
   ranks: string[];
   status: "pending" | "approved" | "denied";
   examScore: number;
@@ -114,7 +127,6 @@ export type Cadet = {
   name: string;
   nameAr: string;
   rankId: string;
-  unit: string;
   status: "pending" | "enrolled" | "graduated" | "discharged";
   examScore: number;
   officerId: string | null;

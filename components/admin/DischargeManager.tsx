@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { UserX, Loader2, Search, ShieldAlert, Loader } from "lucide-react";
-import { Button, Badge, Modal, Field, Textarea, EmptyState } from "@/components/ui";
+import { Button, Badge, Modal, Field, Textarea, Select, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { RANKS, DEPARTMENTS } from "@/lib/seed";
 import { cn } from "@/lib/format";
@@ -13,7 +13,10 @@ export function DischargeManager() {
   const { officers, session } = useStore();
   const [q, setQ] = useState("");
   const [discharging, setDischarging] = useState<string | null>(null);
+  const [type, setType] = useState("");
   const [reason, setReason] = useState("");
+  const [evidence, setEvidence] = useState("");
+  const [blacklist, setBlacklist] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<null | { ok: boolean; text: string }>(null);
   const [memberRoles, setMemberRoles] = useState<MemberRole[]>([]);
@@ -21,6 +24,13 @@ export function DischargeManager() {
   const [loadingRoles, setLoadingRoles] = useState(false);
 
   const target = officers.find((o) => o.id === discharging) || null;
+
+  const DISCHARGE_TYPES = [
+    { value: "honorary", label: "فصل شرفي (Honorary)" },
+    { value: "dishonorable", label: "فصل غير شرفي (Dishonorable)" },
+    { value: "inactivity", label: "الخمول وعدم النشاط (Inactivity)" },
+    { value: "administrative", label: "مخالفة إدارية (Administrative Violation)" },
+  ];
 
   useEffect(() => {
     if (!target?.discordId) {
@@ -75,6 +85,14 @@ export function DischargeManager() {
 
   const doDischarge = async () => {
     if (!target) return;
+    if (!type) {
+      setMsg({ ok: false, text: "يرجى اختيار نوع الفصل" });
+      return;
+    }
+    if (!reason.trim()) {
+      setMsg({ ok: false, text: "التفاصيل/السبب إلزامي" });
+      return;
+    }
     setBusy(true);
     setMsg(null);
     try {
@@ -83,7 +101,10 @@ export function DischargeManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           officerId: target.id,
+          type,
           reason,
+          evidence,
+          blacklist,
           issuer: session?.discordId || null,
           roleIds: Array.from(selected),
         }),
@@ -92,7 +113,7 @@ export function DischargeManager() {
       setMsg({
         ok: d.ok,
         text: d.ok
-          ? `تم فصل ${target.nameAr || target.name} — سُلبت ${d.rolesRemoved ?? 0} رول من ديسكورد`
+          ? `تم فصل ${target.nameAr || target.name} — سُلبت ${d.rolesRemoved ?? 0} رول من ديسكورد${d.blacklisted ? " وأُضيف للقائمة السوداء" : ""}`
           : `فشل الفصل: ${d.error || "البوت غير متصل"}`,
       });
       if (d.ok) setDischarging(null);
@@ -186,9 +207,47 @@ export function DischargeManager() {
               </div>
               <Badge tone="rose">عملية حساسة</Badge>
             </div>
-            <Field label="سبب الفصل">
-              <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="اختياري — يُسجل في سجل الفرد" dir="rtl" />
+            <Field label="نوع الفصل (إلزامي)">
+              <Select value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="">— اختر نوع الفصل —</option>
+                {DISCHARGE_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
             </Field>
+            <Field label="التفاصيل / سبب الفصل (إلزامي)">
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="تفاصيل الفصل — إلزامي"
+                dir="rtl"
+              />
+            </Field>
+            <Field label="الأدلة / روابط التوثيق">
+              <Textarea
+                value={evidence}
+                onChange={(e) => setEvidence(e.target.value)}
+                placeholder="روابط أو مستندات (اختياري)"
+                dir="ltr"
+                className="min-h-[60px] text-left"
+              />
+            </Field>
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-rose-400/25 bg-obsidian-900/50 p-3">
+              <input
+                type="checkbox"
+                checked={blacklist}
+                onChange={(e) => setBlacklist(e.target.checked)}
+                className="h-4 w-4 accent-rose-500"
+              />
+              <span className="flex-1">
+                <span className="block text-sm font-semibold text-white">إضافة إلى القائمة السوداء</span>
+                <span className="block text-xs text-zinc-400">
+                  يمنع هذا الشخص من التقديم للتوظيف مستقبلاً
+                </span>
+              </span>
+            </label>
             <div>
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 font-semibold text-zinc-300">

@@ -2,9 +2,11 @@ import { supabase } from "../supabase.js";
 
 // ---- Rank badge code pools (military code assignment) ----
 // Command/officer ranks own a sequential range of C- codes (higher rank =
-// lower number). رقباء (رئيس رقباء → رقيب) share a sequential N-1..N pool.
-// Training ranks (تحت التدريب) get NT-100+. The bot assigns the LOWEST
-// available (unused) code in the rank's range.
+// lower number). Senior NCOs (رئيس رقباء → رقيب) share a sequential N-1..N
+// pool. Junior NCOs & enlisted (وكيل رقيب → جندي) — together with training
+// ranks — share an NT-100+ pool. The bot assigns the LOWEST available
+// (unused) code in the rank's pool, and codes are recycled automatically:
+// when a member is promoted/discharged their old code returns to its pool.
 const BADGE_POOLS = [
   { rankId: "r-pm",       start: 0,   count: 1 },   // رئيس الوزراء        C-0
   { rankId: "r-vpm",      start: 1,   count: 1 },   // نائب رئيس الوزراء   C-1
@@ -22,19 +24,16 @@ const BADGE_POOLS = [
   { rankId: "r-capt",     start: 55,  count: 20 },  // نقيب                C-55..C-74
   { rankId: "r-1lt",      start: 75,  count: 25 },  // ملازم أول           C-75..C-99
   { rankId: "r-lt",       start: 100, count: 30 },  // ملازم               C-100..C-129
-  { rankId: "r-lcpl",     start: 200, count: 30 },  // عريف                C-200..C-229
-  { rankId: "r-cpl",      start: 230, count: 40 },  // وكيل رقيب           C-230..C-269
-  { rankId: "r-pfc",      start: 270, count: 50 },  // جندي أول            C-270..C-319
-  { rankId: "r-pvt",      start: 320, count: 50 },  // جندي                C-320..C-369
 ];
 
 const POOL_PREFIX = "C";
 
-// رقباء (رئيس رقباء / رقيب أول / رقيب) — shared sequential N-1..N pool.
+// Senior NCOs (رئيس رقباء → رقيب): shared sequential N-1..N pool.
 const N_RANKS = new Set(["r-msg", "r-sfc", "r-sgt"]);
 const N_START = 1;
 
-// Training ranks (تحت التدريب) — NT-100+.
+// Junior NCOs & enlisted (وكيل رقيب → جندي): NT-100+ (shared with training).
+const NT_RANKS = new Set(["r-lcpl", "r-cpl", "r-pfc", "r-pvt"]);
 const NT_START = 100;
 
 // Generic prefixes for ranks outside a pool (safety fallback only)
@@ -70,7 +69,7 @@ export async function nextBadge(rank) {
     return null; // pool exhausted
   }
 
-  // رقباء (رئيس رقباء → رقيب): sequential shared N-1..N pool
+  // Senior NCOs (رئيس رقباء → رقيب): sequential shared N-1..N pool
   if (N_RANKS.has(rank?.id)) {
     const badges = await allBadges();
     const taken = new Set();
@@ -83,8 +82,8 @@ export async function nextBadge(rank) {
     return `N-${n}`;
   }
 
-  // Training ranks (تحت التدريب): NT-100+
-  if (rank?.division === "training") {
+  // Junior NCOs & enlisted (وكيل رقيب → جندي) + training: NT-100+
+  if (NT_RANKS.has(rank?.id) || rank?.division === "training") {
     const badges = await allBadges();
     const taken = new Set();
     for (const b of badges) {
@@ -125,10 +124,60 @@ export function matchesPool(badge, rank) {
   if (N_RANKS.has(rank?.id)) {
     return /^N-\d+$/.test(String(badge || ""));
   }
-  if (rank?.division === "training") {
+  if (NT_RANKS.has(rank?.id) || rank?.division === "training") {
     const m = String(badge || "").match(/^NT-(\d+)$/);
     return !!m && parseInt(m[1], 10) >= NT_START;
   }
   const prefix = BADGE_PREFIX_BY_DIVISION[rank?.division] || "A";
   return badgePrefix(badge) === prefix;
+}
+
+// Pool statistics for the "إدارة الأكواد العسكرية" admin module.
+export async function badgePoolStats() {
+  const badges = await allBadges();
+  const parse = (re) => {
+    const n = badges.map((b) => {
+      const m = String(b).match(re);
+      return m ? parseInt(m[1], 10) : -1;
+    });
+    return n.filter((x) => x >= 0);
+  };
+
+  const cCodes = parse(/^C-(\d+)$/);
+  const pools = BADGE_POOLS.map((p) => {
+    const end = p.start + p.count - 1;
+    const used = cCodes.filter((n) => n >= p.start && n <= end).sort((a, b) => a - b);
+    return {
+      rankId: p.rankId,
+      prefix: POOL_PREFIX,
+      start: p.start,
+      end,
+      used: used.length,
+      available: p.count - used.length,
+      next: used.length >= p.count ? null : `${POOL_PREFIX}-${p.start + used.length}`,
+    };
+  });
+
+  const nCodes = parse(/^N-(\d+)$/).sort((a, b) => a - b);
+  const nEnd = nCodes.length ? nCodes[nCodes.length - 1] : N_START - 1;
+  const ntCodes = parse(/^NT-(\d+)$/).sort((a, b) => a - b);
+  const ntEnd = ntCodes.length ? ntCodes[ntCodes.length - 1] : NT_START - 1;
+
+  return {
+    pools,
+    N: {
+      prefix: "N",
+      start: N_START,
+      end: Math.max(N_START, nEnd),
+      used: nCodes.length,
+      next: `N-${nEnd + 1}`,
+    },
+    NT: {
+      prefix: "NT",
+      start: NT_START,
+      end: Math.max(NT_START, ntEnd),
+      used: ntCodes.length,
+      next: `NT-${ntEnd + 1}`,
+    },
+  };
 }
