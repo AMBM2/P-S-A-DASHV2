@@ -84,7 +84,9 @@ export async function verifyLoginCode(rawUserId, rawCode) {
     if (new Date(dbRes.expiresAt).getTime() < Date.now()) {
       return { ok: false, error: "انتهت صلاحية الرمز — اطلب رمزاً جديداً" };
     }
-    await supabase.from("login_codes").update({ used: true }).eq("id", dbRes.id).catch(() => {});
+    try {
+      await supabase.from("login_codes").update({ used: true }).eq("id", dbRes.id);
+    } catch {}
   } else {
     const mem = memoryCodes.get(userId);
     if (!mem || mem.code !== code) {
