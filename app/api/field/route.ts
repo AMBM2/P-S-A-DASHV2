@@ -10,6 +10,9 @@ export async function POST(req: Request) {
     const memberIds: string[] = Array.isArray(body?.memberIds)
       ? body.memberIds.filter((m: unknown) => typeof m === "string")
       : [];
+    const imageUrl = String(body?.imageUrl || "").trim();
+    const imageData = String(body?.imageData || "").trim();
+    const imageName = String(body?.imageName || "").trim();
 
     if (!location) {
       return NextResponse.json({ ok: false, error: "موقع السيناريو مطلوب" }, { status: 400 });
@@ -22,7 +25,12 @@ export async function POST(req: Request) {
       const r = await fetch(`${botUrl}/dispatch`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-bot-secret": secret },
-        body: JSON.stringify({ location, memberIds }),
+        body: JSON.stringify({
+          location,
+          memberIds,
+          ...(imageUrl ? { imageUrl } : {}),
+          ...(imageData ? { imageData, imageName: imageName || "field-image.png" } : {}),
+        }),
         cache: "no-store",
       });
       let botResult: any = { ok: false, error: "bad response" };

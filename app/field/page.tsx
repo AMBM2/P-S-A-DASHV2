@@ -21,6 +21,9 @@ import {
   Volume2,
   Search,
   X,
+  ImagePlus,
+  Link2,
+  Upload,
 } from "lucide-react";
 import { Button, Card, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
@@ -83,6 +86,20 @@ export default function FieldPage() {
   const [membersError, setMembersError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageData, setImageData] = useState("");
+  const [imageName, setImageName] = useState("");
+
+  const attachImage = (file: File) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageData(String(reader.result || ""));
+      setImageName(file.name);
+      setImageUrl("");
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (!session) {
@@ -189,7 +206,12 @@ export default function FieldPage() {
       const res = await fetch("/api/field", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location, memberIds: [...selected] }),
+        body: JSON.stringify({
+          location,
+          memberIds: [...selected],
+          ...(imageUrl ? { imageUrl } : {}),
+          ...(imageData ? { imageData, imageName: imageName || "field-image.png" } : {}),
+        }),
       });
       const data = await res.json();
       if (data.ok) {
@@ -407,7 +429,71 @@ export default function FieldPage() {
             ))}
           </div>
 
-          {/* Dispatch console */}
+          {/* Image attach */}
+        <div className="mt-6 border-t border-gold-400/15 pt-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-zinc-200">
+              <ImagePlus size={16} className="text-gold-300" /> ارفاق صورة الميدان (اختياري)
+            </h3>
+            {(imageUrl || imageData) && (
+              <button
+                onClick={() => {
+                  setImageUrl("");
+                  setImageData("");
+                  setImageName("");
+                }}
+                className="flex items-center gap-1 rounded-full border border-red-400/30 bg-red-500/10 px-2.5 py-1 text-xs text-red-200 hover:bg-red-500/20"
+              >
+                <X size={12} /> إزالة
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
+              <Link2 size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input
+                value={imageUrl}
+                onChange={(e) => {
+                  setImageUrl(e.target.value);
+                  if (e.target.value.trim()) {
+                    setImageData("");
+                    setImageName("");
+                  }
+                }}
+                placeholder="رابط مباشر لصورة الميدان (https://...)"
+                className="w-full rounded-xl border border-gold-400/15 bg-obsidian-900/60 py-2.5 pr-10 pl-3 text-sm text-white placeholder-zinc-500 outline-none transition focus:border-gold-300/60"
+              />
+            </div>
+            <label className="flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gold-400/25 bg-gold-400/10 px-4 py-2.5 text-sm font-bold text-gold-200 transition hover:bg-gold-400/20">
+              <Upload size={15} />
+              {imageData ? "تغيير الصورة" : "اختيار صورة"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) attachImage(f);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+
+          {(imageUrl || imageData) && (
+            <div className="relative mt-3 inline-block overflow-hidden rounded-xl border border-gold-400/20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageData || imageUrl}
+                alt="صورة الميدان"
+                className="max-h-40 w-auto object-cover"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Dispatch console */}
           <div className="mt-6 border-t border-gold-400/15 pt-5">
             <div className="flex flex-col items-stretch gap-3 sm:flex-row">
               <Button
