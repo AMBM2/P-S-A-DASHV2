@@ -9,7 +9,7 @@ dotenv.config({ path: path.join(__dirname, "..", ".env.local") });
 
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 const PATROL_CHANNEL_ID = process.env.PATROL_CHANNEL_ID;
-const SECRET = process.env.PATROL_BOT_SECRET || "psa-field-secret-2026";
+const SECRET = process.env.PATROL_BOT_SECRET || "";
 const PORT = Number(process.env.PATROL_BOT_PORT || 4000);
 
 import { createClient } from "@supabase/supabase-js";
