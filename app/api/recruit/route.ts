@@ -78,6 +78,25 @@ export async function POST(req: Request) {
       })
       .then(() => {});
 
+    // Announce the new application in the recruitment room (توظيف مواطن).
+    const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");
+    const secret = process.env.PATROL_BOT_SECRET || "";
+    if (botUrl && secret) {
+      const who = (name || nameAr || "").trim();
+      const lines = [
+        "📋 **توظيف مواطن — تقديم جديد**",
+        `المتقدّم: **${who}**`,
+        `ديسكورد: <@${discordId}>`,
+        `الحالة: قيد المراجعة (بانتظار الاختبار العسكري)`,
+      ];
+      fetch(`${botUrl}/announce`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-bot-secret": secret },
+        body: JSON.stringify({ message: lines.join("\n") }),
+        signal: AbortSignal.timeout(4000),
+      }).catch((e) => console.warn(`[recruit] announce failed: ${e?.message}`));
+    }
+
     return NextResponse.json({ ok: true, id: app?.id });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message || "server error" }, { status: 500 });

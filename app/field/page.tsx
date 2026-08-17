@@ -24,6 +24,9 @@ import {
   ImagePlus,
   Link2,
   Upload,
+  Factory,
+  TrainFront,
+  MapPin,
 } from "lucide-react";
 import { Button, Card, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
@@ -56,16 +59,17 @@ const LOCATIONS = [
   "ميني ماركت فقط",
 ];
 
-const GROUPS: { name: string; items: string[] }[] = [
-  { name: "المصانع", items: ["مصنع البقر", "مصنع الدجاج", "مصنع القوارب"] },
-  { name: "المترو", items: ["المترو الاول", "المترو الثاني", "المترو بهامس", "مترو المطار", "مترو المدينة"] },
-  { name: "المواقع العامة", items: ["الاستديو", "الدسكو", "ملاهي داش", "الخياط", "المسرح", "قراج السيارات", "المجوهرات"] },
-  { name: "المواقع الحساسة", items: ["البيت المهجور", "بيق ماركت", "ميني ماركت فقط"] },
+const GROUPS: { name: string; icon: React.ReactNode; items: string[] }[] = [
+  { name: "المصانع", icon: <Factory size={14} />, items: ["مصنع البقر", "مصنع الدجاج", "مصنع القوارب"] },
+  { name: "المترو", icon: <TrainFront size={14} />, items: ["المترو الاول", "المترو الثاني", "المترو بهامس", "مترو المطار", "مترو المدينة"] },
+  { name: "المواقع العامة", icon: <MapPin size={14} />, items: ["الاستديو", "الدسكو", "ملاهي داش", "الخياط", "المسرح", "قراج السيارات", "المجوهرات"] },
+  { name: "المواقع الحساسة", icon: <Shield size={14} />, items: ["البيت المهجور", "بيق ماركت", "ميني ماركت فقط"] },
 ];
 
 type FieldMember = {
   id: string;
   name: string;
+  avatar?: string;
   rankAr: string;
   rankLevel: number;
   category: "officer" | "enlisted";
@@ -193,6 +197,10 @@ export default function FieldPage() {
   ).length;
   const onDutyEnlisted = onDuty - onDutyOfficers;
 
+  const selectedMembers = members.filter((m) => selected.has(m.id));
+  const selectedOfficers = selectedMembers.filter((m) => m.category === "officer").length;
+  const selectedEnlisted = selectedMembers.filter((m) => m.category === "enlisted").length;
+
   const submit = async () => {
     setPhase("idle");
     setError("");
@@ -234,10 +242,10 @@ export default function FieldPage() {
       <button
         onClick={() => toggle(m.id)}
         className={cn(
-          "flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-right transition-all duration-150",
+          "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-right transition-all duration-150",
           active
-            ? "border-gold-300/70 bg-gold-400/15"
-            : "border-gold-400/12 bg-obsidian-900/40 hover:border-gold-400/40"
+            ? "border-gold-300/70 bg-gold-400/15 shadow-[0_0_18px_-6px_rgba(var(--accent-rgb),0.55)]"
+            : "border-gold-400/12 bg-obsidian-900/40 hover:border-gold-400/40 hover:bg-obsidian-900/70"
         )}
       >
         <span
@@ -248,10 +256,33 @@ export default function FieldPage() {
         >
           {active && <UserCheck size={12} />}
         </span>
+        <span className="relative shrink-0">
+          {m.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={m.avatar} alt="" className="h-10 w-10 rounded-full border border-gold-400/30 object-cover" />
+          ) : (
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-gold-400/25 bg-obsidian-800 text-sm font-bold text-gold-300">
+              {m.name.slice(0, 1)}
+            </span>
+          )}
+          {m.connected && (
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-obsidian-900 bg-emerald-400" />
+          )}
+        </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-bold text-white">{m.name}</span>
-          <span className="block truncate text-xs font-semibold gold-text">
-            {m.rankAr || "—"} · {m.category === "officer" ? "ضابط" : "فرد"}
+          <span className="mt-1 flex flex-wrap items-center gap-1.5">
+            <span
+              className={cn(
+                "rounded-full border px-2 py-0.5 text-[10px] font-bold",
+                m.category === "officer"
+                  ? "border-gold-400/40 bg-gold-400/10 text-gold-200"
+                  : "border-sky-400/40 bg-sky-400/10 text-sky-200"
+              )}
+            >
+              {m.rankAr || "—"}
+            </span>
+            <span className="text-[10px] text-zinc-500">{m.category === "officer" ? "ضابط" : "فرد"}</span>
           </span>
         </span>
         <span className="flex shrink-0 items-center gap-1.5">
@@ -388,7 +419,8 @@ export default function FieldPage() {
               <div key={g.name}>
                 <div className="mb-2 flex items-center gap-2">
                   <span className="h-px w-5 bg-gradient-to-l from-gold-400/60 to-transparent" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-400">
+                    <span className="text-gold-300">{g.icon}</span>
                     {g.name}
                   </span>
                   <span className="h-px flex-1 bg-gold-400/10" />
@@ -592,6 +624,12 @@ export default function FieldPage() {
             </Button>
             <span className="mr-auto text-xs text-zinc-500">
               المحدد: <span className="font-bold text-gold-200">{selected.size}</span>
+              {selected.size > 0 && (
+                <span className="mr-2 text-[11px]">
+                  <span className="font-bold text-gold-300">{selectedOfficers}</span> ضابط ·{" "}
+                  <span className="font-bold text-sky-300">{selectedEnlisted}</span> فرد
+                </span>
+              )}
             </span>
           </div>
 
@@ -614,9 +652,11 @@ export default function FieldPage() {
                   </span>
                 </div>
                 <div className="space-y-1.5">
-                  {visibleConnected.map((m) => (
-                    <MemberRow key={m.id} m={m} />
-                  ))}
+                  {[...visibleConnected]
+                    .sort((a, b) => (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name))
+                    .map((m) => (
+                      <MemberRow key={m.id} m={m} />
+                    ))}
                   {visibleConnected.length === 0 && (
                     <div className="py-3 text-center text-xs text-zinc-600">لا نتائج مطابقة</div>
                   )}
@@ -631,9 +671,11 @@ export default function FieldPage() {
                   </span>
                 </div>
                 <div className="space-y-1.5 opacity-80">
-                  {visibleOffline.map((m) => (
-                    <MemberRow key={m.id} m={m} />
-                  ))}
+                  {[...visibleOffline]
+                    .sort((a, b) => (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name))
+                    .map((m) => (
+                      <MemberRow key={m.id} m={m} />
+                    ))}
                   {visibleOffline.length === 0 && (
                     <div className="py-3 text-center text-xs text-zinc-600">لا نتائج مطابقة</div>
                   )}

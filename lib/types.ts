@@ -69,6 +69,7 @@ export type News = {
   status: "draft" | "scheduled" | "published";
   image?: string;
   images?: string[];
+  video?: string;
   views: number;
 };
 

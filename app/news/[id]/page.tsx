@@ -66,6 +66,12 @@ export default function NewsDetailPage() {
       </Link>
 
       <Card className="overflow-hidden">
+        {item.video && (
+          <div className="bg-black">
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video src={item.video} controls className="max-h-[30rem] w-full" />
+          </div>
+        )}
         {images.length > 0 && (
           <div>
             <div className="relative bg-black">

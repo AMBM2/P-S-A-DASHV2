@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft } from "lucide-react";
+import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft, Play } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, ProgressBar, EmptyState } from "@/components/ui";
 import { timeAgo, number } from "@/lib/format";
@@ -185,6 +185,11 @@ export default function HomePage() {
                               <Pin size={11} /> {lang === "ar" ? "مثبت" : "Pinned"}
                             </span>
                           )}
+                          {n.video && (
+                            <span className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full border border-gold-400/30 bg-black/60 px-2 py-0.5 text-[11px] text-white backdrop-blur">
+                              <Play size={11} /> {lang === "ar" ? "فيديو" : "Video"}
+                            </span>
+                          )}
                           <div className="absolute bottom-3 right-3 flex items-center gap-2 text-[11px] text-zinc-300">
                             <span className="flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur">
                               <Eye size={11} /> {number(n.views)}
@@ -192,6 +197,17 @@ export default function HomePage() {
                             <span className="flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur">
                               <MessageSquare size={11} /> تعليقات
                             </span>
+                          </div>
+                        </div>
+                      )}
+                      {!n.images?.[0] && !n.image && n.video && (
+                        <div className="relative flex h-40 items-center justify-center bg-black sm:h-44">
+                          <span className="flex h-14 w-14 items-center justify-center rounded-full border border-gold-400/40 bg-gold-400/10">
+                            <Play size={24} className="text-gold-300" />
+                          </span>
+                          <div className="absolute right-3 top-3 flex gap-2">
+                            <Badge tone="gold">{catLabel(n.category)}</Badge>
+                            <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority] || n.priority}</Badge>
                           </div>
                         </div>
                       )}

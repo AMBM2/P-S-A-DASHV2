@@ -17,6 +17,8 @@ import { badgePoolStats } from "./services/badge.js";
 import { getRoleCategories, setRoleCategory, syncDetectedCategories, getFieldMembers } from "./services/roleCategories.js";
 import { notifyCollege, enrollCadet } from "./services/college.js";
 import { sendAuditLog } from "./services/auditLog.js";
+import { announce } from "./services/announce.js";
+import { createUploadToken, receiveMediaUpload, MAX_UPLOAD_BYTES } from "./services/media.js";
 import { reconcileMemberRoles } from "./services/rolesync.js";
 import { supabase } from "./supabase.js";
 
@@ -78,6 +80,24 @@ http
         });
       });
 
+    // Raw binary body reader for the direct browser media upload (100MB cap).
+    const readRawBody = () =>
+      new Promise((resolve, reject) => {
+        const chunks = [];
+        let size = 0;
+        req.on("data", (c) => {
+          size += c.length;
+          if (size > MAX_UPLOAD_BYTES + 1024 * 1024) {
+            req.destroy();
+            reject(new Error("too-large"));
+            return;
+          }
+          chunks.push(c);
+        });
+        req.on("end", () => resolve(Buffer.concat(chunks)));
+        req.on("error", reject);
+      });
+
     if (req.method === "GET" && url.pathname === "/health") {
       return send(200, {
         ok: true,
@@ -89,16 +109,20 @@ http
       });
     }
 
-    // All other endpoints require the shared secret (the portal sends it).
+    // All other endpoints require the shared secret (the portal sends it),
+    // EXCEPT /media/upload which is authenticated by a one-time token instead
+    // (the browser uploads the file directly, so it cannot hold the secret).
     // Compare in constant time to prevent timing side-channel leakage.
-    const sent = req.headers["x-bot-secret"] || "";
-    const secretOk =
-      typeof sent === "string" &&
-      typeof config.botSecret === "string" &&
-      sent.length === config.botSecret.length &&
-      timingSafeEqual(Buffer.from(sent, "utf8"), Buffer.from(config.botSecret, "utf8"));
-    if (!secretOk) {
-      return send(401, { ok: false, error: "unauthorized" });
+    if (url.pathname !== "/media/upload") {
+      const sent = req.headers["x-bot-secret"] || "";
+      const secretOk =
+        typeof sent === "string" &&
+        typeof config.botSecret === "string" &&
+        sent.length === config.botSecret.length &&
+        timingSafeEqual(Buffer.from(sent, "utf8"), Buffer.from(config.botSecret, "utf8"));
+      if (!secretOk) {
+        return send(401, { ok: false, error: "unauthorized" });
+      }
     }
 
     // Live patrol room tracking (feature 6) — consumed by the portal dashboard
@@ -314,6 +338,27 @@ http
     // Audit log: forward a portal audit entry to the dedicated log channel.
     if (req.method === "POST" && url.pathname === "/audit") {
       const data = await sendAuditLog(client, await readBody());
+      return send(200, { ok: true, ...data });
+    }
+
+    // Recruitment room announcement (توظيف مواطن).
+    if (req.method === "POST" && url.pathname === "/announce") {
+      const data = await announce(client, await readBody());
+      return send(200, { ok: true, ...data });
+    }
+
+    // News media: issue a one-time upload token (secret-checked).
+    if (req.method === "POST" && url.pathname === "/media/token") {
+      const body = await readBody();
+      const token = createUploadToken({ filename: body?.filename, contentType: body?.contentType });
+      return send(200, { ok: true, token, maxBytes: MAX_UPLOAD_BYTES });
+    }
+
+    // News media: receive the raw file body directly from the browser.
+    if (req.method === "POST" && url.pathname === "/media/upload") {
+      const token = url.searchParams.get("token") || "";
+      const buf = await readRawBody();
+      const data = await receiveMediaUpload(client, token, buf);
       return send(200, { ok: true, ...data });
     }
 

@@ -33,6 +33,10 @@ export const config = {
   collegeChannelId: process.env.COLLEGE_CHANNEL_ID,
   // Dedicated channel where the bot posts every audit-log entry (لوق العمليات).
   auditChannelId: process.env.AUDIT_CHANNEL_ID || "1538885966025195601",
+  // Dedicated channel for citizen recruitment announcements (توظيف مواطن).
+  recruitChannelId: process.env.RECRUIT_CHANNEL_ID,
+  // Channel where news images/videos are uploaded as Discord attachments.
+  newsChannelId: process.env.NEWS_CHANNEL_ID,
   botSecret: process.env.PATROL_BOT_SECRET || "",
   masterAdminId: process.env.MASTER_ADMIN_ID || "",
   masterAdminIds: (process.env.MASTER_ADMIN_IDS || "")

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Pin, Eye, FileText, ImagePlus, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Pin, Eye, FileText, ImagePlus, Video, X, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { News } from "@/lib/types";
 import { Button, Card, Badge, Modal, Field, Input, Textarea, Select, EmptyState } from "@/components/ui";
@@ -28,14 +28,17 @@ const emptyForm = (): Omit<News, "id" | "views"> => ({
   status: "published",
   image: "",
   images: [],
+  video: "",
 });
 
 export function NewsManager() {
-  const { news, upsert, remove, settings } = useStore();
+  const { news, upsert, remove, settings, session } = useStore();
   const lang = settings.language;
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<News | null>(null);
   const [form, setForm] = useState(emptyForm());
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const cats = settings.newsCategories || [];
 
   const catLabel = (cid: string) => {
@@ -46,26 +49,75 @@ export function NewsManager() {
   const openNew = () => {
     setEditing(null);
     setForm(emptyForm());
+    setUploadError("");
     setModal(true);
   };
   const openEdit = (n: News) => {
     setEditing(n);
     const { id: _id, views: _v, ...rest } = n;
-    setForm({ ...rest, images: n.images || (n.image ? [n.image] : []) });
+    setForm({ ...rest, images: n.images || (n.image ? [n.image] : []), video: n.video || "" });
+    setUploadError("");
     setModal(true);
   };
 
-  const onImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload an image/video through the bot (Discord attachment URL returned).
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const isVideo = file.type.startsWith("video/");
+    if (isVideo && file.size > 100 * 1024 * 1024) {
+      setUploadError("الفيديو أكبر من 100 ميجا — الحد الأقصى 100MB");
+      return null;
+    }
+    if (!isVideo && !file.type.startsWith("image/")) {
+      setUploadError("نوع الملف غير مدعوم — يسمح فقط بالصور والفيديو");
+      return null;
+    }
+    setUploading(true);
+    setUploadError("");
+    try {
+      const begin = await fetch("/api/news/media/begin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actor: session?.discordId || "", filename: file.name, contentType: file.type }),
+      });
+      const b = await begin.json();
+      if (!b.ok) throw new Error(b.error || "تعذر بدء الرفع");
+      const up = await fetch(b.uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      const u = await up.json();
+      if (!u.ok) throw new Error(u.error || "تعذر رفع الملف");
+      return u.url;
+    } catch (e: any) {
+      setUploadError(e?.message || "تعذر رفع الملف");
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const url = String(reader.result);
-        setForm((f) => ({ ...f, images: [...(f.images || []), url], image: (f.images?.length ? f.image : url) || url }));
-      };
-      reader.readAsDataURL(file);
-    });
+    e.target.value = "";
+    for (const f of files) {
+      const url = await uploadFile(f);
+      if (url) {
+        setForm((prev) => ({
+          ...prev,
+          images: [...(prev.images || []), url],
+          image: (prev.images?.length ? prev.image : url) || url,
+        }));
+      }
+    }
+  };
+
+  const onVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    const url = await uploadFile(f);
+    if (url) setForm((prev) => ({ ...prev, video: url }));
   };
 
   const removeImage = (idx: number) => {
@@ -109,7 +161,7 @@ export function NewsManager() {
                   <img src={n.image} alt="" className="h-16 w-16 shrink-0 rounded-lg border border-gold-400/20 object-cover" />
                 ) : (
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-gold-400/20 bg-obsidian-900/60">
-                    <ImagePlus className="text-zinc-500" size={20} />
+                    {n.video ? <Video className="text-gold-300" size={20} /> : <ImagePlus className="text-zinc-500" size={20} />}
                   </div>
                 )}
                 <div className="min-w-0">
@@ -132,6 +184,7 @@ export function NewsManager() {
                       {AR.newsStatus[n.status] || n.status}
                     </Badge>
                     {n.pinned && <Badge tone="amber"><Pin size={10} /> مثبت</Badge>}
+                    {n.video && <Badge tone="indigo"><Video size={10} /> فيديو</Badge>}
                     <span className="flex items-center gap-1 text-xs text-zinc-500">
                       <Eye size={12} /> {n.views}
                     </span>
@@ -193,11 +246,19 @@ export function NewsManager() {
           <Field label="الكاتب">
             <Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} />
           </Field>
+
+          {uploadError && (
+            <div className="md:col-span-2 rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">
+              {uploadError}
+            </div>
+          )}
+
           <Field label="صور المقال (يمكن إضافة أكثر من صورة)" className="md:col-span-2">
             <div className="flex flex-col gap-3">
               <label className="gold-shimmer inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gold-400/40 bg-gold-400/10 px-4 py-2 text-sm text-gold-200 hover:border-gold-400/70">
-                <ImagePlus size={16} /> إضافة صور
-                <input type="file" accept="image/*" multiple onChange={onImage} className="hidden" />
+                {uploading ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
+                {uploading ? "جارٍ الرفع..." : "إضافة صور"}
+                <input type="file" accept="image/*" multiple onChange={onImage} className="hidden" disabled={uploading} />
               </label>
               {(form.images || []).length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -227,6 +288,28 @@ export function NewsManager() {
               </p>
             </div>
           </Field>
+
+          <Field label="فيديو المقال (حتى 100 ميجا)" className="md:col-span-2">
+            <div className="flex flex-col gap-3">
+              <label className="gold-shimmer inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gold-400/40 bg-gold-400/10 px-4 py-2 text-sm text-gold-200 hover:border-gold-400/70">
+                <Video size={16} /> {form.video ? "تغيير الفيديو" : "إضافة فيديو"}
+                <input type="file" accept="video/*" onChange={onVideo} className="hidden" disabled={uploading} />
+              </label>
+              {form.video && (
+                <div className="flex flex-col gap-2">
+                  {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                  <video src={form.video} controls className="max-h-56 w-full rounded-xl border border-gold-400/20" />
+                  <button
+                    onClick={() => setForm((f) => ({ ...f, video: "" }))}
+                    className="flex items-center gap-1 self-start rounded-full border border-red-400/30 bg-red-500/10 px-2.5 py-1 text-xs text-red-200 hover:bg-red-500/20"
+                  >
+                    <X size={12} /> إزالة الفيديو
+                  </button>
+                </div>
+              )}
+              <p className="text-[11px] text-zinc-500">الحد الأقصى لحجم الفيديو: 100 ميجا بايت.</p>
+            </div>
+          </Field>
         </div>
         <div className="mt-4 flex items-center gap-4">
           <label className="flex items-center gap-2 text-sm text-zinc-300">
@@ -236,7 +319,9 @@ export function NewsManager() {
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setModal(false)}>إلغاء</Button>
-          <Button onClick={save}><FileText size={16} /> {editing ? "حفظ التغييرات" : "إنشاء المقال"}</Button>
+          <Button onClick={save} disabled={uploading}>
+            <FileText size={16} /> {editing ? "حفظ التغييرات" : "إنشاء المقال"}
+          </Button>
         </div>
       </Modal>
     </div>

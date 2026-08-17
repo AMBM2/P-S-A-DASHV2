@@ -103,6 +103,7 @@ export async function getFieldMembers(client) {
     list.push({
       id: member.id,
       name: member.displayName || member.user.username,
+      avatar: member.user.displayAvatarURL({ size: 96 }),
       rankAr: rank?.titleAr || "",
       rankLevel: rank?.level ?? -1,
       category: cat,
