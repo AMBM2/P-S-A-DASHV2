@@ -1,8 +1,11 @@
 ﻿import { supabase } from "../supabase.js";
 import { config } from "../config.js";
+import { resolveAccessLevel } from "./rbac.js";
 
 // Admin-panel login via Discord User ID + one-time DM code.
-// If ADMIN_ROLE_ID or COMMAND_ROLE_ID is configured, only holders may log in.
+// Locked: only users holding a grant (master / executive / field / hr /
+// personnel — via the admins table or the configured category Discord roles)
+// may request a code. Everyone else is rejected before any code is generated.
 
 // In-memory fallback for codes when the login_codes table is unavailable.
 const memoryCodes = new Map();
@@ -22,13 +25,9 @@ export async function requestLoginCode(client, rawUserId) {
     return { ok: false, error: "المستخدم ليس عضواً في سيرفر الأمن العام" };
   }
 
-  // Restrict to admin/command roles when configured
-  const requiresRole = Boolean(config.adminRoleId || config.commandRoleId);
-  const allowed =
-    !requiresRole ||
-    (config.adminRoleId && member.roles.cache.has(config.adminRoleId)) ||
-    (config.commandRoleId && member.roles.cache.has(config.commandRoleId));
-  if (!allowed) {
+  // Locked login: only users with an admin grant may request a code.
+  const access = await resolveAccessLevel(client, userId);
+  if (access.level === "none") {
     return { ok: false, error: "ليس لديك صلاحية دخول لوحة التحكم" };
   }
 
@@ -97,6 +96,13 @@ export async function verifyLoginCode(rawUserId, rawCode) {
       return { ok: false, error: "انتهت صلاحية الرمز — اطلب رمزاً جديداً" };
     }
     memoryCodes.delete(userId);
+  }
+
+  // Re-check access at verify time (defense in depth — a revoked admin loses
+  // access immediately, even with a valid unused code).
+  const access = await resolveAccessLevel(client, userId);
+  if (access.level === "none") {
+    return { ok: false, error: "ليس لديك صلاحية دخول لوحة التحكم" };
   }
 
   const { data: officer } = await supabase

@@ -116,38 +116,40 @@ export default function HomePage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Module 1: News Feed */}
         <div className="lg:col-span-2">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 font-display text-xl font-bold gold-text">
-              <Newspaper size={20} /> {lang === "ar" ? "أخبار الأمن العام" : "Directives & News"}
-            </h2>
-            <div className="gold-flourish mt-2 w-full">
-              <span className="diamond" />
+          <div className="mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="flex items-center gap-2 font-display text-xl font-bold gold-text">
+                <Newspaper size={20} /> {lang === "ar" ? "أخبار الأمن العام" : "Directives & News"}
+              </h2>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-zinc-500 ltr:left-3 rtl:right-3" />
+                  <input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder={lang === "ar" ? "بحث..." : "Search..."}
+                    className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-1.5 pl-8 pr-3 text-xs text-zinc-100 outline-none focus:border-gold-400/70"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {[{ id: "all", labelAr: "الكل", label: "All" }, ...cats].map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setCat(c.id)}
+                      className={`rounded-full border px-3 py-1 text-xs transition-all ${
+                        cat === c.id
+                          ? "border-gold-400/60 bg-gold-400/15 text-gold-200"
+                          : "border-gold-400/15 text-zinc-400 hover:border-gold-400/40 hover:text-zinc-200"
+                      }`}
+                    >
+                      {lang === "ar" ? c.labelAr : c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-zinc-500 ltr:left-3 rtl:right-3" />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder={lang === "ar" ? "بحث..." : "Search..."}
-                  className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-1.5 pl-8 pr-3 text-xs text-zinc-100 outline-none focus:border-gold-400/70"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[{ id: "all", labelAr: "الكل", label: "All" }, ...cats].map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setCat(c.id)}
-                    className={`rounded-full border px-3 py-1 text-xs transition-all ${
-                      cat === c.id
-                        ? "border-gold-400/60 bg-gold-400/15 text-gold-200"
-                        : "border-gold-400/15 text-zinc-400 hover:border-gold-400/40 hover:text-zinc-200"
-                    }`}
-                  >
-                    {lang === "ar" ? c.labelAr : c.label}
-                  </button>
-                ))}
-              </div>
+            <div className="gold-flourish mt-3 w-full">
+              <span className="diamond" />
             </div>
           </div>
 
