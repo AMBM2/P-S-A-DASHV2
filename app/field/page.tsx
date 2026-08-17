@@ -1,13 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Send, Loader2, CheckCircle2, AlertTriangle, Radio, ShieldAlert, MapPin } from "lucide-react";
-import { Button, Card, Field, Input } from "@/components/ui";
+import { Send, Loader2, CheckCircle2, AlertTriangle, Radio, ShieldAlert } from "lucide-react";
+import { Button, Card, Field, Select } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import type { Grant } from "@/lib/types";
 
 const FIELD_GRANTS: Grant[] = ["master", "executive", "field"];
+
+// Fixed scenario locations — the dispatch payload only accepts these.
+const LOCATIONS = [
+  "مصنع البقر",
+  "مصنع الدجاج",
+  "مصنع القوارب",
+  "المترو الاول",
+  "المترو الثاني",
+  "المترو بهامس",
+  "مترو المطار",
+  "مترو المدينة",
+  "الاستديو",
+  "الدسكو",
+  "ملاهي داش",
+  "الخياط",
+  "المسرح",
+  "قراج السيارات",
+  "المجوهرات",
+  "البيت المهجور",
+  "بيق ماركت",
+  "ميني ماركت فقط",
+];
 
 export default function FieldPage() {
   const { session } = useStore();
@@ -48,8 +70,8 @@ export default function FieldPage() {
 
   const submit = async () => {
     setResult(null);
-    if (!location.trim()) {
-      setResult({ ok: false, error: "يرجى تعبئة موقع السيناريو" });
+    if (!location) {
+      setResult({ ok: false, error: "يرجى اختيار موقع السيناريو" });
       return;
     }
     setLoading(true);
@@ -57,12 +79,12 @@ export default function FieldPage() {
       const res = await fetch("/api/field", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location: location.trim() }),
+        body: JSON.stringify({ location }),
       });
       const data = await res.json();
       setResult({
         ok: data.ok,
-        text: data.ok ? `تم إرسال تنبيه الميدان (${location.trim()}) إلى قناة الميدان` : undefined,
+        text: data.ok ? `تم إرسال تنبيه الميدان (${location}) إلى قناة الميدان` : undefined,
         error: data.error,
       });
       if (data.ok) setLocation("");
@@ -117,17 +139,21 @@ export default function FieldPage() {
 
         <div className="space-y-4 p-6">
           <Field label="موقع السيناريو">
-            <div className="relative">
-              <MapPin size={16} className="absolute top-1/2 -translate-y-1/2 text-gold-300 ltr:left-3 rtl:right-3" />
-              <Input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !loading && submit()}
-                placeholder="مثال: شارع الملك فهد — بوابة 3"
-                dir="rtl"
-                className="px-10"
-              />
-            </div>
+            <Select
+              value={location}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setResult(null);
+              }}
+              dir="rtl"
+            >
+              <option value="">— اختر موقع السيناريو —</option>
+              {LOCATIONS.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </Select>
           </Field>
 
           <Button onClick={submit} disabled={loading} className="w-full py-3 text-base font-bold">
