@@ -29,6 +29,14 @@ export function getClientIp(req: Request): string {
   return "unknown";
 }
 
+function safePath(url: string): string {
+  try {
+    return new URL(url).pathname.slice(0, 80);
+  } catch {
+    return "unknown";
+  }
+}
+
 // Returns true when the request is allowed, false when it exceeds the limit.
 export function rateLimit(
   req: Request,
@@ -37,10 +45,12 @@ export function rateLimit(
   const windowMs = opts.windowMs ?? 60_000;
   const now = Date.now();
   const ip = getClientIp(req);
-  const key = opts.key || `${ip}`;
+  // Default scope is the route path so every endpoint keeps its own budget per
+  // IP (callers can pass `key` to scope more tightly, e.g. per user ID).
+  const route = opts.key || safePath(req.url);
+  const bucketKey = `${route}:${ip}`;
 
   sweep();
-  const bucketKey = `${key}:${ip}`;
   let bucket = buckets.get(bucketKey);
   if (!bucket) {
     bucket = { hits: [] };
