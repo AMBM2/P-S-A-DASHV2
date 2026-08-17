@@ -309,16 +309,6 @@ http
       return send(200, { ok: true, ...data });
     }
 
-    // DEBUG: list guild channels (id / name / type) — remove after setup.
-    if (req.method === "GET" && url.pathname === "/channels") {
-      const guild = getGuild(client);
-      if (!guild) return send(200, { ok: false, error: "no-guild" });
-      const list = guild.channels.cache
-        .map((c) => ({ id: c.id, name: c.name, type: c.type }))
-        .sort((a, b) => a.type - b.type);
-      return send(200, { ok: true, guild: guild.name, count: list.length, channels: list });
-    }
-
     return send(404, { ok: false, error: "not found" });
     } catch (e) {
       console.error("[bot][http] error:", e);
