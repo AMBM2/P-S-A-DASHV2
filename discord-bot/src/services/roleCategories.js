@@ -80,6 +80,9 @@ export async function getFieldMembers(client) {
 
   const list = [];
   for (const member of members.values()) {
+    // Only Public Security role holders (the field dispatch target group).
+    if (config.fieldMemberRoleId && !member.roles.cache.has(config.fieldMemberRoleId)) continue;
+
     let cat = null;
     for (const roleId of member.roles.cache.keys()) {
       const c = categoryMap.get(roleId);
