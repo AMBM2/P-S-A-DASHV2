@@ -19,6 +19,8 @@ import {
   Wifi,
   WifiOff,
   Volume2,
+  Search,
+  X,
 } from "lucide-react";
 import { Button, Card, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
@@ -80,6 +82,7 @@ export default function FieldPage() {
   const [membersLoading, setMembersLoading] = useState(true);
   const [membersError, setMembersError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!session) {
@@ -151,6 +154,21 @@ export default function FieldPage() {
 
   const connected = useMemo(() => members.filter((m) => m.connected), [members]);
   const offline = useMemo(() => members.filter((m) => !m.connected), [members]);
+
+  const q = search.trim().toLowerCase();
+  const matches = (m: FieldMember) =>
+    !q ||
+    m.name.toLowerCase().includes(q) ||
+    m.rankAr.toLowerCase().includes(q) ||
+    (m.category === "officer" ? "ضابط" : "فرد").includes(q);
+  const visibleConnected = useMemo(
+    () => connected.filter(matches), // eslint-disable-line react-hooks/exhaustive-deps
+    [connected, q]
+  );
+  const visibleOffline = useMemo(
+    () => offline.filter(matches), // eslint-disable-line react-hooks/exhaustive-deps
+    [offline, q]
+  );
 
   const onDuty = officers.filter((o) => o.status === "on-duty").length;
   const onDutyOfficers = officers.filter(
@@ -463,6 +481,21 @@ export default function FieldPage() {
             </div>
           ) : null}
 
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-gold-400/15 bg-obsidian-900/60 px-3 py-2 focus-within:border-gold-300/60">
+            <Search size={15} className="shrink-0 text-zinc-500" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ابحث بالاسم أو الرتبة..."
+              className="w-full bg-transparent text-sm text-white placeholder-zinc-500 outline-none"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="text-zinc-500 hover:text-zinc-200">
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <Button variant="outline" onClick={selectAllConnected} className="!px-2.5 !py-1.5 !text-xs">
               <Wifi size={13} /> اختيار المتصلين ({connected.length})
@@ -490,13 +523,16 @@ export default function FieldPage() {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-300" />
                   </span>
                   <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-                    متصلون ({connected.length})
+                    متصلون ({visibleConnected.length})
                   </span>
                 </div>
                 <div className="space-y-1.5">
-                  {connected.map((m) => (
+                  {visibleConnected.map((m) => (
                     <MemberRow key={m.id} m={m} />
                   ))}
+                  {visibleConnected.length === 0 && (
+                    <div className="py-3 text-center text-xs text-zinc-600">لا نتائج مطابقة</div>
+                  )}
                 </div>
               </div>
 
@@ -504,13 +540,16 @@ export default function FieldPage() {
                 <div className="mb-2 flex items-center gap-2">
                   <WifiOff size={12} className="text-zinc-500" />
                   <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                    غير متصلين ({offline.length})
+                    غير متصلين ({visibleOffline.length})
                   </span>
                 </div>
                 <div className="space-y-1.5 opacity-80">
-                  {offline.map((m) => (
+                  {visibleOffline.map((m) => (
                     <MemberRow key={m.id} m={m} />
                   ))}
+                  {visibleOffline.length === 0 && (
+                    <div className="py-3 text-center text-xs text-zinc-600">لا نتائج مطابقة</div>
+                  )}
                 </div>
               </div>
             </div>
