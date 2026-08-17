@@ -122,7 +122,24 @@ on conflict ("userId") do update set role = 'master';
 
 -- ============================================================================
 -- 13) Recruitment applications (public survey form → pending review)
+--     Migrate FIRST: an old empty experiment table used legacy snake_case
+--     columns (created_at, discord_id, reviewed_by, unit) with no name/ranks.
+--     It is incompatible with the portal — drop it so the canonical table
+--     below is created with the camelCase schema the app expects.
 -- ============================================================================
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'applications' and column_name = 'created_at'
+  ) and not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'applications' and column_name = 'nameAr'
+  ) then
+    drop table public.applications;
+  end if;
+end $$;
+
 create table if not exists public.applications (
   id uuid primary key default gen_random_uuid(),
   name text not null default '',
