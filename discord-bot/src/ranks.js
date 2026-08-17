@@ -120,6 +120,17 @@ export function getHighestRank(member) {
   return best;
 }
 
+// Given a Discord member, return the ROLE object of their highest military
+// rank (needed to mention the rank role itself in the patrol template).
+export function getHighestRankRole(member) {
+  let best = null;
+  for (const role of member.roles.cache.values()) {
+    const rank = findRankByRoleName(role.name);
+    if (rank && (!best || rank.level > best.level)) best = { role, rank };
+  }
+  return best ? best.role : null;
+}
+
 export function isOnDuty(member) {
   const names = member.roles.cache.map((r) => r.name.toLowerCase());
   return names.some((n) => DUTY_ROLE_MARKERS.some((m) => n.includes(m)));

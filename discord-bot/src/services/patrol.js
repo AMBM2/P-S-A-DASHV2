@@ -2,23 +2,42 @@ import { config } from "../config.js";
 import { getGuild } from "./nickname.js";
 import { AttachmentBuilder } from "discord.js";
 import { loadRoleCategories } from "./roleCategories.js";
-import { getHighestRank } from "../ranks.js";
+import { getHighestRankRole, findRankByRoleName } from "../ranks.js";
 
 const ESC = "\u001b";
 
-// Exact Discord field-patrol dispatch template: ANSI header + fix headers +
-// rank-role mentions. The selected Public Security members are appended next
-// to their rank (rankAr + member mention) inside their section so everyone
-// knows exactly who was called.
+// Group members by their rank role, ordered by the highest rank level first.
+function groupByRank(entries) {
+  const map = new Map();
+  for (const e of entries) {
+    const key = e.rankRoleId || "";
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(e);
+  }
+  return [...map.entries()].sort((a, b) => {
+    const la = Math.max(...a[1].map((e) => e.rankLevel ?? -1));
+    const lb = Math.max(...b[1].map((e) => e.rankLevel ?? -1));
+    return lb - la;
+  });
+}
+
+// One template section: the fix header, then each rank-role mention with the
+// member mentions placed directly underneath their rank.
+function rankSection(header, entries) {
+  const lines = ["```fix", header, "```"];
+  for (const [roleId, members] of groupByRank(entries)) {
+    if (roleId) lines.push(`<@&${roleId}>`);
+    for (const m of members) lines.push(m.mention);
+    lines.push("");
+  }
+  return lines;
+}
+
+// Exact Discord field-patrol dispatch template: ANSI header + fix headers.
+// Selected members are listed under their rank-role mention (no rank text),
+// so the rank ping + the actual member ping appear together.
 export function buildPatrolPayload(location, officers = [], enlisted = []) {
   const loc = String(location || "").trim();
-  const roleMention = (id) => `<@&${id}>`;
-  const line = (m) => (m.rankAr ? `${m.rankAr} ` : "") + m.mention;
-
-  const officerRoleMentions = config.patrolOfficerRoleIds.map(roleMention);
-  const enlistedRoleMentions = config.patrolEnlistedRoleIds.map(roleMention);
-  const officerLines = officers.map(line);
-  const enlistedLines = enlisted.map(line);
 
   return [
     "```ansi",
@@ -51,26 +70,8 @@ export function buildPatrolPayload(location, officers = [], enlisted = []) {
     "",
     "",
     "",
-    "```fix",
-    `                                          - ⚔  ضـبـاط الأمن العام  ⚔ - `,
-    "```",
-    "     ",
-    ...officerRoleMentions.flatMap((mention) => [mention, "", ""]),
-    ...officerLines.flatMap((l) => [l, ""]),
-    "     ",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "```fix",
-    `                                          - ⚔  افـراد الأمن العام  ⚔ -`,
-    "```",
-    "",
-    "",
-    ...enlistedRoleMentions.flatMap((mention) => [mention, ""]),
-    ...enlistedLines.flatMap((l) => [l, ""]),
+    ...rankSection(`                                          - ⚔  ضـبـاط الأمن العام  ⚔ - `, officers),
+    ...rankSection(`                                          - ⚔  افـراد الأمن العام  ⚔ -`, enlisted),
   ].join("\n");
 }
 
@@ -100,8 +101,8 @@ async function buildAttachment(payload) {
   return null;
 }
 
-// Field Patrol dispatch: resolve the selected members into officers/enlisted
-// (with their ranks), post the fixed template, and attach the field image.
+// Field Patrol dispatch: resolve the selected members into officers/enlisted,
+// list each under their rank-role mention, post the template, attach the image.
 export async function dispatchPatrol(client, payload) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
@@ -116,11 +117,8 @@ export async function dispatchPatrol(client, payload) {
   const location = payload.location || payload.nameAr || payload.name || "";
   const memberIds = Array.isArray(payload.memberIds) ? payload.memberIds : [];
 
-  // Resolve the selected members into officers / enlisted with their ranks.
+  // Resolve the selected members into officers / enlisted with their rank role.
   const categoryMap = await loadRoleCategories(client);
-  const sortRank = (a, b) =>
-    (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name);
-
   const officers = [];
   const enlisted = [];
   for (const id of memberIds) {
@@ -138,19 +136,17 @@ export async function dispatchPatrol(client, payload) {
     }
     if (!cat) continue;
 
-    const rank = getHighestRank(member);
+    const rankRole = getHighestRankRole(member);
     const entry = {
       id: member.id,
       name: member.displayName || member.user.username,
       mention: `<@${member.id}>`,
-      rankAr: rank?.titleAr || "",
-      rankLevel: rank?.level ?? -1,
+      rankRoleId: rankRole?.id || "",
+      rankLevel: rankRole?.name ? (findRankByRoleName(rankRole.name)?.level ?? -1) : -1,
     };
     if (cat === "officer") officers.push(entry);
     else enlisted.push(entry);
   }
-  officers.sort(sortRank);
-  enlisted.sort(sortRank);
 
   const content = buildPatrolPayload(location, officers, enlisted);
   const attachment = await buildAttachment(payload);
