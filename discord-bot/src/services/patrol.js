@@ -1,56 +1,71 @@
 import { config } from "../config.js";
 import { getGuild } from "./nickname.js";
-import { loadRoleCategories } from "./roleCategories.js";
-import { getHighestRank } from "../ranks.js";
 
 const ESC = "\u001b";
 
-const PLACEHOLDER_OFFICERS = "لا يوجد ضباط متواجدين حالياً";
-const PLACEHOLDER_ENLISTED = "لا يوجد افراد متواجدين حالياً";
-
-// Exact Discord dispatch payload: ANSI header + fix blocks + live user mentions.
-// The website only collects the location; all the rich formatting and the
-// autonomous voice-room sorting live here and are never rendered on the UI.
-export function buildPatrolPayload(location, officers = [], enlisted = []) {
+// Exact Discord field-patrol dispatch template: ANSI header + fix headers +
+// role mentions (officers then enlisted). Only the scenario location is
+// injected. The whole template is fixed so it renders identically every time.
+export function buildPatrolPayload(location) {
   const loc = String(location || "").trim();
-  const line = (m) => (m.rankAr ? `${m.rankAr} ` : "") + m.mention;
-  const officerList = officers.length
-    ? officers.map(line).join("\n")
-    : PLACEHOLDER_OFFICERS;
-  const enlistedList = enlisted.length
-    ? enlisted.map(line).join("\n")
-    : PLACEHOLDER_ENLISTED;
+  const roleMention = (id) => `<@&${id}>`;
+
+  const officerMentions = config.patrolOfficerRoleIds.map(roleMention);
+  const enlistedMentions = config.patrolEnlistedRoleIds.map(roleMention);
 
   return [
     "```ansi",
-    `${ESC}[1;30;44m                                                『 ⭐👮🏻 الأمن العام 👮🏻⭐ 』                                                                        ${ESC}[0m`,
+    `${ESC}[1;30;44m                                              『 ⭐👮🏻 الأمن العام 👮🏻⭐ 』                                                                              ${ESC}[0m`,
     "```",
     "```fix",
-    `                                               موقع السيناريو :  (${loc})`,
+    `                                             موقع السيناريو :  (${loc})`,
     "```",
     "```fix",
-    "                                                 - ⭐👮🏻  رئاســـــــة الــــــوزراء  👮🏻⭐ -",
+    `                                  - ⭐👮🏻  رئاســـــــة الــــــوزراء  👮🏻⭐ -`,
     "```",
-    "```fix",
-    "                                                  - ⭐👮🏻  وزراء الداخلية   👮🏻⭐ -",
-    "```",
-    "```fix",
-    "                                                 - ⭐👮🏻  قـــادة الأمن العام  👮🏻⭐ -",
-    "```",
-    "```fix",
-    "                                                  - ⚔  ضـبـاط الأمن العام المتواجدين  ⚔ -",
-    "```",
-    officerList,
+    "",
+    "",
     "",
     "```fix",
-    "                                                  - ⚔  افـراد الأمن العام المتواجدين  ⚔ -",
+    `                                         - ⭐👮🏻  وزراء الداخلية   👮🏻⭐ -`,
     "```",
-    enlistedList,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "```fix",
+    `                                       - ⭐👮🏻  قـــادة الأمن العام  👮🏻⭐ -`,
+    "```",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "```fix",
+    `                                          - ⚔  ضـبـاط الأمن العام  ⚔ - `,
+    "```",
+    "     ",
+    ...officerMentions.flatMap((mention) => [mention, "", ""]),
+    "     ",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "```fix",
+    `                                          - ⚔  افـراد الأمن العام  ⚔ -`,
+    "```",
+    "",
+    "",
+    ...enlistedMentions.flatMap((mention) => [mention, ""]),
   ].join("\n");
 }
 
-// Field Patrol dispatch: mention the selected Public Security members (by ID)
-// sorted into officers/enlisted with their ranks, then post the rich payload
+// Field Patrol dispatch: post the fixed template (with the scenario location)
 // to the dedicated PATROL_CHANNEL_ID (fallback: first text channel).
 export async function dispatchPatrol(client, payload) {
   const guild = getGuild(client);
@@ -64,45 +79,7 @@ export async function dispatchPatrol(client, payload) {
   }
 
   const location = payload.location || payload.nameAr || payload.name || "";
-  const memberIds = Array.isArray(payload.memberIds) ? payload.memberIds : [];
-
-  // Resolve the selected members into officers / enlisted with their ranks.
-  const categoryMap = await loadRoleCategories(client);
-  const sortRank = (a, b) =>
-    (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name);
-
-  const officers = [];
-  const enlisted = [];
-  for (const id of memberIds) {
-    const member = guild.members.cache.get(id);
-    if (!member) continue;
-
-    let cat = null;
-    for (const roleId of member.roles.cache.keys()) {
-      const c = categoryMap.get(roleId);
-      if (c === "officer") {
-        cat = "officer";
-        break;
-      }
-      if (c === "enlisted" && !cat) cat = "enlisted";
-    }
-    if (!cat) continue;
-
-    const rank = getHighestRank(member);
-    const entry = {
-      id: member.id,
-      name: member.displayName || member.user.username,
-      mention: `<@${member.id}>`,
-      rankAr: rank?.titleAr || "",
-      rankLevel: rank?.level ?? -1,
-    };
-    if (cat === "officer") officers.push(entry);
-    else enlisted.push(entry);
-  }
-  officers.sort(sortRank);
-  enlisted.sort(sortRank);
-
-  const content = buildPatrolPayload(location, officers, enlisted);
+  const content = buildPatrolPayload(location);
 
   try {
     await target.send({ content });
@@ -114,7 +91,5 @@ export async function dispatchPatrol(client, payload) {
     ok: true,
     sentTo: target.id,
     location,
-    officers: officers.length,
-    enlisted: enlisted.length,
   };
 }

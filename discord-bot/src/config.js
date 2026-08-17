@@ -71,6 +71,17 @@ export const config = {
     .map((s) => s.trim())
     .filter(Boolean),
 
+  // Role IDs mentioned by the field-patrol dispatch template (fixed template).
+  patrolOfficerRoleIds: (process.env.PATROL_OFFICER_ROLE_IDS ||
+    "1527321852266021005,1527321853247492158,1527321854023565433,1527321854857969774,1527321855667736586,1527321856581832855,1527321857445990550,1527321858263748788")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+  patrolEnlistedRoleIds: (process.env.PATROL_ENLISTED_ROLE_IDS || "1527321813325971577")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+
   // Only sync members who hold this role (empty = sync everyone)
   memberRoleId: process.env.MEMBER_ROLE_ID || null,
 
