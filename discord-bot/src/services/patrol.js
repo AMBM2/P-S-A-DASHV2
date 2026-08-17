@@ -2,7 +2,7 @@ import { config } from "../config.js";
 import { getGuild } from "./nickname.js";
 import { AttachmentBuilder } from "discord.js";
 import { loadRoleCategories } from "./roleCategories.js";
-import { getHighestRankRole, findRankByRoleName } from "../ranks.js";
+import { getHighestRank, getHighestRankRole, findRankByRoleName } from "../ranks.js";
 
 const ESC = "\u001b";
 
@@ -131,14 +131,22 @@ export async function dispatchPatrol(client, payload) {
     const member = guild.members.cache.get(id);
     if (!member) continue;
 
+    // Category is driven by the member's HIGHEST military rank (not just the
+    // first matching role in cache order), so a member holding both an officer
+    // and an enlisted role is always placed under their highest rank tier.
     let cat = null;
-    for (const roleId of member.roles.cache.keys()) {
-      const c = categoryMap.get(roleId);
-      if (c === "officer") {
-        cat = "officer";
-        break;
+    const rank = getHighestRank(member);
+    if (rank && (rank.division === "command" || rank.division === "officer")) cat = "officer";
+    else if (rank && rank.division === "troop") cat = "enlisted";
+    if (!cat) {
+      for (const roleId of member.roles.cache.keys()) {
+        const c = categoryMap.get(roleId);
+        if (c === "officer") {
+          cat = "officer";
+          break;
+        }
+        if (c === "enlisted" && !cat) cat = "enlisted";
       }
-      if (c === "enlisted" && !cat) cat = "enlisted";
     }
     if (!cat) continue;
 

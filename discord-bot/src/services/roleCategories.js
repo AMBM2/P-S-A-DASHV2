@@ -84,17 +84,21 @@ export async function getFieldMembers(client) {
     if (config.fieldMemberRoleId && !member.roles.cache.has(config.fieldMemberRoleId)) continue;
 
     let cat = null;
-    for (const roleId of member.roles.cache.keys()) {
-      const c = categoryMap.get(roleId);
-      if (c === "officer") {
-        cat = "officer";
-        break;
+    const rank = getHighestRank(member);
+    if (rank && (rank.division === "command" || rank.division === "officer")) cat = "officer";
+    else if (rank && rank.division === "troop") cat = "enlisted";
+    if (!cat) {
+      for (const roleId of member.roles.cache.keys()) {
+        const c = categoryMap.get(roleId);
+        if (c === "officer") {
+          cat = "officer";
+          break;
+        }
+        if (c === "enlisted" && !cat) cat = "enlisted";
       }
-      if (c === "enlisted" && !cat) cat = "enlisted";
     }
     if (!cat) continue;
 
-    const rank = getHighestRank(member);
     const status = member.presence?.status || "offline";
     list.push({
       id: member.id,
