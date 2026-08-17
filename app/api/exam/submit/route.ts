@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase-server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 // Score an exam: compare the submitted answers to the questions' correctIndex,
 // persist the score on the application + cadet records.
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
     const submitted: number[] = Array.isArray(answers) ? answers : [];
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
     const { data: questions, error } = await supabase
       .from("exam_questions")
       .select("*")

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Music, Play, Pause, Volume2, VolumeX } from "lucide-react";
-import { useStore } from "@/lib/store";
 import { getController, subscribe } from "@/lib/audio";
 import { cn } from "@/lib/format";
 
@@ -14,13 +13,19 @@ function fmt(sec: number) {
 }
 
 export function AudioPlayer() {
-  const { settings, updateSettings } = useStore();
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(100);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [soundPref, setSoundPref] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      setSoundPref(localStorage.getItem("psa_sound") !== "off");
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const c = getController();
@@ -52,10 +57,16 @@ export function AudioPlayer() {
     if (!c) return;
     if (playing) {
       c.pause();
-      updateSettings({ sound: false });
+      setSoundPref(false);
+      try {
+        localStorage.setItem("psa_sound", "off");
+      } catch {}
     } else {
       c.play();
-      updateSettings({ sound: true });
+      setSoundPref(true);
+      try {
+        localStorage.setItem("psa_sound", "on");
+      } catch {}
     }
   };
 
@@ -78,7 +89,7 @@ export function AudioPlayer() {
             ? "border-gold-300/60 bg-gold-400/15 text-gold-100"
             : "border-gold-400/20 text-zinc-300 hover:text-gold-100"
         )}
-        title={settings.sound ? "مشغل الصوت" : "مشغل الصوت"}
+        title={soundPref ? "مشغل الصوت" : "مشغل الصوت"}
       >
         {playing && !muted ? <Volume2 size={18} /> : <VolumeX size={18} />}
       </button>

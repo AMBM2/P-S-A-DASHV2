@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase-server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 // Public recruitment survey submit. Creates a pending application + a Military
 // College cadet record assigned to the main military department (d-hq).
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "معرّف ديسكورد غير صالح" }, { status: 400 });
     }
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
 
     // Reject applicants on the blacklist (القائمة السوداء).
     const { data: blocked } = await supabase

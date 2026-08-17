@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase-server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 // Review an application: approve -> cadet enrolled at the Military College
 // (assign recruit role + notify via bot), deny -> cadet dropped.
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
     }
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
     const { data: app } = await supabase
       .from("applications")
       .select("*")

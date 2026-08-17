@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase-server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 // Graduate a Military College cadet: promote to a full officer record assigned
 // to the main military department (realtime onboarding gives badge/nickname/DM;
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "cadetId مطلوب" }, { status: 400 });
     }
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
     const { data: cadet } = await supabase
       .from("cadets")
       .select("*")

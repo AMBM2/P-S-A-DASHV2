@@ -312,6 +312,69 @@ begin
 end $$;
 
 -- ============================================================================
+-- 20) SECURITY HARDENING — revoke full anon access (the anon key is public in
+--     the browser bundle, so anon must NEVER write or read sensitive tables).
+--     After this: anon may only SELECT the public display tables below.
+--     All writes now go through the portal API routes / the bot using the
+--     SUPABASE_SERVICE_ROLE_KEY (server-side only).
+-- ============================================================================
+do $$
+declare pol text;
+begin
+  -- Remove every permissive "anon_all_*" policy from public tables.
+  for pol in
+    select policyname from pg_policies
+    where schemaname = 'public' and policyname like 'anon_all\_%'
+  loop
+    execute format('drop policy %I on public.%I',
+      pol, (select tablename from pg_policies where policyname = pol and schemaname='public'));
+  end loop;
+end $$;
+
+-- Public display tables: anon SELECT only (no insert/update/delete).
+alter table public.news enable row level security;
+alter table public.officers enable row level security;
+alter table public.leaders enable row level security;
+alter table public.codes enable row level security;
+alter table public.settings enable row level security;
+
+do $$
+begin
+  if not exists (select from pg_policies where schemaname='public' and tablename='news' and policyname='pub_read_news') then
+    create policy "pub_read_news" on public.news for select to anon using (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='officers' and policyname='pub_read_officers') then
+    create policy "pub_read_officers" on public.officers for select to anon using (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='leaders' and policyname='pub_read_leaders') then
+    create policy "pub_read_leaders" on public.leaders for select to anon using (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='codes' and policyname='pub_read_codes') then
+    create policy "pub_read_codes" on public.codes for select to anon using (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='settings' and policyname='pub_read_settings') then
+    create policy "pub_read_settings" on public.settings for select to anon using (true);
+  end if;
+end $$;
+
+-- Storage: keep public read + upload (insert) only; drop delete/update so the
+-- media bucket cannot be wiped/tampered by the public anon key.
+do $$
+begin
+  if exists (select from pg_policies where schemaname='storage' and tablename='objects' and policyname='psa_media_anon_delete') then
+    drop policy "psa_media_anon_delete" on storage.objects;
+  end if;
+  if exists (select from pg_policies where schemaname='storage' and tablename='objects' and policyname='psa_media_anon_update') then
+    drop policy "psa_media_anon_update" on storage.objects;
+  end if;
+end $$;
+
+-- NOTE: admins, applications, cadets, exam_questions, strikes, leave_requests,
+-- blacklist, discharges, role_categories, login_codes, audit and patrols have
+-- NO anon policy anymore — the anon key cannot touch them. The bot and the
+-- portal server routes (SUPABASE_SERVICE_ROLE_KEY) are their only access path.
+
+-- ============================================================================
 -- Storage bucket "psa-media" (public) for anthem / welcome / news media
 -- ============================================================================
 insert into storage.buckets (id, name, public)

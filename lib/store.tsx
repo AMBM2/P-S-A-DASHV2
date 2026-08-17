@@ -71,8 +71,6 @@ const TABLE: Record<keyof Collections, string> = {
   codes: "codes",
 };
 
-const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
-
 const StoreContext = createContext<Store | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -184,7 +182,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ip: "127.0.0.1",
     };
     setAudit((prev) => [entry, ...prev].slice(0, 200));
-    supabase.from("audit").insert(entry).then(() => {});
+    // Server-side only (service role key) — never via the public anon key.
+    fetch("/api/audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ entry, actor: session?.discordId || "" }),
+    }).catch(() => {});
   };
 
   const upsert = <K extends keyof Collections>(key: K, item: Collections[K][number]) => {
@@ -203,9 +206,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         : [item, ...list]) as never[];
     });
     addAudit(existing ? "Updated" : "Created", key);
-    supabase.from(TABLE[key]).upsert(item as object).then(({ error }) => {
-      if (error) console.error(`upsert ${key} failed:`, error.message);
-    });
+    fetch("/api/store/upsert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ table: TABLE[key], item, actor: session?.discordId || "" }),
+    }).catch(() => {});
   };
 
   const remove = <K extends keyof Collections>(key: K, id: string) => {
@@ -219,15 +224,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       (prev as unknown as { id: string }[]).filter((x) => x.id !== id) as never[]
     );
     addAudit("Deleted", key);
-    supabase.from(TABLE[key]).delete().eq("id", id).then(({ error }) => {
-      if (error) console.error(`delete ${key} failed:`, error.message);
-    });
+    fetch("/api/store/remove", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ table: TABLE[key], id, actor: session?.discordId || "" }),
+    }).catch(() => {});
   };
 
   const updateSettings = (patch: Partial<Settings>) => {
     setSettings((prev) => {
       const next = { ...prev, ...patch };
-      supabase.from("settings").upsert({ key: "settings", value: next }).then(() => {});
+      fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: next, actor: session?.discordId || "" }),
+      }).catch(() => {});
       return next;
     });
   };
@@ -247,11 +258,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetData = async () => {
-    await supabase.from("news").delete().neq("id", ZERO_UUID);
-    await supabase.from("officers").delete().neq("id", ZERO_UUID);
-    await supabase.from("leaders").delete().neq("id", ZERO_UUID);
-    await supabase.from("codes").delete().neq("id", ZERO_UUID);
-    await supabase.from("audit").delete().neq("id", ZERO_UUID);
+    // Master-only, server-side (service role key). No more client-side deletes.
+    await fetch("/api/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ actor: session?.discordId || "" }),
+    }).catch(() => {});
     window.location.reload();
   };
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase-server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 // Drop a cadet from the Military College (keeps the record, strips roles if the
 // cadet already graduated into an officer record).
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "cadetId مطلوب" }, { status: 400 });
     }
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
     const { data: cadet } = await supabase
       .from("cadets")
       .select("*")
