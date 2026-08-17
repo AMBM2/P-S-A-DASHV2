@@ -19,6 +19,7 @@ import { notifyCollege, enrollCadet } from "./services/college.js";
 import { sendAuditLog } from "./services/auditLog.js";
 import { announce } from "./services/announce.js";
 import { createUploadToken, receiveMediaUpload, MAX_UPLOAD_BYTES } from "./services/media.js";
+import { ensureChannelPermissions } from "./services/permissions.js";
 import { reconcileMemberRoles } from "./services/rolesync.js";
 import { supabase } from "./supabase.js";
 
@@ -43,12 +44,23 @@ client.once(Events.ClientReady, (c) => {
   startRealtime(c);
   registerGuildListeners(c);
 
+  // Self-healing channel permissions (logs, recruitment, news, patrol).
+  ensureChannelPermissions(c).then((r) => {
+    if (!r.ok) console.warn("[perms] Some channels need attention — see warnings above.");
+  });
+
   console.log(`[bot] Servers: ${c.guilds.cache.size}`);
 
   // Periodic: expire approved leaves whose end date has passed (feature 7)
   setInterval(() => {
     expireLeaves(c).catch((e) => console.warn("[leave] expiry:", e.message));
   }, 60 * 60 * 1000);
+
+  // Periodic: re-verify channel permissions every 15 minutes so newly granted
+  // (or revoked) Discord permissions are picked up without a restart.
+  setInterval(() => {
+    ensureChannelPermissions(c).catch(() => {});
+  }, 15 * 60 * 1000);
 });
 
 client.on(Events.Error, (e) => console.error("[bot] error:", e.message));
