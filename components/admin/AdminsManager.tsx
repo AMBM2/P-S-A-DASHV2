@@ -74,10 +74,21 @@ export function AdminsManager() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    try {
+      const r = await fetch(`/api/admins?actor=${encodeURIComponent(session?.discordId || "")}`, { cache: "no-store" });
+      const d = await r.json();
+      if (r.ok && d.ok && Array.isArray(d.admins)) {
+        setAdmins(d.admins as AdminUser[]);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // fall through to client read
+    }
     const { data } = await supabase.from("admins").select("*").order("createdAt", { ascending: true });
     if (data) setAdmins(data as AdminUser[]);
     setLoading(false);
-  }, []);
+  }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     load();

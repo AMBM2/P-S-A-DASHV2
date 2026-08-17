@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button, Card, Badge, Modal, Field, EmptyState } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
+import { useStore } from "@/lib/store";
 import { ExamPanel } from "./ExamPanel";
 import { cn } from "@/lib/format";
 import type { Application } from "@/lib/types";
@@ -23,6 +24,7 @@ const STATUS_TONE: Record<string, any> = {
 };
 
 export function RecruitmentManager() {
+  const { session } = useStore();
   const [applications, setApplications] = useState<Application[]>([]);
   const [roles, setRoles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -33,12 +35,21 @@ export function RecruitmentManager() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [appsRes, rolesRes] = await Promise.all([
-      supabase.from("applications").select("*").order("createdAt", { ascending: false }),
-      fetch("/api/discord/roles", { cache: "no-store" }),
-    ]);
-    if (appsRes.data) setApplications(appsRes.data as Application[]);
+    let apps: Application[] = [];
     try {
+      const r = await fetch(`/api/applications?actor=${encodeURIComponent(session?.discordId || "")}`, { cache: "no-store" });
+      const d = await r.json();
+      if (r.ok && d.ok && Array.isArray(d.applications)) apps = d.applications as Application[];
+    } catch {
+      // fall through to client read
+    }
+    if (apps.length === 0) {
+      const appsRes = await supabase.from("applications").select("*").order("createdAt", { ascending: false });
+      if (appsRes.data) apps = appsRes.data as Application[];
+    }
+    if (apps.length) setApplications(apps);
+    try {
+      const rolesRes = await fetch("/api/discord/roles", { cache: "no-store" });
       const d = await rolesRes.json();
       if (d.ok && Array.isArray(d.roles)) {
         const map: Record<string, string> = {};
@@ -49,7 +60,7 @@ export function RecruitmentManager() {
       // roles map stays empty — fall back to raw IDs
     }
     setLoading(false);
-  }, []);
+  }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     load();

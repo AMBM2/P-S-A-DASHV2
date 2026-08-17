@@ -108,12 +108,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      const [n, o, l, c, a, st] = await Promise.all([
+      const [n, o, l, c, st] = await Promise.all([
         supabase.from("news").select("*").order("publishedAt", { ascending: false }),
         supabase.from("officers").select("*"),
         supabase.from("leaders").select("*"),
         supabase.from("codes").select("*"),
-        supabase.from("audit").select("*").order("timestamp", { ascending: false }),
         supabase.from("settings").select("*").eq("key", "settings").single(),
       ]);
       if (!active) return;
@@ -121,7 +120,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (o.data) setOfficers(o.data as Officer[]);
       if (l.data) setLeaders(l.data as Leader[]);
       if (c.data) setCodes(c.data as MilitaryCode[]);
-      if (a.data) setAudit(a.data as AuditEntry[]);
       if (st.data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(st.data.value as Partial<Settings>), language: "ar" });
       setLoading(false);
     })();

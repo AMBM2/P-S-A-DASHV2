@@ -8,7 +8,6 @@ import { useStore } from "@/lib/store";
 import { Card, Badge, EmptyState } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { AR } from "@/lib/ar";
-import { supabase } from "@/lib/supabase";
 
 const PRIORITY_TONE: Record<string, any> = {
   critical: "rose",
@@ -34,11 +33,12 @@ export default function NewsDetailPage() {
 
   useEffect(() => {
     if (!id || !item) return;
-    supabase
-      .from("news")
-      .update({ views: (item.views || 0) + 1 })
-      .eq("id", id)
-      .then(() => {});
+    fetch("/api/news/views", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+      cache: "no-store",
+    }).catch(() => {});
   }, [id, item?.views]);
 
   useEffect(() => {

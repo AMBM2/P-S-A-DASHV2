@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Newspaper,
   Users,
@@ -24,6 +24,7 @@ import { Button, Card, Stat, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { getMasterKey, setMasterKey, meetsPolicy } from "@/lib/security";
 import { uploadMedia, isYoutubeUrl } from "@/lib/upload";
+import type { AuditEntry } from "@/lib/types";
 
 const ENTITY_AR: Record<string, string> = {
   news: "الأخبار",
@@ -66,7 +67,7 @@ function MediaToggle({
 }
 
 export function AdminOverview() {
-  const { news, officers, codes, leaders, audit, settings, updateSettings, exportJSON, resetData, logout } = useStore();
+  const { news, officers, codes, leaders, audit, settings, session, updateSettings, exportJSON, resetData, logout } = useStore();
   const lang = settings.language;
   const [confirmReset, setConfirmReset] = useState(false);
   const [newKey, setNewKey] = useState("");
@@ -82,6 +83,36 @@ export function AdminOverview() {
     isYoutubeUrl(settings.welcome?.videoUrl) ? "url" : "upload"
   );
   const [newCatAr, setNewCatAr] = useState("");
+
+  const [logs, setLogs] = useState<AuditEntry[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const actor = session?.discordId || "";
+        const r = await fetch(`/api/audit?actor=${encodeURIComponent(actor)}`, { cache: "no-store" });
+        if (r.ok) {
+          const d = await r.json();
+          if (active && d.ok && Array.isArray(d.entries)) setLogs(d.entries);
+        }
+      } catch {
+        // fallback to optimistic store entries
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Server log is authoritative; optimistic store entries fill in immediately.
+  const displayedAudit = useMemo(() => {
+    const server = new Map(logs.map((l) => [l.id, l]));
+    audit.forEach((a) => {
+      if (!server.has(a.id)) server.set(a.id, a);
+    });
+    return [...server.values()].slice(0, 200);
+  }, [logs, audit]);
 
   const addCategory = () => {
     const labelAr = newCatAr.trim();
@@ -184,11 +215,11 @@ export function AdminOverview() {
           <h3 className="mb-4 flex items-center gap-2 font-display text-lg font-bold gold-text">
             <Activity size={18} /> سجل التدقيق
           </h3>
-          {audit.length === 0 ? (
+          {displayedAudit.length === 0 ? (
             <p className="text-sm text-zinc-500">لا يوجد نشاط مسجل بعد. ستظهر الإجراءات في لوحة التحكم هنا.</p>
           ) : (
             <div className="max-h-80 space-y-2 overflow-y-auto scrollbar-thin">
-              {audit.map((a) => (
+              {displayedAudit.map((a) => (
                 <div key={a.id} className="flex items-center justify-between rounded-lg border border-gold-400/15 bg-obsidian-900/50 px-4 py-2 text-sm">
                   <span className="text-zinc-300">
                     <span className="font-semibold text-gold-200">{ACTION_AR[a.action] || a.action}</span> → {ENTITY_AR[a.entity] || a.entity}

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button, Badge, Modal, Field, Select, EmptyState } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
+import { useStore } from "@/lib/store";
 import { RANKS } from "@/lib/seed";
 import { cn } from "@/lib/format";
 import type { Cadet } from "@/lib/types";
@@ -23,6 +24,7 @@ const STATUS_TONE: Record<string, any> = {
 };
 
 export function CollegeManager() {
+  const { session } = useStore();
   const [cadets, setCadets] = useState<Cadet[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -33,13 +35,21 @@ export function CollegeManager() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("cadets")
-      .select("*")
-      .order("createdAt", { ascending: false });
-    if (data) setCadets(data as Cadet[]);
+    let list: Cadet[] = [];
+    try {
+      const r = await fetch(`/api/cadets?actor=${encodeURIComponent(session?.discordId || "")}`, { cache: "no-store" });
+      const d = await r.json();
+      if (r.ok && d.ok && Array.isArray(d.cadets)) list = d.cadets as Cadet[];
+    } catch {
+      // fall through to client read
+    }
+    if (list.length === 0) {
+      const { data } = await supabase.from("cadets").select("*").order("createdAt", { ascending: false });
+      if (data) list = data as Cadet[];
+    }
+    if (list.length) setCadets(list);
     setLoading(false);
-  }, []);
+  }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     load();
