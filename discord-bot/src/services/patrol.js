@@ -33,11 +33,42 @@ function rankSection(header, entries) {
   return lines;
 }
 
+// Officer tier by rank level (from ranks.js):
+//   command 24+ → رئاسة الوزراء  | 22-23 → وزراء الداخلية
+//   17-21 → القادة | 11-16 → ضباط | else → أفراد
+const OFFICER_TIERS = [
+  { key: "command", levelMin: 24, header: `                                  - ⭐👮🏻  رئاســـــــة الــــــوزراء  👮🏻⭐ -` },
+  { key: "ministers", levelMin: 22, header: `                                         - ⭐👮🏻  وزراء الداخلية   👮🏻⭐ -` },
+  { key: "leaders", levelMin: 17, header: `                                       - ⭐👮🏻  قـــادة الأمن العام  👮🏻⭐ -` },
+  { key: "officers", levelMin: 11, header: `                                          - ⚔  ضـبـاط الأمن العام  ⚔ - ` },
+];
+
 // Exact Discord field-patrol dispatch template: ANSI header + fix headers.
-// Selected members are listed under their rank-role mention (no rank text),
-// so the rank ping + the actual member ping appear together.
+// Selected members are placed under their own tier header (رئاسة الوزراء /
+// وزراء الداخلية / القادة / ضباط / أفراد) and listed under their rank-role
+// mention — tiers are never merged together.
 export function buildPatrolPayload(location, officers = [], enlisted = []) {
   const loc = String(location || "").trim();
+
+  // Ensure each member appears under exactly one tier (highest applicable).
+  let placed = new Set();
+  const tierEntries = (tier) => {
+    const list = [];
+    for (const o of officers) {
+      if (o.rankLevel >= tier.levelMin && !placed.has(o.id)) {
+        placed.add(o.id);
+        list.push(o);
+      }
+    }
+    return list;
+  };
+
+  const sections = [];
+  for (const tier of OFFICER_TIERS) {
+    const members = tierEntries(tier);
+    sections.push(...rankSection(tier.header, members));
+  }
+  sections.push(...rankSection(`                                          - ⚔  افـراد الأمن العام  ⚔ -`, enlisted));
 
   return [
     "```ansi",
@@ -46,32 +77,7 @@ export function buildPatrolPayload(location, officers = [], enlisted = []) {
     "```fix",
     `                                             موقع السيناريو :  (${loc})`,
     "```",
-    "```fix",
-    `                                  - ⭐👮🏻  رئاســـــــة الــــــوزراء  👮🏻⭐ -`,
-    "```",
-    "",
-    "",
-    "",
-    "```fix",
-    `                                         - ⭐👮🏻  وزراء الداخلية   👮🏻⭐ -`,
-    "```",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "```fix",
-    `                                       - ⭐👮🏻  قـــادة الأمن العام  👮🏻⭐ -`,
-    "```",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    ...rankSection(`                                          - ⚔  ضـبـاط الأمن العام  ⚔ - `, officers),
-    ...rankSection(`                                          - ⚔  افـراد الأمن العام  ⚔ -`, enlisted),
+    ...sections,
   ].join("\n");
 }
 
