@@ -104,7 +104,7 @@ export function ExamPanel({
             <Badge tone="slate">{q.points} نقطة</Badge>
           </div>
           <div className="grid gap-2">
-            {q.choices.map((c, ci) => {
+            {(q.options || []).map((c, ci) => {
               const active = answers[qi] === ci;
               return (
                 <button

@@ -103,6 +103,97 @@ begin
 end $$;
 
 -- ============================================================================
+-- 21) PERMISSION DELEGATES — dynamic role & permission management (الصلاحيات)
+--     The Master Super Admin (hardcoded 897450827353063505) delegates granular
+--     sub-permissions to users by Discord ID. The anon key CANNOT read/write
+--     this table — only the portal server routes (service role key).
+-- ============================================================================
+create table if not exists public.permissions (
+  id uuid primary key default gen_random_uuid(),
+  "discordId" text unique not null default '',
+  permissions jsonb not null default '[]'::jsonb,
+  note text not null default '',
+  "createdBy" text not null default '',
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now()
+);
+
+-- ============================================================================
+-- 22) SYSTEM AUDIT LOGS (لوق العمليات) — every critical action on the site.
+-- ============================================================================
+create table if not exists public.audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  action text not null default '',
+  "actionAr" text not null default '',
+  executor text not null default '',
+  "executorName" text,
+  target text,
+  "targetName" text,
+  metadata jsonb not null default '{}'::jsonb,
+  "createdAt" timestamptz not null default now()
+);
+
+-- ============================================================================
+-- 23) MILITARY EXAM BUILDER & CITIZEN RECRUITMENT PORTAL (الاختبارات)
+--     exams → exam_questions → exam_attempts (detailed candidate score reports).
+-- ============================================================================
+create table if not exists public.exams (
+  id uuid primary key default gen_random_uuid(),
+  title text not null default '',
+  description text not null default '',
+  "durationMinutes" integer not null default 15,
+  status text not null default 'draft',
+  "createdBy" text not null default '',
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now()
+);
+
+-- Extend the existing exam_questions table with the full builder schema.
+-- The legacy college questions (examId null) keep working unchanged.
+alter table public.exam_questions add column if not exists "examId" uuid;
+alter table public.exam_questions add column if not exists type text not null default 'single';
+alter table public.exam_questions add column if not exists media text not null default 'none';
+alter table public.exam_questions add column if not exists "mediaUrl" text not null default '';
+alter table public.exam_questions add column if not exists "correctIndices" jsonb not null default '[]'::jsonb;
+alter table public.exam_questions add column if not exists "sortOrder" integer not null default 0;
+
+create table if not exists public.exam_attempts (
+  id uuid primary key default gen_random_uuid(),
+  "examId" uuid references public.exams(id) on delete cascade,
+  "recruiterId" text not null default '',
+  "citizenId" text not null default '',
+  "citizenName" text not null default '',
+  answers jsonb not null default '[]'::jsonb,
+  score integer not null default 0,
+  total integer not null default 0,
+  percentage numeric not null default 0,
+  passed boolean not null default false,
+  "startedAt" timestamptz not null default now(),
+  "completedAt" timestamptz not null default now(),
+  "createdAt" timestamptz not null default now()
+);
+
+alter table public.permissions enable row level security;
+alter table public.audit_logs enable row level security;
+alter table public.exams enable row level security;
+alter table public.exam_attempts enable row level security;
+
+-- NOTE: intentionally NO anon policies — these tables are only reachable
+-- through the portal server routes / the bot (SUPABASE_SERVICE_ROLE_KEY).
+
+-- Realtime for the exam system + audit logs.
+do $$
+declare t text;
+begin
+  foreach t in array array['permissions','audit_logs','exams','exam_attempts'] loop
+    begin
+      execute format('alter publication supabase_realtime add table public.%I', t);
+    exception when duplicate_object then null;
+    end;
+  end loop;
+end $$;
+
+-- ============================================================================
 -- 12) RBAC — admins (master / admin / recruitment). Master can delegate access.
 --     NOTE: replace the seed Discord user ID with the Master Super Admin's ID.
 -- ============================================================================

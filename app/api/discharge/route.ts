@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auditLog } from "@/lib/audit";
 
 // Discharge an officer: the bot strips rank/recruit roles in Discord, marks the
 // record discharged, optionally blacklists, and logs the discharge (defense in
@@ -40,6 +41,15 @@ export async function POST(req: Request) {
       data = await r.json();
     } catch {
       data = { ok: false, error: "استجابة غير متوقعة من البوت" };
+    }
+    if (data.ok) {
+      await auditLog({
+        action: "officer.discharged",
+        actionAr: "فصل ضابط",
+        executor: issuer || "",
+        target: officerId,
+        metadata: { type, reason, blacklist: blacklist === true },
+      });
     }
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {

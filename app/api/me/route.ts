@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { resolvePermissions } from "@/lib/permissions";
 
 // Resolve a Discord user's access level (master / admin / recruitment / none)
-// via the bot's RBAC service (admins table + Discord recruitment role).
+// via the bot's RBAC service (admins table + Discord recruitment role), plus
+// the granular delegate permissions from the permissions table.
 export async function POST(req: Request) {
   try {
     const { discordId } = await req.json();
@@ -25,10 +27,11 @@ export async function POST(req: Request) {
     } catch {
       data = { ok: false, error: "bad response", level: "none" };
     }
+    data.permissions = await resolvePermissions(discordId);
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {
     return NextResponse.json(
-      { ok: false, error: e?.message || "bot unreachable", level: "none" },
+      { ok: false, error: e?.message || "bot unreachable", level: "none", permissions: [] },
       { status: 200 }
     );
   }

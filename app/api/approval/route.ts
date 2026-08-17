@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { auditLog } from "@/lib/audit";
 
 // Review an application: approve -> cadet enrolled at the Military College
 // (assign recruit role + notify via bot), deny -> cadet dropped.
@@ -31,6 +32,15 @@ export async function POST(req: Request) {
       .eq("applicationId", applicationId)
       .select("*")
       .single();
+
+    await auditLog({
+      action: decision === "approved" ? "recruitment.approved" : "recruitment.denied",
+      actionAr: decision === "approved" ? "قبول طلب توظيف" : "رفض طلب توظيف",
+      executor: reviewedBy || "",
+      target: app.discordId || app.id,
+      targetName: app.nameAr || app.name || "",
+      metadata: { applicationId, recruiterId: reviewedBy || "", applicantId: app.discordId || "" },
+    });
 
     // Notify the Military College channel + grant the selected rank roles.
     if (decision === "approved" && cadet) {

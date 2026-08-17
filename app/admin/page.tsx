@@ -15,6 +15,9 @@ import {
   ShieldCheck,
   Loader2,
   Settings2,
+  FileBadge,
+  ScrollText,
+  KeyRound,
 } from "lucide-react";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { NewsManager } from "@/components/admin/NewsManager";
@@ -26,31 +29,39 @@ import { RolesManager } from "@/components/admin/RolesManager";
 import { RecruitmentManager } from "@/components/admin/RecruitmentManager";
 import { CollegeManager } from "@/components/admin/CollegeManager";
 import { DischargeManager } from "@/components/admin/DischargeManager";
-import { AdminsManager } from "@/components/admin/AdminsManager";
+import { PermissionsManager } from "@/components/admin/PermissionsManager";
+import { ExamBuilder } from "@/components/admin/ExamBuilder";
+import { AuditLogs } from "@/components/admin/AuditLogs";
 import { RoleCategoriesManager } from "@/components/admin/RoleCategoriesManager";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/format";
-import type { AccessLevel, Grant } from "@/lib/types";
+import { PERMISSION_DEFS } from "@/lib/permissions";
+import type { AccessLevel, Grant, PermissionKey } from "@/lib/types";
 
-const TABS: {
+type TabDef = {
   id: string;
   label: string;
   icon: any;
   cats: Grant[];
-}[] = [
-  { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, cats: ["master", "executive"] },
-  { id: "news", label: "الأخبار", icon: Newspaper, cats: ["master", "executive"] },
-  { id: "roster", label: "الأفراد", icon: Users, cats: ["master", "executive", "personnel"] },
-  { id: "roles", label: "الرتب العسكرية", icon: Shield, cats: ["master", "executive"] },
-  { id: "leadership", label: "القيادة", icon: Crown, cats: ["master", "executive"] },
-  { id: "codes", label: "الأكواد", icon: Radio, cats: ["master", "executive", "hr"] },
-  { id: "recruit", label: "التوظيف", icon: UserPlus, cats: ["master", "executive", "hr"] },
-  { id: "college", label: "الكلية العسكرية", icon: GraduationCap, cats: ["master", "executive", "hr"] },
-  { id: "discharge", label: "الفصل", icon: UserX, cats: ["master", "executive"] },
-  { id: "admins", label: "الصلاحيات", icon: ShieldCheck, cats: ["master"] },
-  { id: "settings", label: "الإعدادات", icon: Settings2, cats: ["master", "executive"] },
+  perms: PermissionKey[];
+};
+
+const TABS: TabDef[] = [
+  { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
+  { id: "news", label: "الأخبار", icon: Newspaper, cats: ["master", "executive"], perms: ["NEWS_ADMIN"] },
+  { id: "roster", label: "الأفراد", icon: Users, cats: ["master", "executive", "personnel"], perms: ["SITE_ADMIN"] },
+  { id: "roles", label: "الرتب العسكرية", icon: Shield, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
+  { id: "leadership", label: "القيادة", icon: Crown, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
+  { id: "codes", label: "الأكواد", icon: Radio, cats: ["master", "executive", "hr"], perms: ["SITE_ADMIN"] },
+  { id: "recruit", label: "التوظيف", icon: UserPlus, cats: ["master", "executive", "hr"], perms: ["RECRUITMENT_ADMIN"] },
+  { id: "college", label: "الكلية العسكرية", icon: GraduationCap, cats: ["master", "executive", "hr"], perms: ["RECRUITMENT_ADMIN"] },
+  { id: "exams", label: "بناء الاختبارات", icon: FileBadge, cats: ["master", "executive"], perms: ["EXAMS_ADMIN"] },
+  { id: "discharge", label: "الفصل", icon: UserX, cats: ["master", "executive"], perms: ["DISCHARGE_ADMIN"] },
+  { id: "delegates", label: "الصلاحيات", icon: KeyRound, cats: ["master"], perms: ["PERMISSIONS_ADMIN"] },
+  { id: "audit", label: "لوق العمليات", icon: ScrollText, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
+  { id: "settings", label: "الإعدادات", icon: Settings2, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
 ];
 
 export default function AdminPage() {
@@ -59,6 +70,7 @@ export default function AdminPage() {
   const [tab, setTab] = useState("overview");
   const [level, setLevel] = useState<AccessLevel | null>(null);
   const [grants, setGrants] = useState<Grant[]>([]);
+  const [perms, setPerms] = useState<PermissionKey[]>([]);
   const [resolving, setResolving] = useState(false);
   const [levelError, setLevelError] = useState<string | null>(null);
 
@@ -79,6 +91,7 @@ export default function AdminPage() {
         if (!active) return;
         setLevel(d.level || "none");
         setGrants(d.grants || []);
+        setPerms(d.permissions || []);
       } catch {
         if (!active) return;
         setLevel("none");
@@ -92,14 +105,19 @@ export default function AdminPage() {
     };
   }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Jump to the first tab the user may see once their grants resolve.
+  const canSee = (t: TabDef) =>
+    t.cats.some((c) => grants.includes(c)) || t.perms.some((p) => perms.includes(p));
+
+  const isAdmin = level !== null && (level !== "none" || perms.length > 0);
+
+  // Jump to the first tab the user may see once grants/permissions resolve.
   useEffect(() => {
-    if (!grants.length) return;
-    const allowed = TABS.filter((t) => t.cats.some((c) => grants.includes(c)));
+    if (!grants.length && !perms.length) return;
+    const allowed = TABS.filter(canSee);
     if (allowed.length === 0) return;
     if (!allowed.some((t) => t.id === tab)) setTab(allowed[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grants]);
+  }, [grants, perms]);
 
   if (!session) {
     return (
@@ -117,7 +135,10 @@ export default function AdminPage() {
     );
   }
 
-  const allowed = TABS.filter((t) => t.cats.some((c) => grants.includes(c)));
+  const allowed = TABS.filter(canSee);
+  const myPerms = perms
+    .map((p) => PERMISSION_DEFS.find((x) => x.key === p)?.label || p)
+    .filter((l) => l !== "صلاحية السوبر أدمن");
 
   return (
     <div>
@@ -140,6 +161,11 @@ export default function AdminPage() {
             {level === "master" ? "سوبر أدمن" : level === "admin" ? "أدمن" : "توظيف"}
           </span>
         )}
+        {myPerms.length > 0 && (
+          <span className="hidden max-w-[260px] truncate rounded-full border border-gold-400/30 bg-gold-400/10 px-2.5 py-0.5 text-[11px] text-gold-200 sm:block">
+            {myPerms.join(" • ")}
+          </span>
+        )}
         <button
           onClick={logout}
           className="flex items-center gap-1.5 rounded-lg border border-gold-400/25 px-3 py-1.5 text-xs font-bold text-zinc-300 transition-colors hover:border-rose-400/40 hover:text-rose-300"
@@ -150,14 +176,14 @@ export default function AdminPage() {
 
       <PageHeader
         title={lang === "ar" ? "لوحة التحكم" : "Admin Control Panel"}
-        subtitle={lang === "ar" ? "إدارة الأخبار والأفراد والقيادة والأكواد" : "Manage news, personnel, leadership and codes"}
+        subtitle={lang === "ar" ? "إدارة الأخبار والأفراد والاختبارات والصلاحيات" : "Manage news, personnel, exams and permissions"}
       />
 
       {resolving ? (
         <div className="glass flex items-center justify-center gap-2 rounded-2xl p-14 text-zinc-400">
           <Loader2 size={20} className="animate-spin" /> جارٍ التحقق من الصلاحيات...
         </div>
-      ) : level === "none" || level === null ? (
+      ) : !isAdmin ? (
         <div className="glass flex flex-col items-center gap-4 rounded-2xl p-14 text-center">
           <ShieldCheck size={36} className="text-rose-300" />
           <div>
@@ -201,8 +227,10 @@ export default function AdminPage() {
             )}
             {tab === "recruit" && <RecruitmentManager />}
             {tab === "college" && <CollegeManager />}
+            {tab === "exams" && <ExamBuilder />}
             {tab === "discharge" && <DischargeManager />}
-            {tab === "admins" && <AdminsManager />}
+            {tab === "delegates" && <PermissionsManager />}
+            {tab === "audit" && <AuditLogs />}
             {tab === "settings" && <RoleCategoriesManager />}
           </div>
         </>
