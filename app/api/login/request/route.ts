@@ -1,11 +1,22 @@
 ﻿import { NextResponse } from "next/server";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 
 export async function POST(req: Request) {
+  if (checkOrigin(req)) {
+    return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+  }
+  if (!rateLimit(req, { limit: 10, windowMs: 60_000 })) return tooMany();
+
   let userId = "";
   try {
     const body = await req.json();
-    userId = String(body?.userId || "").trim();
+    userId = cleanString(body?.userId, 40);
   } catch {}
+  if (!/^\d{15,20}$/.test(userId)) {
+    return NextResponse.json({ ok: false, error: "معرّف ديسكورد غير صالح" }, { status: 400 });
+  }
 
   const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");
 

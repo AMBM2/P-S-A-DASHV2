@@ -206,10 +206,15 @@ create table if not exists public.admins (
   "createdAt" timestamptz not null default now()
 );
 
+-- Only the hardcoded Master Super Admin (897450827353063505) may hold the
+-- 'master' role. Any other user is demoted to 'executive' (safety net).
 insert into public.admins ("userId", role, note)
-values ('1527322761473822811', 'master', 'Master Super Admin'),
-       ('897450827353063505', 'master', 'مسؤول إدارة الموقع كاملة')
+values ('897450827353063505', 'master', 'مسؤول إدارة الموقع كاملة')
 on conflict ("userId") do update set role = 'master';
+
+update public.admins
+   set role = 'executive'
+ where role = 'master' and "userId" <> '897450827353063505';
 
 -- ============================================================================
 -- 13) Recruitment applications (public survey form → pending review)
@@ -504,3 +509,62 @@ begin
     create policy "psa_media_anon_delete" on storage.objects for delete using (bucket_id = 'psa-media');
   end if;
 end $$;
+
+-- ============================================================================
+-- 24) STRICT ROW-LEVEL SECURITY ENFORCEMENT (defense in depth)
+--     Run AFTER sections 1-23. Idempotent — safe to re-run.
+-- ============================================================================
+
+-- Public display tables: keep anon SELECT (via the pub_read_* policies) but
+-- strip every WRITE privilege from anon + authenticated. Only the portal server
+-- routes (service role key) can insert/update/delete these rows.
+alter table public.news enable row level security;
+alter table public.officers enable row level security;
+alter table public.leaders enable row level security;
+alter table public.codes enable row level security;
+alter table public.settings enable row level security;
+
+revoke insert, update, delete on public.news, public.officers,
+       public.leaders, public.codes, public.settings from anon, authenticated;
+grant select on public.news, public.officers,
+      public.leaders, public.codes, public.settings to anon;
+
+-- Sensitive tables: full revoke — neither anon nor authenticated can read or
+-- write them. Only the bot and the portal server routes (SUPABASE_SERVICE_ROLE_KEY)
+-- may access these. Skips tables that are not migrated yet.
+do $$
+declare t text; tbl text[] := array[
+  'admins','permissions','audit','audit_logs','applications','cadets',
+  'exam_questions','exams','exam_attempts','strikes','leave_requests',
+  'blacklist','discharges','role_categories','login_codes','patrols'
+];
+begin
+  foreach t in array tbl loop
+    if to_regclass(format('public.%I', t)) is not null then
+      execute format('alter table public.%I enable row level security', t);
+      execute format('revoke all on public.%I from anon, authenticated', t);
+    end if;
+  end loop;
+end $$;
+
+-- Belt + suspenders: drop any remaining permissive anon "all" policies.
+do $$
+declare pol text;
+begin
+  for pol in
+    select policyname from pg_policies
+     where schemaname = 'public' and policyname like 'anon_all\_%'
+  loop
+    execute format('drop policy %I on public.%I',
+      pol, (select tablename from pg_policies where policyname = pol and schemaname='public'));
+  end loop;
+end $$;
+
+-- Verification (informational — should return 0 rows):
+-- any anon-permissive WRITE/ALL policy left in the public schema.
+select policyname, tablename, cmd, roles
+  from pg_policies
+ where schemaname = 'public'
+   and permissive
+   and (cmd = 'all' or cmd in ('insert','update','delete'))
+   and 'anon'::name = any(roles);

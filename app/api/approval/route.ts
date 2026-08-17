@@ -1,12 +1,33 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { requireGrants } from "@/lib/admin-gate";
+import { requirePermission, PERMS } from "@/lib/permissions";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 import { auditLog } from "@/lib/audit";
 
 // Review an application: approve -> cadet enrolled at the Military College
 // (assign recruit role + notify via bot), deny -> cadet dropped.
 export async function POST(req: Request) {
   try {
-    const { applicationId, decision, reviewedBy } = await req.json();
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 60, windowMs: 60_000 })) return tooMany();
+
+    const body = await req.json();
+    const applicationId = cleanString(body?.applicationId, 64);
+    const decision = cleanString(body?.decision, 16);
+    const reviewedBy = cleanString(body?.reviewedBy, 40);
+
+    // Caller must be HR/Executive/Master (category) OR a RECRUITMENT_ADMIN delegate.
+    const grantsGate = await requireGrants(reviewedBy, ["hr", "executive", "master"]);
+    const permGate = await requirePermission(reviewedBy, PERMS.RECRUITMENT_ADMIN);
+    if (grantsGate instanceof NextResponse && permGate instanceof NextResponse) {
+      return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    }
+
     if (!applicationId || !["approved", "denied"].includes(decision)) {
       return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
     }

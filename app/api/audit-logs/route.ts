@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { cleanString } from "@/lib/sanitize";
 
 // Centralized System Audit Logs (لوق العمليات) — read-only dashboard feed.
 export async function GET(req: Request) {
   try {
-    const actor = new URL(req.url).searchParams.get("actor") || "";
+    if (!rateLimit(req, { limit: 60, windowMs: 60_000 })) return tooMany();
+    const actor = cleanString(new URL(req.url).searchParams.get("actor"), 40);
     const limit = Math.min(Number(new URL(req.url).searchParams.get("limit")) || 200, 500);
     const gate = await requirePermission(actor, PERMS.SITE_ADMIN);
     if (gate instanceof NextResponse) return gate;

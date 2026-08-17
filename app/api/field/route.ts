@@ -1,18 +1,31 @@
 import { NextResponse } from "next/server";
+import { requireGrants } from "@/lib/admin-gate";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString, isSafeHttpUrl, isSafeDataImage } from "@/lib/sanitize";
 
 // Field Patrol Live Dispatch: the portal collects the patrol location + the
 // selected member IDs; the bot builds the rich ANSI/fix payload mentioning
 // those members (with ranks) and posts it to PATROL_CHANNEL_ID.
 export async function POST(req: Request) {
   try {
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 20, windowMs: 60_000 })) return tooMany();
+
     const body = await req.json();
-    const location = String(body?.location || "").trim();
+    const actor = cleanString(body?.actor || "", 40);
+    const gate = await requireGrants(actor, ["field", "executive", "master"]);
+    if (gate instanceof NextResponse) return gate;
+
+    const location = cleanString(body?.location, 200);
     const memberIds: string[] = Array.isArray(body?.memberIds)
-      ? body.memberIds.filter((m: unknown) => typeof m === "string")
+      ? body.memberIds.filter((m: unknown) => typeof m === "string" && /^\d{15,20}$/.test(String(m))).slice(0, 50)
       : [];
-    const imageUrl = String(body?.imageUrl || "").trim();
-    const imageData = String(body?.imageData || "").trim();
-    const imageName = String(body?.imageName || "").trim();
+    const imageUrl = isSafeHttpUrl(body?.imageUrl) ? cleanString(body?.imageUrl, 2048) : "";
+    const imageData = isSafeDataImage(body?.imageData) ? String(body?.imageData) : "";
+    const imageName = cleanString(body?.imageName, 120);
 
     if (!location) {
       return NextResponse.json({ ok: false, error: "موقع السيناريو مطلوب" }, { status: 400 });

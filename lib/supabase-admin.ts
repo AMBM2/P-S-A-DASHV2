@@ -11,10 +11,10 @@ export function getSupabaseAdmin(): any {
   if (instance) return instance;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // SECURITY: the service-role key is a server-side secret. It MUST only come
+  // from SUPABASE_SERVICE_ROLE_KEY — never from a NEXT_PUBLIC_* variable
+  // (Next.js would inline that into client bundles and leak it to the browser).
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceKey) {
     throw new Error(

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireGrants } from "@/lib/admin-gate";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanObject } from "@/lib/sanitize";
 
 // Server-side audit log read (executive / master only).
 export async function GET(req: Request) {
@@ -27,7 +30,14 @@ export async function GET(req: Request) {
 // Server-side audit log insert (executive / master only).
 export async function POST(req: Request) {
   try {
-    const { entry, actor } = await req.json();
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 120, windowMs: 60_000 })) return tooMany();
+
+    const body = await req.json();
+    const entry = cleanObject(body?.entry, { maxLen: 2000, maxKeys: 50 });
+    const actor = cleanObject(body?.actor, { maxLen: 40 }) as string;
     if (!entry || !entry.id || !entry.action) {
       return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
     }

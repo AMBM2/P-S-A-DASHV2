@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { requirePermission, PERMS, ALL_PERMS } from "@/lib/permissions";
+import { requirePermission, PERMS, ALL_PERMS, MASTER_ADMIN_ID } from "@/lib/permissions";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 import { auditLog } from "@/lib/audit";
 import type { PermissionKey } from "@/lib/types";
 
@@ -26,19 +29,28 @@ export async function GET(req: Request) {
 }
 
 // Assign or update a delegate's sub-permissions (by pasted Discord ID).
+// SECURITY: only the hardcoded MASTER_ADMIN_ID may modify permissions.
 export async function POST(req: Request) {
   try {
-    const { discordId, permissions, note, actor } = await req.json();
-    const id = String(discordId || "").trim();
-    if (!/^\d{15,20}$/.test(id)) {
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 30, windowMs: 60_000 })) return tooMany();
+
+    const body = await req.json();
+    const actor = cleanString(body?.actor, 40);
+    if (actor !== MASTER_ADMIN_ID) {
+      return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    }
+
+    const discordId = cleanString(body?.discordId, 40);
+    const note = cleanString(body?.note, 300);
+    if (!/^\d{15,20}$/.test(discordId)) {
       return NextResponse.json({ ok: false, error: "معرّف ديسكورد غير صالح" }, { status: 400 });
     }
-    const permList = Array.isArray(permissions)
-      ? (permissions.filter((p: unknown) => typeof p === "string" && (ALL_PERMS as string[]).includes(p)) as PermissionKey[])
+    const permList = Array.isArray(body?.permissions)
+      ? (body.permissions.filter((p: unknown) => typeof p === "string" && (ALL_PERMS as string[]).includes(p)) as PermissionKey[])
       : [];
-
-    const gate = await requirePermission(actor || "", PERMS.PERMISSIONS_ADMIN);
-    if (gate instanceof NextResponse) return gate;
 
     // MASTER_ADMIN can never be delegated — it is hardcoded to the owner only.
     const clean = permList.filter((p: string) => p !== PERMS.MASTER_ADMIN);
@@ -48,10 +60,10 @@ export async function POST(req: Request) {
       .from("permissions")
       .upsert(
         {
-          discordId: id,
+          discordId,
           permissions: clean,
-          note: String(note || "").trim(),
-          createdBy: actor || "",
+          note,
+          createdBy: actor,
           updatedAt: new Date().toISOString(),
         },
         { onConflict: "discordId" }
@@ -63,9 +75,9 @@ export async function POST(req: Request) {
     await auditLog({
       action: "permissions.upsert",
       actionAr: "تحديث صلاحيات مستخدم",
-      executor: actor || "",
-      target: id,
-      metadata: { permissions: clean, note: String(note || "").trim() },
+      executor: actor,
+      target: discordId,
+      metadata: { permissions: clean, note },
     });
     return NextResponse.json({ ok: true, permissions: clean });
   } catch (e: any) {
@@ -76,14 +88,20 @@ export async function POST(req: Request) {
 // Revoke a delegate entirely.
 export async function DELETE(req: Request) {
   try {
-    const { discordId, actor } = await req.json();
-    const id = String(discordId || "").trim();
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 30, windowMs: 60_000 })) return tooMany();
 
-    const gate = await requirePermission(actor || "", PERMS.PERMISSIONS_ADMIN);
-    if (gate instanceof NextResponse) return gate;
+    const body = await req.json();
+    const actor = cleanString(body?.actor, 40);
+    if (actor !== MASTER_ADMIN_ID) {
+      return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    }
 
+    const discordId = cleanString(body?.discordId, 40);
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("permissions").delete().eq("discordId", id);
+    const { error } = await supabase.from("permissions").delete().eq("discordId", discordId);
     if (error) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
@@ -91,8 +109,8 @@ export async function DELETE(req: Request) {
     await auditLog({
       action: "permissions.revoke",
       actionAr: "سحب صلاحيات مستخدم",
-      executor: actor || "",
-      target: id,
+      executor: actor,
+      target: discordId,
     });
     return NextResponse.json({ ok: true });
   } catch (e: any) {

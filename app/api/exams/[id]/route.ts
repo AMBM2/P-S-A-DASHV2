@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 import { auditLog } from "@/lib/audit";
 
 // Single exam (with questions). Public fetch only for active exams; editing
@@ -35,9 +38,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 20, windowMs: 60_000 })) return tooMany();
+
     const id = (await params).id;
     const body = await req.json();
-    const actor = String(body?.actor || "");
+    const actor = cleanString(body?.actor, 40);
     const gate = await requirePermission(actor, PERMS.EXAMS_ADMIN);
     if (gate instanceof NextResponse) return gate;
 
@@ -48,10 +56,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const patch: Record<string, unknown> = { updatedAt: new Date().toISOString() };
-    if (typeof body.title === "string" && body.title.trim()) patch.title = body.title.trim();
-    if (typeof body.description === "string") patch.description = body.description.trim();
-    if (Number(body.durationMinutes) > 0) patch.durationMinutes = Math.max(1, Number(body.durationMinutes));
-    if (["draft", "active", "archived"].includes(body.status)) patch.status = body.status;
+    const title = cleanString(body?.title, 200);
+    const description = cleanString(body?.description, 1000);
+    const durationMinutes = Number(body?.durationMinutes);
+    if (title) patch.title = title;
+    if (typeof body?.description === "string") patch.description = description;
+    if (durationMinutes > 0) patch.durationMinutes = Math.max(1, Math.min(600, durationMinutes));
+    if (["draft", "active", "archived"].includes(body?.status)) patch.status = body.status;
 
     const { error } = await supabase.from("exams").update(patch).eq("id", id);
     if (error) {
@@ -59,19 +70,22 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     // Replace questions when a full question set is provided.
-    if (Array.isArray(body.questions)) {
+    if (Array.isArray(body?.questions)) {
       await supabase.from("exam_questions").delete().eq("examId", id);
-      if (body.questions.length) {
-        const rows = body.questions.map((q: any, i: number) => ({
+      const rawQuestions = (body.questions as any[]).slice(0, 200);
+      if (rawQuestions.length) {
+        const rows = rawQuestions.map((q: any, i: number) => ({
           examId: id,
-          prompt: String(q.prompt || "").trim(),
-          choices: Array.isArray(q.options) ? q.options : [],
-          type: q.type === "multi" ? "multi" : "single",
-          media: ["image", "video"].includes(q.media) ? q.media : "none",
-          mediaUrl: String(q.mediaUrl || ""),
-          correctIndex: Number(q.correctIndex) || 0,
-          correctIndices: Array.isArray(q.correctIndices) ? q.correctIndices : [],
-          points: Math.max(1, Number(q.points) || 1),
+          prompt: cleanString(q?.prompt, 2000),
+          choices: Array.isArray(q?.options)
+            ? q.options.map((o: unknown) => cleanString(o, 500)).slice(0, 8)
+            : [],
+          type: q?.type === "multi" ? "multi" : "single",
+          media: ["image", "video"].includes(q?.media) ? q?.media : "none",
+          mediaUrl: cleanString(q?.mediaUrl, 2048),
+          correctIndex: Number(q?.correctIndex) || 0,
+          correctIndices: Array.isArray(q?.correctIndices) ? q.correctIndices.map(Number).slice(0, 8) : [],
+          points: Math.max(1, Math.min(100, Number(q?.points) || 1)),
           sortOrder: i,
           active: true,
         }));
@@ -98,8 +112,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 20, windowMs: 60_000 })) return tooMany();
+
     const id = (await params).id;
-    const actor = new URL(req.url).searchParams.get("actor") || "";
+    const actor = cleanString(new URL(req.url).searchParams.get("actor"), 40);
     const gate = await requirePermission(actor, PERMS.EXAMS_ADMIN);
     if (gate instanceof NextResponse) return gate;
 

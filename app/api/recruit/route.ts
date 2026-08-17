@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 
 // Public recruitment survey submit. Creates a pending application + a Military
 // College cadet record assigned to the main military department (d-hq).
@@ -7,13 +10,19 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 // member on approval. Blacklisted users are rejected automatically.
 export async function POST(req: Request) {
   try {
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    // Anti-spam: 5 submissions per IP per minute.
+    if (!rateLimit(req, { limit: 5, windowMs: 60_000 })) return tooMany();
+
     const body = await req.json();
-    const name = String(body?.name || "").trim();
-    const nameAr = String(body?.nameAr || "").trim();
-    const discordId = String(body?.discordId || "").trim();
-    const primaryRankId = String(body?.primaryRankId || "").trim();
+    const name = cleanString(body?.name, 120);
+    const nameAr = cleanString(body?.nameAr, 120);
+    const discordId = cleanString(body?.discordId, 40);
+    const primaryRankId = cleanString(body?.primaryRankId, 40);
     const ranks: string[] = Array.isArray(body?.ranks)
-      ? body.ranks.filter((r: unknown) => typeof r === "string")
+      ? body.ranks.filter((r: unknown) => typeof r === "string").slice(0, 10)
       : [];
 
     if (!name && !nameAr) {

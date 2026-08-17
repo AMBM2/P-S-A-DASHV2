@@ -47,7 +47,6 @@ const DEFAULT_SETTINGS: Settings = {
   maintenance: false,
   twoFactor: true,
   inactivityMinutes: 15,
-  discordBotToken: "",
   anthemUrl: "https://www.youtube.com/watch?v=ecdPScS0MKo",
   welcome: {
     enabled: true,
@@ -70,6 +69,30 @@ const TABLE: Record<keyof Collections, string> = {
   leaders: "leaders",
   codes: "codes",
 };
+
+// SECURITY: the settings row is readable with the public anon key. Never let
+// any secret-shaped key (bot tokens, API keys, service keys, passwords) reach
+// the browser bundle, even if it was ever stored in the settings value.
+const SECRET_KEYS = /token|secret|apikey|api_key|service_role|password|discordBotToken/i;
+function stripSecrets(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripSecrets);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (SECRET_KEYS.test(k)) continue;
+      out[k] = stripSecrets(v);
+    }
+    return out;
+  }
+  return value;
+}
+function safeSettings(raw: any): Settings {
+  return {
+    ...DEFAULT_SETTINGS,
+    ...(stripSecrets(raw?.value || {}) as Partial<Settings>),
+    language: "ar",
+  };
+}
 
 const StoreContext = createContext<Store | null>(null);
 
@@ -120,7 +143,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (o.data) setOfficers(o.data as Officer[]);
       if (l.data) setLeaders(l.data as Leader[]);
       if (c.data) setCodes(c.data as MilitaryCode[]);
-      if (st.data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(st.data.value as Partial<Settings>), language: "ar" });
+      if (st.data?.value) setSettings(safeSettings(st.data));
       setLoading(false);
     })();
     return () => {
@@ -145,7 +168,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
                 .select("*")
                 .eq("key", "settings")
                 .single();
-              if (data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(data.value as Partial<Settings>) });
+              if (data?.value) setSettings(safeSettings(data));
               return;
             }
             const query = supabase.from(t).select("*");

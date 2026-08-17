@@ -237,7 +237,6 @@ export type Settings = {
   maintenance: boolean;
   twoFactor: boolean;
   inactivityMinutes: number;
-  discordBotToken?: string;
   anthemUrl?: string;
   welcome?: {
     enabled: boolean;

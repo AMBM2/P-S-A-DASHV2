@@ -10,10 +10,30 @@ import { resolveAccessLevel } from "./rbac.js";
 // In-memory fallback for codes when the login_codes table is unavailable.
 const memoryCodes = new Map();
 
+// Brute-force guard: cap code requests and verification attempts per user.
+const requestCalls = new Map(); // userId -> timestamps
+const attemptCalls = new Map(); // userId -> timestamps
+
+function withinLimit(map, key, limit, windowMs) {
+  const now = Date.now();
+  const arr = (map.get(key) || []).filter((t) => now - t < windowMs);
+  if (arr.length >= limit) {
+    map.set(key, arr);
+    return false;
+  }
+  arr.push(now);
+  map.set(key, arr);
+  return true;
+}
+
 export async function requestLoginCode(client, rawUserId) {
   const userId = String(rawUserId || "").trim();
   if (!/^\d{15,20}$/.test(userId)) {
     return { ok: false, error: "معرّف ديسكورد غير صالح" };
+  }
+  // Anti-abuse: max 3 code requests per user per 5 minutes.
+  if (!withinLimit(requestCalls, userId, 3, 5 * 60 * 1000)) {
+    return { ok: false, error: "طلبات كثيرة جداً — انتظر 5 دقائق ثم حاول" };
   }
 
   let member = null;
@@ -68,6 +88,11 @@ export async function requestLoginCode(client, rawUserId) {
 export async function verifyLoginCode(rawUserId, rawCode) {
   const userId = String(rawUserId || "").trim();
   const code = String(rawCode || "").trim();
+
+  // Brute-force guard: max 8 verification attempts per user per 5 minutes.
+  if (!withinLimit(attemptCalls, userId, 8, 5 * 60 * 1000)) {
+    return { ok: false, error: "محاولات كثيرة — انتظر 5 دقائق ثم اطلب رمزاً جديداً" };
+  }
 
   let dbRes = null;
   const { data } = await supabase

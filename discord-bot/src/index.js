@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, ActivityType, Events } from "discord.js";
 import http from "node:http";
+import { timingSafeEqual } from "node:crypto";
 import { config } from "./config.js";
 import { startRealtime } from "./listeners/realtime.js";
 import { registerGuildListeners } from "./listeners/guild.js";
@@ -89,7 +90,14 @@ http
     }
 
     // All other endpoints require the shared secret (the portal sends it).
-    if (req.headers["x-bot-secret"] !== config.botSecret) {
+    // Compare in constant time to prevent timing side-channel leakage.
+    const sent = req.headers["x-bot-secret"] || "";
+    const secretOk =
+      typeof sent === "string" &&
+      typeof config.botSecret === "string" &&
+      sent.length === config.botSecret.length &&
+      timingSafeEqual(Buffer.from(sent, "utf8"), Buffer.from(config.botSecret, "utf8"));
+    if (!secretOk) {
       return send(401, { ok: false, error: "unauthorized" });
     }
 

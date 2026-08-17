@@ -7,7 +7,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const token = _req.nextUrl.searchParams.get("token") || process.env.DISCORD_BOT_TOKEN || "";
+  // SECURITY: the Discord bot token is a server-side secret and is read ONLY
+  // from the environment here. We never accept a client-supplied ?token=
+  // (doing so would let any caller use arbitrary tokens and leak the real one
+  // through URL logs / browser history).
+  const token = process.env.DISCORD_BOT_TOKEN || "";
 
   if (!id) {
     return NextResponse.json({ error: "missing_id" }, { status: 400 });

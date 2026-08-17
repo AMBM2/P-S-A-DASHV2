@@ -91,11 +91,8 @@ export default function LookupPage() {
 
     setLoading(true);
     try {
-      const tokenParam = settings.discordBotToken
-        ? `?token=${encodeURIComponent(settings.discordBotToken)}`
-        : "";
       const [u, m] = await Promise.all([
-        fetch(`/api/discord/${id}${tokenParam}`).then((r) => r.json()),
+        fetch(`/api/discord/${id}`).then((r) => r.json()),
         fetch(`/api/discord/member/${id}`).then((r) => r.json()).catch(() => ({ ok: false })),
       ]);
       if (u && !u.error && (u.id || u.username)) {
@@ -155,14 +152,6 @@ export default function LookupPage() {
             ? "جرّب: 1530685609704820856 (حساب مسجّل) · أو أي USER ID موجود لدى Discord"
             : "Try: 1530685609704820856 (registered) · or any existing Discord USER ID"}
         </p>
-        {!settings.discordBotToken && (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-zinc-500">
-            <AlertTriangle size={13} />
-            {lang === "ar"
-              ? "التعرف التلقائي مفعّل عبر رمز البوت من الإعدادات."
-              : "Automatic recognition enabled via the server bot token."}
-          </p>
-        )}
       </Card>
 
       {searched && !loading && !live && !officer && (

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 import { auditLog } from "@/lib/audit";
 
 // Auto-grade an exam attempt for a citizen. Mandatory ID verification:
@@ -7,12 +10,19 @@ import { auditLog } from "@/lib/audit";
 // in exam_attempts and writes an audit log entry.
 export async function POST(req: Request) {
   try {
-    const { examId, recruiterId, citizenId, citizenName, answers } = await req.json();
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 15, windowMs: 60_000 })) return tooMany();
+
+    const body = await req.json();
+    const examId = cleanString(body?.examId, 64);
     if (!examId) {
       return NextResponse.json({ ok: false, error: "examId مطلوب" }, { status: 400 });
     }
-    const recruiter = String(recruiterId || "").trim();
-    const citizen = String(citizenId || "").trim();
+    const recruiter = cleanString(body?.recruiterId, 40);
+    const citizen = cleanString(body?.citizenId, 40);
+    const citizenName = cleanString(body?.citizenName, 120);
     if (!/^\d{15,20}$/.test(recruiter) || !/^\d{15,20}$/.test(citizen)) {
       return NextResponse.json(
         { ok: false, error: "يجب إدخال معرّف ديسكورد صالح لكل من المجنّد والمتقدّم" },
@@ -20,7 +30,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const submitted: number[][] = Array.isArray(answers) ? answers : [];
+    const submitted: number[][] = Array.isArray(body?.answers)
+      ? body.answers
+          .map((a: unknown) => (Array.isArray(a) ? a.map(Number).filter((n: number) => Number.isFinite(n)) : []))
+          .slice(0, 300)
+      : [];
 
     const supabase = getSupabaseAdmin();
     const { data: exam } = await supabase
@@ -68,7 +82,7 @@ export async function POST(req: Request) {
       examId,
       recruiterId: recruiter,
       citizenId: citizen,
-      citizenName: String(citizenName || "").trim(),
+      citizenName,
       answers: submitted,
       score: earned,
       total,
@@ -87,7 +101,7 @@ export async function POST(req: Request) {
       executor: recruiter,
       executorName: "المجنّد",
       target: citizen,
-      targetName: String(citizenName || "").trim(),
+      targetName: citizenName,
       metadata: { examId, examTitle: exam.title, score: earned, total, percentage, passed, detail },
     });
 

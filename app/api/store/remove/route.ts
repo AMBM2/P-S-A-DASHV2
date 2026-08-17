@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireGrants } from "@/lib/admin-gate";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 import { auditLog } from "@/lib/audit";
 import type { PermissionKey } from "@/lib/types";
 
@@ -20,7 +23,15 @@ const ALLOWED_PERM: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { table, id, actor } = await req.json();
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 60, windowMs: 60_000 })) return tooMany();
+
+    const body = await req.json();
+    const table = cleanString(body?.table, 32);
+    const id = cleanString(body?.id, 128);
+    const actor = cleanString(body?.actor, 40);
     const needed = ALLOWED[table as string];
     if (!needed || !id) {
       return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
