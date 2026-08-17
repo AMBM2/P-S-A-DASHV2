@@ -1,7 +1,7 @@
 import { config } from "../config.js";
 import { supabase } from "../supabase.js";
 import { getGuild } from "./nickname.js";
-import { findRankByRoleName } from "../ranks.js";
+import { findRankByRoleName, getHighestRank } from "../ranks.js";
 
 // Maps Discord role IDs to the two patrol groups:
 //   "officer"  — قسم الضباط (command + officer division ranks)
@@ -48,24 +48,32 @@ export async function loadRoleCategories(client) {
   return map;
 }
 
-// Categorize the members currently connected to a voice channel.
+// Categorize the members currently connected to a voice channel and resolve
+// their military rank. Precise when the configured VOICE_ROOM_ID is visible;
+// otherwise falls back to ANY security member (officer/enlisted category role)
+// currently connected to a visible voice channel — so dispatch keeps mentioning
+// the sector members present even without access to the primary room.
 export async function scanVoiceRoom(client) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
 
-  const roomId = config.voiceRoomId || config.voiceRoomIds[0] || "";
-  if (!roomId) return { ok: false, error: "no-voice-room" };
-
-  const room = guild.channels.cache.get(roomId);
-  if (!room || !room.isVoiceBased()) {
-    return { ok: false, error: "voice-channel-not-found" };
-  }
-
   const categoryMap = await loadRoleCategories(client);
+  const roomId = config.voiceRoomId || config.voiceRoomIds[0] || "";
+  const room = roomId ? guild.channels.cache.get(roomId) : null;
+
+  // Collect currently-present members (primary room first, then any voice room).
+  const members = new Map();
+  if (room && room.isVoiceBased()) {
+    for (const member of room.members.values()) members.set(member.id, member);
+  } else {
+    for (const ch of guild.channels.cache.filter((c) => c.isVoiceBased()).values()) {
+      for (const member of ch.members.values()) members.set(member.id, member);
+    }
+  }
 
   let officers = [];
   let enlisted = [];
-  for (const member of room.members.values()) {
+  for (const member of members.values()) {
     let cat = null;
     for (const roleId of member.roles.cache.keys()) {
       const c = categoryMap.get(roleId);
@@ -75,26 +83,32 @@ export async function scanVoiceRoom(client) {
       }
       if (c === "enlisted" && !cat) cat = "enlisted";
     }
-    if (cat === "officer") officers.push(member);
-    else if (cat === "enlisted") enlisted.push(member);
+    if (!cat) continue;
+
+    const rank = getHighestRank(member);
+    const entry = {
+      id: member.id,
+      name: member.displayName || member.user.username,
+      mention: `<@${member.id}>`,
+      rankAr: rank?.titleAr || "",
+      rankLevel: rank?.level ?? -1,
+    };
+    if (cat === "officer") officers.push(entry);
+    else enlisted.push(entry);
   }
 
-  // Preserve voice order (most recently joined = end of collection).
+  const sortRank = (a, b) =>
+    (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name);
+  officers.sort(sortRank);
+  enlisted.sort(sortRank);
+
   return {
     ok: true,
-    roomId: room.id,
-    roomName: room.name,
+    roomId: room?.id || null,
+    roomName: room?.name || null,
     total: officers.length + enlisted.length,
-    officers: officers.map((m) => ({
-      id: m.id,
-      name: m.displayName || m.user.username,
-      mention: `<@${m.id}>`,
-    })),
-    enlisted: enlisted.map((m) => ({
-      id: m.id,
-      name: m.displayName || m.user.username,
-      mention: `<@${m.id}>`,
-    })),
+    officers,
+    enlisted,
   };
 }
 

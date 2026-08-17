@@ -12,11 +12,12 @@ const PLACEHOLDER_ENLISTED = "لا يوجد افراد متواجدين حالي
 // autonomous voice-room sorting live here and are never rendered on the UI.
 export function buildPatrolPayload(location, officers = [], enlisted = []) {
   const loc = String(location || "").trim();
+  const line = (m) => (m.rankAr ? `${m.rankAr} ` : "") + m.mention;
   const officerList = officers.length
-    ? officers.map((m) => m.mention).join("\n")
+    ? officers.map(line).join("\n")
     : PLACEHOLDER_OFFICERS;
   const enlistedList = enlisted.length
-    ? enlisted.map((m) => m.mention).join("\n")
+    ? enlisted.map(line).join("\n")
     : PLACEHOLDER_ENLISTED;
 
   return [
