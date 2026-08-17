@@ -15,6 +15,7 @@ import { dischargeMember } from "./services/discharge.js";
 import { badgePoolStats } from "./services/badge.js";
 import { getRoleCategories, setRoleCategory, syncDetectedCategories, getFieldMembers } from "./services/roleCategories.js";
 import { notifyCollege, enrollCadet } from "./services/college.js";
+import { sendAuditLog } from "./services/auditLog.js";
 import { reconcileMemberRoles } from "./services/rolesync.js";
 import { supabase } from "./supabase.js";
 
@@ -300,6 +301,22 @@ http
     if (req.method === "POST" && url.pathname === "/cadet/enroll") {
       const data = await enrollCadet(client, await readBody());
       return send(200, data);
+    }
+
+    // Audit log: forward a portal audit entry to the dedicated log channel.
+    if (req.method === "POST" && url.pathname === "/audit") {
+      const data = await sendAuditLog(client, await readBody());
+      return send(200, { ok: true, ...data });
+    }
+
+    // DEBUG: list guild channels (id / name / type) — remove after setup.
+    if (req.method === "GET" && url.pathname === "/channels") {
+      const guild = getGuild(client);
+      if (!guild) return send(200, { ok: false, error: "no-guild" });
+      const list = guild.channels.cache
+        .map((c) => ({ id: c.id, name: c.name, type: c.type }))
+        .sort((a, b) => a.type - b.type);
+      return send(200, { ok: true, guild: guild.name, count: list.length, channels: list });
     }
 
     return send(404, { ok: false, error: "not found" });

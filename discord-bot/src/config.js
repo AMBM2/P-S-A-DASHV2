@@ -31,6 +31,8 @@ export const config = {
   patrolChannelId: process.env.PATROL_CHANNEL_ID,
   loginChannelId: process.env.LOGIN_CHANNEL_ID,
   collegeChannelId: process.env.COLLEGE_CHANNEL_ID,
+  // Dedicated channel where the bot posts every audit-log entry (لوق العمليات).
+  auditChannelId: process.env.AUDIT_CHANNEL_ID || "1538885966025195601",
   botSecret: process.env.PATROL_BOT_SECRET || "",
   masterAdminId: process.env.MASTER_ADMIN_ID || "",
   masterAdminIds: (process.env.MASTER_ADMIN_IDS || "")
