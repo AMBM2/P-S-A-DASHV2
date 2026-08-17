@@ -1,5 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import { config } from "../config.js";
+import { supabase } from "../supabase.js";
 import { getGuild, buildNickname } from "./nickname.js";
 import { findRankByLevel } from "../ranks.js";
 
@@ -15,6 +16,18 @@ function findRoleForLevel(guild, level) {
   return null;
 }
 
+// Next free badge code (PSA-XXXX) derived from the officers table.
+export async function nextBadge() {
+  const { data, error } = await supabase.from("officers").select("badge");
+  if (error || !Array.isArray(data)) return "PSA-1000";
+  let max = 0;
+  for (const row of data) {
+    const m = String(row.badge || "").match(/PSA-(\d+)/i);
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  }
+  return `PSA-${max + 1}`;
+}
+
 // Assign a cadet/recruit role + the selected military rank roles + notify the
 // college channel when an application is approved and the applicant becomes a
 // Military College cadet. `ranks` is an array of Discord role IDs (selected on
@@ -23,7 +36,13 @@ export async function enrollCadet(client, cadet) {
   const guild = getGuild(client);
   if (!guild || !cadet?.discordId) return { ok: false, reason: "no-guild-or-discord" };
 
-  const results = { roleAssigned: false, ranksGranted: 0, notified: false, dmSent: false };
+  const results = {
+    roleAssigned: false,
+    officialRoleAssigned: false,
+    ranksGranted: 0,
+    notified: false,
+    dmSent: false,
+  };
   const selectedRoleIds = Array.isArray(cadet.ranks) ? cadet.ranks : [];
 
   try {
@@ -56,8 +75,19 @@ export async function enrollCadet(client, cadet) {
       }
     }
 
+    // 2b. Official member role (العضو الرسمي) — the permanent membership role.
+    const officialRole = guild.roles.cache.get(config.officialMemberRoleId || "");
+    if (officialRole && !member.roles.cache.has(officialRole.id)) {
+      try {
+        await member.roles.add(officialRole.id, "Official member (approved application)");
+        results.officialRoleAssigned = true;
+      } catch (e) {
+        console.warn("[college] official role add failed:", e.message);
+      }
+    }
+
     try {
-      const nick = buildNickname({ nameAr: cadet.nameAr, name: cadet.name, badge: "" });
+      const nick = buildNickname({ nameAr: cadet.nameAr, name: cadet.name, badge: cadet.badge || "" });
       if (member.nickname !== nick && member.manageable) {
         await member.setNickname(nick, "Military College enrollment");
       }

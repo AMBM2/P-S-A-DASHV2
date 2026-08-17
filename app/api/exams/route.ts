@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString, cleanObject } from "@/lib/sanitize";
@@ -40,7 +41,12 @@ export async function POST(req: Request) {
     if (!rateLimit(req, { limit: 20, windowMs: 60_000 })) return tooMany();
 
     const body = await req.json();
-    const actor = cleanString(body?.actor, 40);
+    const claimed = cleanString(body?.actor, 40);
+
+    // SECURITY: the actor is the server-verified cookie identity.
+    const gateActor = await requireActor(req, claimed || undefined);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
     const gate = await requirePermission(actor, PERMS.EXAMS_ADMIN);
     if (gate instanceof NextResponse) return gate;
 

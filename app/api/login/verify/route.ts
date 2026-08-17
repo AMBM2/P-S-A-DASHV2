@@ -2,6 +2,7 @@
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
+import { attachSessionCookie } from "@/lib/auth";
 
 export async function POST(req: Request) {
   if (checkOrigin(req)) {
@@ -42,7 +43,14 @@ export async function POST(req: Request) {
     } catch {
       data = { ok: false, error: "استجابة غير متوقعة من البوت — تأكد أنه متصل" };
     }
-    return NextResponse.json(data, { status: r.status });
+    // On success, mint a server-signed httpOnly session cookie bound to the
+    // verified Discord ID. Sensitive routes now trust THIS cookie as the actor
+    // identity instead of the client-supplied body field.
+    const res = NextResponse.json(data, { status: r.status });
+    if (data?.ok && userId) {
+      attachSessionCookie(res, userId);
+    }
+    return res;
   } catch (e: any) {
     return NextResponse.json(
       { ok: false, error: e?.message || "البوت غير متصل" },

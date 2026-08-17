@@ -63,15 +63,33 @@ export async function dischargeMember(client, officerId, opts = {}) {
         }
       } else {
         const military = rankRoleIds(guild);
-        const extra = [
-          config.recruitmentRoleId,
-          config.newRecruitRoleId,
-          config.onLeaveRoleId,
-          config.suspensionRoleId,
-          config.strikeWarningRoleId,
-        ].filter(Boolean);
+        const extra = new Set(
+          [
+            config.recruitmentRoleId,
+            config.newRecruitRoleId,
+            config.onLeaveRoleId,
+            config.suspensionRoleId,
+            config.strikeWarningRoleId,
+            config.officialMemberRoleId,
+            ...config.officerRoleIds,
+            ...config.enlistedRoleIds,
+          ].filter(Boolean)
+        );
+        // Include any role_categories entries marked officer/enlisted.
+        try {
+          const { data: cats } = await supabase
+            .from("role_categories")
+            .select("roleId, category");
+          if (Array.isArray(cats)) {
+            for (const c of cats) {
+              if (["officer", "enlisted"].includes(c.category) && c.roleId) extra.add(c.roleId);
+            }
+          }
+        } catch {
+          // role_categories table missing — best effort
+        }
         for (const roleId of member.roles.cache.keys()) {
-          if (military.has(roleId) || extra.includes(roleId)) toRemove.push(roleId);
+          if (military.has(roleId) || extra.has(roleId)) toRemove.push(roleId);
         }
       }
 

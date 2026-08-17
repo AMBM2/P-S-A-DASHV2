@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireGrants } from "@/lib/admin-gate";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
@@ -20,10 +21,16 @@ export async function POST(req: Request) {
     const submitted: number[] = Array.isArray(body?.answers)
       ? body.answers.filter((a: unknown) => typeof a === "number").slice(0, 300)
       : [];
+    const claimed = cleanString(body?.actor || "", 40);
+
+    // SECURITY: the actor is the server-verified cookie identity.
+    const gateActor = await requireActor(req, claimed || undefined);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
 
     // Exam scoring is an admin-only write to recruitment records.
-    const grantsGate = await requireGrants(cleanString(body?.actor || "", 40), ["hr", "executive", "master"]);
-    const permGate = await requirePermission(cleanString(body?.actor || "", 40), PERMS.RECRUITMENT_ADMIN);
+    const grantsGate = await requireGrants(actor, ["hr", "executive", "master"]);
+    const permGate = await requirePermission(actor, PERMS.RECRUITMENT_ADMIN);
     if (grantsGate instanceof NextResponse && permGate instanceof NextResponse) {
       return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
     }

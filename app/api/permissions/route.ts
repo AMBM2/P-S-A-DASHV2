@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requirePermission, PERMS, ALL_PERMS, MASTER_ADMIN_ID } from "@/lib/permissions";
+import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
@@ -38,7 +39,13 @@ export async function POST(req: Request) {
     if (!rateLimit(req, { limit: 30, windowMs: 60_000 })) return tooMany();
 
     const body = await req.json();
-    const actor = cleanString(body?.actor, 40);
+    const claimed = cleanString(body?.actor, 40);
+
+    // SECURITY: the actor is the server-verified cookie identity. Passing the
+    // master ID in the body is no longer enough — the cookie must prove it.
+    const gate = await requireActor(req, claimed || undefined);
+    if (gate instanceof NextResponse) return gate;
+    const actor = gate.actor;
     if (actor !== MASTER_ADMIN_ID) {
       return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
     }
@@ -94,7 +101,13 @@ export async function DELETE(req: Request) {
     if (!rateLimit(req, { limit: 30, windowMs: 60_000 })) return tooMany();
 
     const body = await req.json();
-    const actor = cleanString(body?.actor, 40);
+    const claimed = cleanString(body?.actor, 40);
+
+    // SECURITY: the actor is the server-verified cookie identity. Passing the
+    // master ID in the body is no longer enough — the cookie must prove it.
+    const gate = await requireActor(req, claimed || undefined);
+    if (gate instanceof NextResponse) return gate;
+    const actor = gate.actor;
     if (actor !== MASTER_ADMIN_ID) {
       return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
     }

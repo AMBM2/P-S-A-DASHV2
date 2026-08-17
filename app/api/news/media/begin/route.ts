@@ -4,6 +4,7 @@ import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
 import { requireGrants } from "@/lib/admin-gate";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { requireActor } from "@/lib/auth";
 import type { PermissionKey } from "@/lib/types";
 
 // Issue a one-time upload token for news media (images/videos). The browser
@@ -17,14 +18,19 @@ export async function POST(req: Request) {
     if (!rateLimit(req, { limit: 30, windowMs: 60_000 })) return tooMany();
 
     const body = await req.json();
-    const actor = cleanString(body?.actor, 40);
+    const claimed = cleanString(body?.actor, 40);
     const filename = cleanString(body?.filename, 120);
     const contentType = cleanString(body?.contentType, 128);
 
-    const legacy = await requireGrants(actor || "", ["executive"]);
+    // SECURITY: the actor is the server-verified cookie identity.
+    const gateActor = await requireActor(req, claimed || undefined);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
+
+    const legacy = await requireGrants(actor, ["executive"]);
     const delegated =
       legacy instanceof NextResponse
-        ? await requirePermission(actor || "", PERMS.NEWS_ADMIN as PermissionKey)
+        ? await requirePermission(actor, PERMS.NEWS_ADMIN as PermissionKey)
         : legacy;
     if (delegated instanceof NextResponse) return delegated;
 

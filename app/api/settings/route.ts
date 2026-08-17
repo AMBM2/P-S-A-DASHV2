@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireGrants } from "@/lib/admin-gate";
+import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanObject } from "@/lib/sanitize";
@@ -16,7 +17,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const value = cleanObject(body?.value, { maxLen: 500, maxKeys: 64 });
-    const actor = cleanObject(body?.actor, { maxLen: 40 }) as string;
+    const claimed = cleanObject(body?.actor, { maxLen: 40 }) as string;
+
+    // SECURITY: the actor is the server-verified cookie identity.
+    const gateActor = await requireActor(req, claimed || undefined);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
+
     if (!value || typeof value !== "object") {
       return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
     }

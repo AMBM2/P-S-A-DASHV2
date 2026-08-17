@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireGrants } from "@/lib/admin-gate";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
@@ -31,7 +32,13 @@ export async function POST(req: Request) {
     const body = await req.json();
     const table = cleanString(body?.table, 32);
     const id = cleanString(body?.id, 128);
-    const actor = cleanString(body?.actor, 40);
+    const claimed = cleanString(body?.actor, 40);
+
+    // SECURITY: the actor is the server-verified cookie identity.
+    const gateActor = await requireActor(req, claimed || undefined);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
+
     const needed = ALLOWED[table as string];
     if (!needed || !id) {
       return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });

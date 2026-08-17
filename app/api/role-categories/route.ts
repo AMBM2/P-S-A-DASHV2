@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import { requireGrants } from "@/lib/admin-gate";
+import { requireActor } from "@/lib/auth";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 
 const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");
 
@@ -6,7 +11,11 @@ const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/
 // / detected category, and update role -> officer/enlisted mappings.
 export async function GET(req: Request) {
   try {
-    const actor = req.headers.get("x-bot-actor") || "";
+    const claimed = req.headers.get("x-bot-actor") || "";
+    const gate = await requireActor(req, claimed || undefined);
+    if (gate instanceof NextResponse) return gate;
+    const actor = gate.actor;
+
     const r = await fetch(`${botUrl}/role-categories`, {
       headers: {
         "x-bot-secret": process.env.PATROL_BOT_SECRET || "",
@@ -28,7 +37,23 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { roleId, category, actor } = await req.json();
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 30, windowMs: 60_000 })) return tooMany();
+
+    const body = await req.json();
+    const roleId = cleanString(body?.roleId, 40);
+    const category = cleanString(body?.category, 24);
+    const claimed = cleanString(body?.actor || "", 40);
+
+    // SECURITY: the actor is the server-verified cookie identity.
+    const gateActor = await requireActor(req, claimed || undefined);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
+    const grantsGate = await requireGrants(actor, ["executive", "master"]);
+    if (grantsGate instanceof NextResponse) return grantsGate;
+
     if (!roleId) {
       return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
     }

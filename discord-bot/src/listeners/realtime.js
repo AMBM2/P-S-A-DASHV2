@@ -5,7 +5,7 @@ import { onboardRecruit, shouldOnboard } from "../services/recruitment.js";
 import { handlePromotion } from "../services/promotion.js";
 import { applyLeave } from "../services/leave.js";
 import { handleStrike } from "../services/strikes.js";
-import { notifyCollege } from "../services/college.js";
+import { notifyCollege, enrollCadet, nextBadge } from "../services/college.js";
 import { dischargeMember } from "../services/discharge.js";
 
 // Listens to Supabase Realtime across all bot tables.
@@ -64,15 +64,31 @@ export function startRealtime(client) {
     }
   });
 
-  // ---- applications: Military College notifications (feature 12) ----
+  // ---- applications: Military College notifications + approval enroll ----
   onTable("applications", async (payload) => {
-    if (payload.eventType !== "INSERT") return;
-    const res = await notifyCollege(client, payload.new);
-    console.log(
-      res.ok
-        ? `[college] notified channel ${res.channelId} for ${payload.new.nameAr || payload.new.name}`
-        : `[college] notify failed: ${res.reason}`
-    );
+    // New application -> notify the college channel (feature 12).
+    if (payload.eventType === "INSERT") {
+      const res = await notifyCollege(client, payload.new);
+      console.log(
+        res.ok
+          ? `[college] notified channel ${res.channelId} for ${payload.new.nameAr || payload.new.name}`
+          : `[college] notify failed: ${res.reason}`
+      );
+      return;
+    }
+
+    // Approved application -> enroll the cadet (defense in depth). The portal
+    // also calls /cadet/enroll, but this guarantees role+badge sync even if
+    // that HTTP call fails or is bypassed.
+    if (payload.eventType === "UPDATE") {
+      const rec = payload.new || {};
+      const old = payload.old || {};
+      if (rec.status === "approved" && old.status !== "approved" && rec.discordId) {
+        const badge = await nextBadge();
+        const res = await enrollCadet(client, { ...rec, ranks: rec.ranks || [], badge });
+        console.log(`[college] approved-enroll result:`, res);
+      }
+    }
   });
 
   // ---- patrols: field patrol dispatch (feature 6) ----

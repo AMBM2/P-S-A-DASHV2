@@ -51,6 +51,9 @@ export const config = {
   suspensionRoleId: process.env.SUSPENSION_ROLE_ID,
   adminRoleId: process.env.ADMIN_ROLE_ID,
   commandRoleId: process.env.COMMAND_ROLE_ID,
+  // Role granted to fully approved officers (رتبة العضو الرسمي). Granted by
+  // enrollCadet along with the badge nickname ([PSA-XXXX] Name).
+  officialMemberRoleId: process.env.OFFICIAL_MEMBER_ROLE_ID,
 
   // Categorized admin permissions (Discord role IDs → capability grants).
   executiveRoleId: process.env.EXECUTIVE_ROLE_ID || process.env.COMMAND_ROLE_ID,

@@ -1,12 +1,37 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { requireGrants } from "@/lib/admin-gate";
+import { requirePermission, PERMS } from "@/lib/permissions";
+import { requireActor } from "@/lib/auth";
+import { rateLimit, tooMany } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/csrf";
+import { cleanString } from "@/lib/sanitize";
 
 // Graduate a Military College cadet: promote to a full officer record assigned
 // to the main military department (realtime onboarding gives badge/nickname/DM;
 // roles-sync assigns the rank role).
 export async function POST(req: Request) {
   try {
-    const { cadetId, rankId } = await req.json();
+    if (checkOrigin(req)) {
+      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
+    }
+    if (!rateLimit(req, { limit: 40, windowMs: 60_000 })) return tooMany();
+
+    const body = await req.json();
+    const cadetId = cleanString(body?.cadetId, 64);
+    const rankId = cleanString(body?.rankId, 40);
+    const claimed = cleanString(body?.actor || "", 40);
+
+    // SECURITY: the actor is the server-verified cookie identity.
+    const gateActor = await requireActor(req, claimed || undefined);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
+    const grantsGate = await requireGrants(actor, ["hr", "executive", "master"]);
+    const permGate = await requirePermission(actor, PERMS.RECRUITMENT_ADMIN);
+    if (grantsGate instanceof NextResponse && permGate instanceof NextResponse) {
+      return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    }
+
     if (!cadetId) {
       return NextResponse.json({ ok: false, error: "cadetId مطلوب" }, { status: 400 });
     }

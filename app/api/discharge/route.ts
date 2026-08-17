@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireGrants } from "@/lib/admin-gate";
 import { requirePermission, PERMS } from "@/lib/permissions";
+import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
@@ -22,10 +23,16 @@ export async function POST(req: Request) {
     const reason = cleanString(body?.reason, 1000);
     const evidence = cleanString(body?.evidence, 1000);
     const blacklist = body?.blacklist === true;
-    const issuer = cleanString(body?.issuer, 40);
+    const claimed = cleanString(body?.issuer, 40);
     const roleIds = Array.isArray(body?.roleIds)
       ? body.roleIds.filter((r: unknown) => typeof r === "string").slice(0, 20)
       : [];
+
+    // SECURITY: identity comes from the server-verified session cookie, NOT the
+    // client-supplied body. A body issuer that mismatches the cookie is rejected.
+    const gate = await requireActor(req, claimed || undefined);
+    if (gate instanceof NextResponse) return gate;
+    const issuer = gate.actor;
 
     // Discharge is a destructive, irreversible action: Executive/Command
     // category grant OR an explicit DISCHARGE_ADMIN permission is required.
