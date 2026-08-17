@@ -1,4 +1,149 @@
 -- ============================================================================
+-- PSA PORTAL — MASTER SCHEMA (كل شي في ملف واحد)
+-- شامل: الجداول الأساسية + الصلاحيات + التوظيف + الكلية العسكرية + الاختبارات
+-- + سجل العمليات + الميدان + الحماية الكاملة. آمن للتشغيل المتكرر.
+-- الصق الكل في Supabase SQL Editor ثم اضغط Run.
+-- ============================================================================
+
+-- ============================================================================
+-- PUBLIC SECURITY PORTAL — Supabase Schema
+-- Run this entire script in the Supabase SQL Editor (Dashboard -> SQL -> New query)
+-- ============================================================================
+
+-- ============ NEWS ============
+create table if not exists public.news (
+  id uuid primary key default gen_random_uuid(),
+  title text not null default '',
+  "titleAr" text not null default '',
+  body text not null default '',
+  "bodyAr" text not null default '',
+  category text not null default 'general',
+  priority text not null default 'normal',
+  author text not null default '',
+  "publishedAt" timestamptz not null default now(),
+  pinned boolean not null default false,
+  status text not null default 'draft',
+  image text,
+  images jsonb default '[]'::jsonb,
+  views integer not null default 0,
+  "commentsEnabled" boolean not null default true
+);
+
+-- ============ OFFICERS ============
+create table if not exists public.officers (
+  id uuid primary key default gen_random_uuid(),
+  badge text not null default '',
+  callsign text not null default '',
+  name text not null default '',
+  "nameAr" text not null default '',
+  cid text,
+  "discordId" text,
+  "discordName" text,
+  "discordAvatar" text,
+  "rankId" text not null default '',
+  "departmentId" text not null default '',
+  status text not null default 'off-duty',
+  specialization text[] not null default '{}',
+  squad text,
+  "joinedAt" timestamptz not null default now(),
+  email text,
+  phone text,
+  "emergencyContact" text,
+  medals text[] not null default '{}',
+  "activityHours" integer not null default 0,
+  performance numeric not null default 0,
+  threats integer not null default 0,
+  "medicalClear" boolean not null default false
+);
+
+-- ============ LEADERS ============
+create table if not exists public.leaders (
+  id uuid primary key default gen_random_uuid(),
+  name text not null default '',
+  "nameAr" text not null default '',
+  title text not null default '',
+  "titleAr" text not null default '',
+  badge text not null default '',
+  mandate text not null default '',
+  "mandateAr" text not null default '',
+  rank text not null default '',
+  photo text
+);
+
+-- ============ CODES ============
+create table if not exists public.codes (
+  id uuid primary key default gen_random_uuid(),
+  code text not null default '',
+  meaning text not null default '',
+  "meaningAr" text not null default '',
+  type text not null default '10-code'
+);
+
+-- ============ SETTINGS (key/value) ============
+create table if not exists public.settings (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb
+);
+
+-- ============ AUDIT ============
+create table if not exists public.audit (
+  id uuid primary key default gen_random_uuid(),
+  actor text not null default '',
+  action text not null default '',
+  entity text not null default '',
+  timestamp timestamptz not null default now(),
+  ip text
+);
+
+-- ============ SESSIONS ============
+create table if not exists public.sessions (
+  id uuid primary key default gen_random_uuid(),
+  "user" text not null default '',
+  ip text not null default '',
+  action text not null default '',
+  at timestamptz not null default now()
+);
+
+-- ============ ROW LEVEL SECURITY ============
+alter table public.news enable row level security;
+alter table public.officers enable row level security;
+alter table public.leaders enable row level security;
+alter table public.codes enable row level security;
+alter table public.settings enable row level security;
+alter table public.audit enable row level security;
+alter table public.sessions enable row level security;
+
+-- Allow anonymous full access (public portal with client-side CRUD)
+do $$
+begin
+  if not exists (select from pg_policies where schemaname='public' and tablename='news' and policyname='anon_all_news') then
+    create policy "anon_all_news" on public.news for all to anon using (true) with check (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='officers' and policyname='anon_all_officers') then
+    create policy "anon_all_officers" on public.officers for all to anon using (true) with check (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='leaders' and policyname='anon_all_leaders') then
+    create policy "anon_all_leaders" on public.leaders for all to anon using (true) with check (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='codes' and policyname='anon_all_codes') then
+    create policy "anon_all_codes" on public.codes for all to anon using (true) with check (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='settings' and policyname='anon_all_settings') then
+    create policy "anon_all_settings" on public.settings for all to anon using (true) with check (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='audit' and policyname='anon_all_audit') then
+    create policy "anon_all_audit" on public.audit for all to anon using (true) with check (true);
+  end if;
+  if not exists (select from pg_policies where schemaname='public' and tablename='sessions' and policyname='anon_all_sessions') then
+    create policy "anon_all_sessions" on public.sessions for all to anon using (true) with check (true);
+  end if;
+end $$;
+
+-- ============================================================================
+-- الجزء الثاني: كل الإضافات (تم تصحيح ترتيب exam_questions)
+-- ============================================================================
+
+-- ============================================================================
 -- PSA PORTAL — EVERYTHING NEEDED (run once in Supabase SQL Editor)
 -- Covers: news images column, news_comments, login_codes, roles, strikes,
 --         leave_requests, patrols, RBAC (admins), recruitment (applications),
@@ -147,6 +292,29 @@ create table if not exists public.exams (
   "createdAt" timestamptz not null default now(),
   "updatedAt" timestamptz not null default now()
 );
+-- >>> [REORDERED] exam_questions CREATE moved here, before the ALTERs below <<<
+-- ============================================================================
+-- 15) Exam questions (Military College entrance / recruitment exam)
+-- ============================================================================
+create table if not exists public.exam_questions (
+  id uuid primary key default gen_random_uuid(),
+  prompt text not null default '',
+  choices jsonb not null default '[]'::jsonb,
+  "correctIndex" integer not null default 0,
+  points integer not null default 1,
+  active boolean not null default true,
+  "createdAt" timestamptz not null default now()
+);
+
+-- Seed a few default questions (edit/replace from the admin panel or SQL)
+insert into public.exam_questions (prompt, choices, "correctIndex", points)
+select * from (values
+  ('ما هو الإجراء الأول عند اكتشاف حريق داخل المقر؟', '["إخلاء الموقع فوراً والاتصال بالدفاع المدني","التقاط صور للمكان","الانتظار حتى تصل فرق الإطفاء","فتح النوافذ للتهوية"]'::jsonb, 0, 2),
+  ('ما معنى "المسؤولية المشتركة" في العمل الأمني؟', '["توزيع المهام والتعاون لتحقيق الأهداف المشتركة","تحميل فرد واحد كل المسؤوليات","تفويض كل المهام للقيادة","تجاهل الأخطاء الفردية"]'::jsonb, 0, 2),
+  ('أي التصرفات التالية يتعارض مع قواعد السرية؟', '["مشاركة معلومات سرية مع أشخاص غير مخوّلين","حفظ المستندات في أماكن آمنة","اتباع إجراءات التشفير المعتمدة","الإبلاغ عن أي تسريب محتمل"]'::jsonb, 0, 2),
+  ('ما أهمية التواصل الفعال داخل الفريق؟', '["يقلل من سوء الفهم ويسرّع تنفيذ المهام","يزيد من الازدحام","لا يؤثر على الأداء","يتطلب وقتاً إضافياً فقط"]'::jsonb, 0, 2)
+) as t(prompt, choices, "correctIndex", points)
+where not exists (select 1 from public.exam_questions);
 
 -- Extend the existing exam_questions table with the full builder schema.
 -- The legacy college questions (examId null) keep working unchanged.
@@ -232,7 +400,7 @@ begin
     select 1 from information_schema.columns
     where table_schema = 'public' and table_name = 'applications' and column_name = 'nameAr'
   ) then
-    drop table public.applications;
+    drop table public.applications cascade;
   end if;
 end $$;
 
@@ -267,28 +435,6 @@ create table if not exists public.cadets (
   "createdAt" timestamptz not null default now()
 );
 
--- ============================================================================
--- 15) Exam questions (Military College entrance / recruitment exam)
--- ============================================================================
-create table if not exists public.exam_questions (
-  id uuid primary key default gen_random_uuid(),
-  prompt text not null default '',
-  choices jsonb not null default '[]'::jsonb,
-  "correctIndex" integer not null default 0,
-  points integer not null default 1,
-  active boolean not null default true,
-  "createdAt" timestamptz not null default now()
-);
-
--- Seed a few default questions (edit/replace from the admin panel or SQL)
-insert into public.exam_questions (prompt, choices, "correctIndex", points)
-select * from (values
-  ('ما هو الإجراء الأول عند اكتشاف حريق داخل المقر؟', '["إخلاء الموقع فوراً والاتصال بالدفاع المدني","التقاط صور للمكان","الانتظار حتى تصل فرق الإطفاء","فتح النوافذ للتهوية"]'::jsonb, 0, 2),
-  ('ما معنى "المسؤولية المشتركة" في العمل الأمني؟', '["توزيع المهام والتعاون لتحقيق الأهداف المشتركة","تحميل فرد واحد كل المسؤوليات","تفويض كل المهام للقيادة","تجاهل الأخطاء الفردية"]'::jsonb, 0, 2),
-  ('أي التصرفات التالية يتعارض مع قواعد السرية؟', '["مشاركة معلومات سرية مع أشخاص غير مخوّلين","حفظ المستندات في أماكن آمنة","اتباع إجراءات التشفير المعتمدة","الإبلاغ عن أي تسريب محتمل"]'::jsonb, 0, 2),
-  ('ما أهمية التواصل الفعال داخل الفريق؟', '["يقلل من سوء الفهم ويسرّع تنفيذ المهام","يزيد من الازدحام","لا يؤثر على الأداء","يتطلب وقتاً إضافياً فقط"]'::jsonb, 0, 2)
-) as t(prompt, choices, "correctIndex", points)
-where not exists (select 1 from public.exam_questions);
 
 -- ===== RLS policies =====
 alter table public.admins enable row level security;

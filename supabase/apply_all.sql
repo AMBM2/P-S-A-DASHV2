@@ -1,5 +1,8 @@
+﻿-- PSA PORTAL — APPLY ALL (corrected ordering: exam_questions created before its ALTERs)
+-- Generated from setup_all.sql. Safe to re-run.
+
 -- ============================================================================
--- PSA PORTAL — EVERYTHING NEEDED (run once in Supabase SQL Editor)
+-- PSA PORTAL â€” EVERYTHING NEEDED (run once in Supabase SQL Editor)
 -- Covers: news images column, news_comments, login_codes, roles, strikes,
 --         leave_requests, patrols, RBAC (admins), recruitment (applications),
 --         military college (cadets, exam_questions), psa-media storage bucket,
@@ -75,7 +78,7 @@ alter table public.leave_requests enable row level security;
 alter table public.news_comments enable row level security;
 alter table public.login_codes enable row level security;
 
--- 7) Field patrols (جدول الميدان) + officers.fieldPoints
+-- 7) Field patrols (Ø¬Ø¯ÙˆÙ„ Ø§Ù„Ù…ÙŠØ¯Ø§Ù†) + officers.fieldPoints
 alter table public.officers add column if not exists "fieldPoints" integer not null default 0;
 alter table public.officers add column if not exists "dischargedAt" timestamptz;
 alter table public.officers add column if not exists "dischargedBy" text;
@@ -103,10 +106,10 @@ begin
 end $$;
 
 -- ============================================================================
--- 21) PERMISSION DELEGATES — dynamic role & permission management (الصلاحيات)
+-- 21) PERMISSION DELEGATES â€” dynamic role & permission management (Ø§Ù„ØµÙ„Ø§Ø­ÙŠØ§Øª)
 --     The Master Super Admin (hardcoded 897450827353063505) delegates granular
 --     sub-permissions to users by Discord ID. The anon key CANNOT read/write
---     this table — only the portal server routes (service role key).
+--     this table â€” only the portal server routes (service role key).
 -- ============================================================================
 create table if not exists public.permissions (
   id uuid primary key default gen_random_uuid(),
@@ -119,7 +122,7 @@ create table if not exists public.permissions (
 );
 
 -- ============================================================================
--- 22) SYSTEM AUDIT LOGS (لوق العمليات) — every critical action on the site.
+-- 22) SYSTEM AUDIT LOGS (Ù„ÙˆÙ‚ Ø§Ù„Ø¹Ù…Ù„ÙŠØ§Øª) â€” every critical action on the site.
 -- ============================================================================
 create table if not exists public.audit_logs (
   id uuid primary key default gen_random_uuid(),
@@ -134,8 +137,8 @@ create table if not exists public.audit_logs (
 );
 
 -- ============================================================================
--- 23) MILITARY EXAM BUILDER & CITIZEN RECRUITMENT PORTAL (الاختبارات)
---     exams → exam_questions → exam_attempts (detailed candidate score reports).
+-- 23) MILITARY EXAM BUILDER & CITIZEN RECRUITMENT PORTAL (Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª)
+--     exams â†’ exam_questions â†’ exam_attempts (detailed candidate score reports).
 -- ============================================================================
 create table if not exists public.exams (
   id uuid primary key default gen_random_uuid(),
@@ -147,6 +150,29 @@ create table if not exists public.exams (
   "createdAt" timestamptz not null default now(),
   "updatedAt" timestamptz not null default now()
 );
+-- >>> [REORDERED] exam_questions CREATE moved here, before the ALTERs below <<<
+-- ============================================================================
+-- 15) Exam questions (Military College entrance / recruitment exam)
+-- ============================================================================
+create table if not exists public.exam_questions (
+  id uuid primary key default gen_random_uuid(),
+  prompt text not null default '',
+  choices jsonb not null default '[]'::jsonb,
+  "correctIndex" integer not null default 0,
+  points integer not null default 1,
+  active boolean not null default true,
+  "createdAt" timestamptz not null default now()
+);
+
+-- Seed a few default questions (edit/replace from the admin panel or SQL)
+insert into public.exam_questions (prompt, choices, "correctIndex", points)
+select * from (values
+  ('Ù…Ø§ Ù‡Ùˆ Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡ Ø§Ù„Ø£ÙˆÙ„ Ø¹Ù†Ø¯ Ø§ÙƒØªØ´Ø§Ù Ø­Ø±ÙŠÙ‚ Ø¯Ø§Ø®Ù„ Ø§Ù„Ù…Ù‚Ø±ØŸ', '["Ø¥Ø®Ù„Ø§Ø¡ Ø§Ù„Ù…ÙˆÙ‚Ø¹ ÙÙˆØ±Ø§Ù‹ ÙˆØ§Ù„Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¯ÙØ§Ø¹ Ø§Ù„Ù…Ø¯Ù†ÙŠ","Ø§Ù„ØªÙ‚Ø§Ø· ØµÙˆØ± Ù„Ù„Ù…ÙƒØ§Ù†","Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø± Ø­ØªÙ‰ ØªØµÙ„ ÙØ±Ù‚ Ø§Ù„Ø¥Ø·ÙØ§Ø¡","ÙØªØ­ Ø§Ù„Ù†ÙˆØ§ÙØ° Ù„Ù„ØªÙ‡ÙˆÙŠØ©"]'::jsonb, 0, 2),
+  ('Ù…Ø§ Ù…Ø¹Ù†Ù‰ "Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„ÙŠØ© Ø§Ù„Ù…Ø´ØªØ±ÙƒØ©" ÙÙŠ Ø§Ù„Ø¹Ù…Ù„ Ø§Ù„Ø£Ù…Ù†ÙŠØŸ', '["ØªÙˆØ²ÙŠØ¹ Ø§Ù„Ù…Ù‡Ø§Ù… ÙˆØ§Ù„ØªØ¹Ø§ÙˆÙ† Ù„ØªØ­Ù‚ÙŠÙ‚ Ø§Ù„Ø£Ù‡Ø¯Ø§Ù Ø§Ù„Ù…Ø´ØªØ±ÙƒØ©","ØªØ­Ù…ÙŠÙ„ ÙØ±Ø¯ ÙˆØ§Ø­Ø¯ ÙƒÙ„ Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„ÙŠØ§Øª","ØªÙÙˆÙŠØ¶ ÙƒÙ„ Ø§Ù„Ù…Ù‡Ø§Ù… Ù„Ù„Ù‚ÙŠØ§Ø¯Ø©","ØªØ¬Ø§Ù‡Ù„ Ø§Ù„Ø£Ø®Ø·Ø§Ø¡ Ø§Ù„ÙØ±Ø¯ÙŠØ©"]'::jsonb, 0, 2),
+  ('Ø£ÙŠ Ø§Ù„ØªØµØ±ÙØ§Øª Ø§Ù„ØªØ§Ù„ÙŠØ© ÙŠØªØ¹Ø§Ø±Ø¶ Ù…Ø¹ Ù‚ÙˆØ§Ø¹Ø¯ Ø§Ù„Ø³Ø±ÙŠØ©ØŸ', '["Ù…Ø´Ø§Ø±ÙƒØ© Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø³Ø±ÙŠØ© Ù…Ø¹ Ø£Ø´Ø®Ø§Øµ ØºÙŠØ± Ù…Ø®ÙˆÙ‘Ù„ÙŠÙ†","Ø­ÙØ¸ Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª ÙÙŠ Ø£Ù…Ø§ÙƒÙ† Ø¢Ù…Ù†Ø©","Ø§ØªØ¨Ø§Ø¹ Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª Ø§Ù„ØªØ´ÙÙŠØ± Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø©","Ø§Ù„Ø¥Ø¨Ù„Ø§Øº Ø¹Ù† Ø£ÙŠ ØªØ³Ø±ÙŠØ¨ Ù…Ø­ØªÙ…Ù„"]'::jsonb, 0, 2),
+  ('Ù…Ø§ Ø£Ù‡Ù…ÙŠØ© Ø§Ù„ØªÙˆØ§ØµÙ„ Ø§Ù„ÙØ¹Ø§Ù„ Ø¯Ø§Ø®Ù„ Ø§Ù„ÙØ±ÙŠÙ‚ØŸ', '["ÙŠÙ‚Ù„Ù„ Ù…Ù† Ø³ÙˆØ¡ Ø§Ù„ÙÙ‡Ù… ÙˆÙŠØ³Ø±Ù‘Ø¹ ØªÙ†ÙÙŠØ° Ø§Ù„Ù…Ù‡Ø§Ù…","ÙŠØ²ÙŠØ¯ Ù…Ù† Ø§Ù„Ø§Ø²Ø¯Ø­Ø§Ù…","Ù„Ø§ ÙŠØ¤Ø«Ø± Ø¹Ù„Ù‰ Ø§Ù„Ø£Ø¯Ø§Ø¡","ÙŠØªØ·Ù„Ø¨ ÙˆÙ‚ØªØ§Ù‹ Ø¥Ø¶Ø§ÙÙŠØ§Ù‹ ÙÙ‚Ø·"]'::jsonb, 0, 2)
+) as t(prompt, choices, "correctIndex", points)
+where not exists (select 1 from public.exam_questions);
 
 -- Extend the existing exam_questions table with the full builder schema.
 -- The legacy college questions (examId null) keep working unchanged.
@@ -178,7 +204,7 @@ alter table public.audit_logs enable row level security;
 alter table public.exams enable row level security;
 alter table public.exam_attempts enable row level security;
 
--- NOTE: intentionally NO anon policies — these tables are only reachable
+-- NOTE: intentionally NO anon policies â€” these tables are only reachable
 -- through the portal server routes / the bot (SUPABASE_SERVICE_ROLE_KEY).
 
 -- Realtime for the exam system + audit logs.
@@ -194,7 +220,7 @@ begin
 end $$;
 
 -- ============================================================================
--- 12) RBAC — admins (master / admin / recruitment). Master can delegate access.
+-- 12) RBAC â€” admins (master / admin / recruitment). Master can delegate access.
 --     NOTE: replace the seed Discord user ID with the Master Super Admin's ID.
 -- ============================================================================
 create table if not exists public.admins (
@@ -209,7 +235,7 @@ create table if not exists public.admins (
 -- Only the hardcoded Master Super Admin (897450827353063505) may hold the
 -- 'master' role. Any other user is demoted to 'executive' (safety net).
 insert into public.admins ("userId", role, note)
-values ('897450827353063505', 'master', 'مسؤول إدارة الموقع كاملة')
+values ('897450827353063505', 'master', 'Ù…Ø³Ø¤ÙˆÙ„ Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…ÙˆÙ‚Ø¹ ÙƒØ§Ù…Ù„Ø©')
 on conflict ("userId") do update set role = 'master';
 
 update public.admins
@@ -217,10 +243,10 @@ update public.admins
  where role = 'master' and "userId" <> '897450827353063505';
 
 -- ============================================================================
--- 13) Recruitment applications (public survey form → pending review)
+-- 13) Recruitment applications (public survey form â†’ pending review)
 --     Migrate FIRST: an old empty experiment table used legacy snake_case
 --     columns (created_at, discord_id, reviewed_by, unit) with no name/ranks.
---     It is incompatible with the portal — drop it so the canonical table
+--     It is incompatible with the portal â€” drop it so the canonical table
 --     below is created with the camelCase schema the app expects.
 -- ============================================================================
 do $$
@@ -267,28 +293,6 @@ create table if not exists public.cadets (
   "createdAt" timestamptz not null default now()
 );
 
--- ============================================================================
--- 15) Exam questions (Military College entrance / recruitment exam)
--- ============================================================================
-create table if not exists public.exam_questions (
-  id uuid primary key default gen_random_uuid(),
-  prompt text not null default '',
-  choices jsonb not null default '[]'::jsonb,
-  "correctIndex" integer not null default 0,
-  points integer not null default 1,
-  active boolean not null default true,
-  "createdAt" timestamptz not null default now()
-);
-
--- Seed a few default questions (edit/replace from the admin panel or SQL)
-insert into public.exam_questions (prompt, choices, "correctIndex", points)
-select * from (values
-  ('ما هو الإجراء الأول عند اكتشاف حريق داخل المقر؟', '["إخلاء الموقع فوراً والاتصال بالدفاع المدني","التقاط صور للمكان","الانتظار حتى تصل فرق الإطفاء","فتح النوافذ للتهوية"]'::jsonb, 0, 2),
-  ('ما معنى "المسؤولية المشتركة" في العمل الأمني؟', '["توزيع المهام والتعاون لتحقيق الأهداف المشتركة","تحميل فرد واحد كل المسؤوليات","تفويض كل المهام للقيادة","تجاهل الأخطاء الفردية"]'::jsonb, 0, 2),
-  ('أي التصرفات التالية يتعارض مع قواعد السرية؟', '["مشاركة معلومات سرية مع أشخاص غير مخوّلين","حفظ المستندات في أماكن آمنة","اتباع إجراءات التشفير المعتمدة","الإبلاغ عن أي تسريب محتمل"]'::jsonb, 0, 2),
-  ('ما أهمية التواصل الفعال داخل الفريق؟', '["يقلل من سوء الفهم ويسرّع تنفيذ المهام","يزيد من الازدحام","لا يؤثر على الأداء","يتطلب وقتاً إضافياً فقط"]'::jsonb, 0, 2)
-) as t(prompt, choices, "correctIndex", points)
-where not exists (select 1 from public.exam_questions);
 
 -- ===== RLS policies =====
 alter table public.admins enable row level security;
@@ -356,14 +360,14 @@ begin
 end $$;
 
 -- ============================================================================
--- 16) Recruitment streamlining — remove the Unit field entirely
+-- 16) Recruitment streamlining â€” remove the Unit field entirely
 --     (applicants are assigned to the main military department on approval).
 -- ============================================================================
 alter table public.applications drop column if exists unit;
 alter table public.cadets drop column if exists unit;
 
 -- ============================================================================
--- 17) Advanced discharge — type, evidence, blacklist + discharge audit log
+-- 17) Advanced discharge â€” type, evidence, blacklist + discharge audit log
 -- ============================================================================
 alter table public.officers add column if not exists "dischargeType" text;
 alter table public.officers add column if not exists "dischargeReason" text;
@@ -403,7 +407,7 @@ begin
 end $$;
 
 -- ============================================================================
--- 18) Role categories — maps Discord role IDs to OFFICER / ENLISTED groups for
+-- 18) Role categories â€” maps Discord role IDs to OFFICER / ENLISTED groups for
 --     the autonomous member sorting in patrol dispatch. Managed from the
 --     Web Dashboard settings tab (role_categories table).
 -- ============================================================================
@@ -425,7 +429,7 @@ begin
 end $$;
 
 -- ============================================================================
--- 20) SECURITY HARDENING — revoke full anon access (the anon key is public in
+-- 20) SECURITY HARDENING â€” revoke full anon access (the anon key is public in
 --     the browser bundle, so anon must NEVER write or read sensitive tables).
 --     After this: anon may only SELECT the public display tables below.
 --     All writes now go through the portal API routes / the bot using the
@@ -484,7 +488,7 @@ end $$;
 
 -- NOTE: admins, applications, cadets, exam_questions, strikes, leave_requests,
 -- blacklist, discharges, role_categories, login_codes, audit and patrols have
--- NO anon policy anymore — the anon key cannot touch them. The bot and the
+-- NO anon policy anymore â€” the anon key cannot touch them. The bot and the
 -- portal server routes (SUPABASE_SERVICE_ROLE_KEY) are their only access path.
 
 -- ============================================================================
@@ -512,7 +516,7 @@ end $$;
 
 -- ============================================================================
 -- 24) STRICT ROW-LEVEL SECURITY ENFORCEMENT (defense in depth)
---     Run AFTER sections 1-23. Idempotent — safe to re-run.
+--     Run AFTER sections 1-23. Idempotent â€” safe to re-run.
 -- ============================================================================
 
 -- Public display tables: keep anon SELECT (via the pub_read_* policies) but
@@ -529,7 +533,7 @@ revoke insert, update, delete on public.news, public.officers,
 grant select on public.news, public.officers,
       public.leaders, public.codes, public.settings to anon;
 
--- Sensitive tables: full revoke — neither anon nor authenticated can read or
+-- Sensitive tables: full revoke â€” neither anon nor authenticated can read or
 -- write them. Only the bot and the portal server routes (SUPABASE_SERVICE_ROLE_KEY)
 -- may access these. Skips tables that are not migrated yet.
 do $$
@@ -559,3 +563,12 @@ begin
       pol, (select tablename from pg_policies where policyname = pol and schemaname='public'));
   end loop;
 end $$;
+
+-- Verification (informational â€” should return 0 rows):
+-- any anon-permissive WRITE/ALL policy left in the public schema.
+select policyname, tablename, cmd, roles
+  from pg_policies
+ where schemaname = 'public'
+   and permissive
+   and (cmd = 'all' or cmd in ('insert','update','delete'))
+   and 'anon'::name = any(roles);

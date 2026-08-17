@@ -70,6 +70,7 @@ export async function getFieldMembers(client) {
   try {
     members = await guild.members.fetch();
   } catch (e) {
+    if (fieldCache.data) return fieldCache.data;
     return { ok: false, error: e.message };
   }
 
@@ -103,7 +104,7 @@ export async function getFieldMembers(client) {
     list.push({
       id: member.id,
       name: member.displayName || member.user.username,
-      avatar: member.user.displayAvatarURL({ size: 96 }),
+      avatar: member.user.displayAvatarURL({ size: 128 }),
       rankAr: rank?.titleAr || "",
       rankLevel: rank?.level ?? -1,
       category: cat,

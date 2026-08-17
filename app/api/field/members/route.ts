@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { requireGrants } from "@/lib/admin-gate";
+import { requireActor } from "@/lib/auth";
 
 // Public Security member list (connected / offline + ranks) for the field
 // dispatch UI. Gated to field command + executive + master.
 export async function GET(req: Request) {
   try {
-    const actor = new URL(req.url).searchParams.get("actor") || "";
+    // SECURITY: the actor is the server-verified cookie identity — never trust
+    // a query param for authorization.
+    const gateActor = await requireActor(req);
+    if (gateActor instanceof NextResponse) return gateActor;
+    const actor = gateActor.actor;
+
     const gate = await requireGrants(actor, ["field", "executive", "master"]);
     if (gate instanceof NextResponse) return gate;
 

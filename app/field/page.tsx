@@ -138,7 +138,7 @@ export default function FieldPage() {
     setMembersLoading(true);
     setMembersError("");
     try {
-      const r = await fetch(`/api/field/members?actor=${encodeURIComponent(session?.discordId || "")}`, { cache: "no-store" });
+      const r = await fetch(`/api/field/members`, { cache: "no-store" });
       const d = await r.json();
       if (d.ok && Array.isArray(d.members)) {
         setMembers(d.members as FieldMember[]);

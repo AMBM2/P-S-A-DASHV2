@@ -85,7 +85,7 @@ export async function requestLoginCode(client, rawUserId) {
   }
 }
 
-export async function verifyLoginCode(rawUserId, rawCode) {
+export async function verifyLoginCode(client, rawUserId, rawCode) {
   const userId = String(rawUserId || "").trim();
   const code = String(rawCode || "").trim();
 

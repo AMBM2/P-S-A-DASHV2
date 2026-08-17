@@ -228,7 +228,7 @@ http
     // Admin login: verify the code the user received in DM
     if (req.method === "POST" && url.pathname === "/login/verify") {
       const { userId, code } = await readBody();
-      const data = await verifyLoginCode(userId, code);
+      const data = await verifyLoginCode(client, userId, code);
       return send(200, data);
     }
 
