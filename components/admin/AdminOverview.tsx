@@ -22,7 +22,6 @@ import {
 import { useStore } from "@/lib/store";
 import { Button, Card, Stat, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
-import { getMasterKey, setMasterKey, meetsPolicy } from "@/lib/security";
 import { uploadMedia, isYoutubeUrl } from "@/lib/upload";
 import type { AuditEntry } from "@/lib/types";
 
@@ -70,8 +69,6 @@ export function AdminOverview() {
   const { news, officers, codes, leaders, audit, settings, session, updateSettings, exportJSON, resetData, logout } = useStore();
   const lang = settings.language;
   const [confirmReset, setConfirmReset] = useState(false);
-  const [newKey, setNewKey] = useState("");
-  const [keyMsg, setKeyMsg] = useState("");
   const [uploading, setUploading] = useState(false);
   const [welcomeVideoMsg, setWelcomeVideoMsg] = useState("");
   const [anthemUploading, setAnthemUploading] = useState(false);
@@ -162,16 +159,6 @@ export function AdminOverview() {
     e.target.value = "";
   };
 
-  const changeKey = () => {
-    if (!meetsPolicy(newKey)) {
-      setKeyMsg("المفتاح يجب أن يكون 24 حرفاً على الأقل ويتضمن أحرف كبيرة وصغيرة وأرقاماً ورموزاً خاصة");
-      return;
-    }
-    setMasterKey(newKey);
-    setNewKey("");
-    setKeyMsg("تم تحديث مفتاح الوصول بنجاح");
-  };
-
   return (
     <div>
       <div className="mb-6 flex flex-wrap gap-3">
@@ -244,34 +231,6 @@ export function AdminOverview() {
           </div>
         </Card>
       </div>
-
-      <Card className="mt-4">
-        <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
-          <KeyRound size={18} /> الأمان: مفتاح الوصول السري
-        </h3>
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <input
-              type="password"
-              value={newKey}
-              onChange={(e) => setNewKey(e.target.value)}
-              placeholder="مفتاح جديد (24 حرفاً على الأقل)"
-              dir="ltr"
-              className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
-            />
-            <Button variant="outline" onClick={changeKey}>تحديث المفتاح</Button>
-          </div>
-          {keyMsg && <p className="text-xs text-rose-300">{keyMsg}</p>}
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-zinc-500">
-              {settings.language === "ar"
-                ? "يتطلب المفتاح: 24+ حرفاً، أحرف كبيرة وصغيرة، أرقام، ورموز خاصة"
-                : "Key requires: 24+ chars, upper/lowercase, numbers, and symbols"}
-            </p>
-            <Button variant="danger" onClick={logout}>تسجيل الخروج</Button>
-          </div>
-        </div>
-      </Card>
 
       <Card className="mt-4">
         <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
