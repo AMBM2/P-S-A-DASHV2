@@ -290,6 +290,28 @@ begin
 end $$;
 
 -- ============================================================================
+-- 18) Role categories — maps Discord role IDs to OFFICER / ENLISTED groups for
+--     the autonomous member sorting in patrol dispatch. Managed from the
+--     Web Dashboard settings tab (role_categories table).
+-- ============================================================================
+create table if not exists public.role_categories (
+  id uuid primary key default gen_random_uuid(),
+  "roleId" text unique not null default '',
+  category text not null default 'officer',
+  name text not null default '',
+  "updatedAt" timestamptz not null default now()
+);
+
+alter table public.role_categories enable row level security;
+
+do $$
+begin
+  if not exists (select from pg_policies where schemaname='public' and tablename='role_categories' and policyname='anon_all_role_categories') then
+    create policy "anon_all_role_categories" on public.role_categories for all to anon using (true) with check (true);
+  end if;
+end $$;
+
+-- ============================================================================
 -- Storage bucket "psa-media" (public) for anthem / welcome / news media
 -- ============================================================================
 insert into storage.buckets (id, name, public)

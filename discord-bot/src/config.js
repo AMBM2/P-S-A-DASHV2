@@ -57,6 +57,20 @@ export const config = {
     .map((s) => s.trim())
     .filter(Boolean),
 
+  // Primary voice room scanned during patrol dispatch (defaults to first of voiceRoomIds).
+  voiceRoomId: process.env.VOICE_ROOM_ID || "",
+
+  // Fallback role categories for member sorting when role_categories is empty
+  // (prefer the role_categories table; env is only a seed).
+  officerRoleIds: (process.env.OFFICER_ROLE_IDS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+  enlistedRoleIds: (process.env.ENLISTED_ROLE_IDS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+
   // Only sync members who hold this role (empty = sync everyone)
   memberRoleId: process.env.MEMBER_ROLE_ID || null,
 

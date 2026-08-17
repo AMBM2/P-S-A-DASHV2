@@ -14,6 +14,7 @@ import {
   UserX,
   ShieldCheck,
   Loader2,
+  Settings2,
 } from "lucide-react";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { NewsManager } from "@/components/admin/NewsManager";
@@ -26,6 +27,7 @@ import { RecruitmentManager } from "@/components/admin/RecruitmentManager";
 import { CollegeManager } from "@/components/admin/CollegeManager";
 import { DischargeManager } from "@/components/admin/DischargeManager";
 import { AdminsManager } from "@/components/admin/AdminsManager";
+import { RoleCategoriesManager } from "@/components/admin/RoleCategoriesManager";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@/lib/store";
@@ -48,6 +50,7 @@ const TABS: {
   { id: "college", label: "الكلية العسكرية", icon: GraduationCap, cats: ["master", "executive", "hr"] },
   { id: "discharge", label: "الفصل", icon: UserX, cats: ["master", "executive"] },
   { id: "admins", label: "الصلاحيات", icon: ShieldCheck, cats: ["master"] },
+  { id: "settings", label: "الإعدادات", icon: Settings2, cats: ["master", "executive"] },
 ];
 
 export default function AdminPage() {
@@ -200,6 +203,7 @@ export default function AdminPage() {
             {tab === "college" && <CollegeManager />}
             {tab === "discharge" && <DischargeManager />}
             {tab === "admins" && <AdminsManager />}
+            {tab === "settings" && <RoleCategoriesManager />}
           </div>
         </>
       )}

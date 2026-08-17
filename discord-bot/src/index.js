@@ -10,9 +10,10 @@ import { expireLeaves } from "./services/leave.js";
 import { extractAllMembers } from "./services/members.js";
 import { requestLoginCode, verifyLoginCode } from "./services/login.js";
 import { dispatchPatrol } from "./services/patrol.js";
-import { resolveAccessLevel, bootstrapMaster } from "./services/rbac.js";
+import { resolveAccessLevel, bootstrapMaster, hasGrant } from "./services/rbac.js";
 import { dischargeMember } from "./services/discharge.js";
 import { badgePoolStats } from "./services/badge.js";
+import { getRoleCategories, setRoleCategory, syncDetectedCategories } from "./services/roleCategories.js";
 import { notifyCollege, enrollCadet } from "./services/college.js";
 import { reconcileMemberRoles } from "./services/rolesync.js";
 import { supabase } from "./supabase.js";
@@ -250,6 +251,36 @@ http
     if (req.method === "GET" && url.pathname === "/badges") {
       const data = await badgePoolStats();
       return send(200, { ok: true, ...data });
+    }
+
+    // Role categories (الفرز التلقائي): full listing for the settings UI
+    if (req.method === "GET" && url.pathname === "/role-categories") {
+      const actor = await resolveAccessLevel(client, req.headers["x-bot-actor"] || "");
+      if (!actor.grants.length) return send(200, { ok: false, error: "forbidden" });
+      const data = await getRoleCategories(client);
+      return send(200, data);
+    }
+
+    // Role categories: set/remove a role -> officer/enlisted mapping
+    if (req.method === "POST" && url.pathname === "/role-categories") {
+      const { roleId, category } = await readBody();
+      const actor = await resolveAccessLevel(client, req.headers["x-bot-actor"] || "");
+      if (!hasGrant(actor.grants, "executive")) {
+        return send(200, { ok: false, error: "forbidden" });
+      }
+      if (!roleId) return send(200, { ok: false, error: "missing roleId" });
+      const data = await setRoleCategory(roleId, category);
+      return send(200, data);
+    }
+
+    // Role categories: auto-configure from detected military ranks
+    if (req.method === "POST" && url.pathname === "/role-categories/sync") {
+      const actor = await resolveAccessLevel(client, req.headers["x-bot-actor"] || "");
+      if (!hasGrant(actor.grants, "executive")) {
+        return send(200, { ok: false, error: "forbidden" });
+      }
+      const data = await syncDetectedCategories(client);
+      return send(200, data);
     }
 
     // Military College notification (new application / approval)
