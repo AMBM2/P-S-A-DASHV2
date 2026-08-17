@@ -1,6 +1,7 @@
 import { config } from "../config.js";
 import { getGuild } from "./nickname.js";
-import { scanVoiceRoom } from "./roleCategories.js";
+import { loadRoleCategories } from "./roleCategories.js";
+import { getHighestRank } from "../ranks.js";
 
 const ESC = "\u001b";
 
@@ -48,9 +49,9 @@ export function buildPatrolPayload(location, officers = [], enlisted = []) {
   ].join("\n");
 }
 
-// Field Patrol dispatch: scan the configured voice room, sort connected members
-// by their roles into officers/enlisted, then post the rich payload to the
-// dedicated PATROL_CHANNEL_ID (fallback: first text channel).
+// Field Patrol dispatch: mention the selected Public Security members (by ID)
+// sorted into officers/enlisted with their ranks, then post the rich payload
+// to the dedicated PATROL_CHANNEL_ID (fallback: first text channel).
 export async function dispatchPatrol(client, payload) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
@@ -63,11 +64,43 @@ export async function dispatchPatrol(client, payload) {
   }
 
   const location = payload.location || payload.nameAr || payload.name || "";
+  const memberIds = Array.isArray(payload.memberIds) ? payload.memberIds : [];
 
-  // Autonomous voice-room scan + role sorting (officers / enlisted).
-  const scan = await scanVoiceRoom(client);
-  const officers = scan.ok ? scan.officers : [];
-  const enlisted = scan.ok ? scan.enlisted : [];
+  // Resolve the selected members into officers / enlisted with their ranks.
+  const categoryMap = await loadRoleCategories(client);
+  const sortRank = (a, b) =>
+    (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name);
+
+  const officers = [];
+  const enlisted = [];
+  for (const id of memberIds) {
+    const member = guild.members.cache.get(id);
+    if (!member) continue;
+
+    let cat = null;
+    for (const roleId of member.roles.cache.keys()) {
+      const c = categoryMap.get(roleId);
+      if (c === "officer") {
+        cat = "officer";
+        break;
+      }
+      if (c === "enlisted" && !cat) cat = "enlisted";
+    }
+    if (!cat) continue;
+
+    const rank = getHighestRank(member);
+    const entry = {
+      id: member.id,
+      name: member.displayName || member.user.username,
+      mention: `<@${member.id}>`,
+      rankAr: rank?.titleAr || "",
+      rankLevel: rank?.level ?? -1,
+    };
+    if (cat === "officer") officers.push(entry);
+    else enlisted.push(entry);
+  }
+  officers.sort(sortRank);
+  enlisted.sort(sortRank);
 
   const content = buildPatrolPayload(location, officers, enlisted);
 
@@ -81,7 +114,6 @@ export async function dispatchPatrol(client, payload) {
     ok: true,
     sentTo: target.id,
     location,
-    room: scan.ok ? { id: scan.roomId, name: scan.roomName, total: scan.total } : null,
     officers: officers.length,
     enlisted: enlisted.length,
   };

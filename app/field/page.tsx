@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Send,
@@ -14,6 +14,11 @@ import {
   Shield,
   Siren,
   Crosshair,
+  UserCheck,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+  Volume2,
 } from "lucide-react";
 import { Button, Card, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
@@ -53,6 +58,16 @@ const GROUPS: { name: string; items: string[] }[] = [
   { name: "المواقع الحساسة", items: ["البيت المهجور", "بيق ماركت", "ميني ماركت فقط"] },
 ];
 
+type FieldMember = {
+  id: string;
+  name: string;
+  rankAr: string;
+  rankLevel: number;
+  category: "officer" | "enlisted";
+  connected: boolean;
+  inVoice: boolean;
+};
+
 export default function FieldPage() {
   const { session, officers } = useStore();
   const [grants, setGrants] = useState<Grant[]>([]);
@@ -60,6 +75,11 @@ export default function FieldPage() {
   const [location, setLocation] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState("");
+
+  const [members, setMembers] = useState<FieldMember[]>([]);
+  const [membersLoading, setMembersLoading] = useState(true);
+  const [membersError, setMembersError] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!session) {
@@ -89,6 +109,49 @@ export default function FieldPage() {
   }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const allowed = grants.some((g) => FIELD_GRANTS.includes(g));
+
+  const loadMembers = async () => {
+    setMembersLoading(true);
+    setMembersError("");
+    try {
+      const r = await fetch(`/api/field/members?actor=${encodeURIComponent(session?.discordId || "")}`, { cache: "no-store" });
+      const d = await r.json();
+      if (d.ok && Array.isArray(d.members)) {
+        setMembers(d.members as FieldMember[]);
+      } else {
+        setMembersError(d.error || "تعذر جلب قائمة الأعضاء");
+      }
+    } catch {
+      setMembersError("تعذر الاتصال بالبوت");
+    } finally {
+      setMembersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (allowed && session) loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, session?.discordId]);
+
+  const toggle = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    setPhase("idle");
+    setError("");
+  };
+
+  const selectAllConnected = () => {
+    setSelected(new Set(members.filter((m) => m.connected).map((m) => m.id)));
+  };
+  const clearAll = () => setSelected(new Set());
+
+  const connected = useMemo(() => members.filter((m) => m.connected), [members]);
+  const offline = useMemo(() => members.filter((m) => !m.connected), [members]);
+
   const onDuty = officers.filter((o) => o.status === "on-duty").length;
   const onDutyOfficers = officers.filter(
     (o) => o.status === "on-duty" && RANKS.find((r) => r.id === o.rankId)?.division === "officer"
@@ -108,7 +171,7 @@ export default function FieldPage() {
       const res = await fetch("/api/field", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location }),
+        body: JSON.stringify({ location, memberIds: [...selected] }),
       });
       const data = await res.json();
       if (data.ok) {
@@ -122,6 +185,54 @@ export default function FieldPage() {
       setPhase("error");
       setError("تعذر الاتصال بالخادم");
     }
+  };
+
+  const MemberRow = ({ m }: { m: FieldMember }) => {
+    const active = selected.has(m.id);
+    return (
+      <button
+        onClick={() => toggle(m.id)}
+        className={cn(
+          "flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-right transition-all duration-150",
+          active
+            ? "border-gold-300/70 bg-gold-400/15"
+            : "border-gold-400/12 bg-obsidian-900/40 hover:border-gold-400/40"
+        )}
+      >
+        <span
+          className={cn(
+            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all",
+            active ? "border-gold-300 bg-gold-300 text-obsidian-900" : "border-zinc-600"
+          )}
+        >
+          {active && <UserCheck size={12} />}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-bold text-white">{m.name}</span>
+          <span className="block truncate text-xs font-semibold gold-text">
+            {m.rankAr || "—"} · {m.category === "officer" ? "ضابط" : "فرد"}
+          </span>
+        </span>
+        <span className="flex shrink-0 items-center gap-1.5">
+          {m.inVoice && (
+            <span className="flex items-center gap-1 rounded-full border border-gold-400/30 bg-gold-400/10 px-1.5 py-0.5 text-[10px] text-gold-200">
+              <Volume2 size={10} /> روم
+            </span>
+          )}
+          <span
+            className={cn(
+              "flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
+              m.connected
+                ? "border border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+                : "border border-zinc-600/40 bg-zinc-500/10 text-zinc-500"
+            )}
+          >
+            {m.connected ? <Wifi size={10} /> : <WifiOff size={10} />}
+            {m.connected ? "متصل" : "غير متصل"}
+          </span>
+        </span>
+      </button>
+    );
   };
 
   if (!session) {
@@ -176,7 +287,7 @@ export default function FieldPage() {
                 </h1>
               </div>
               <p className="text-sm text-zinc-400">
-                اختر موقع السيناريو ثم أرسل التنبيه المنسّق إلى قناة الميدان في ديسكورد
+                اختر الموقع، حدّد أعضاء الأمن العام المطلوب استدعاؤهم، ثم أرسل التنبيه
               </p>
             </div>
           </div>
@@ -215,123 +326,197 @@ export default function FieldPage() {
         </div>
       </div>
 
-      {/* Tactical scenario grid */}
-      <Card className="p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 font-display text-lg font-bold gold-text">
-            <Crosshair size={18} /> اختر موقع السيناريو
-          </h2>
-          {location ? (
-            <span className="rounded-full border border-gold-400/40 bg-gold-400/15 px-3 py-1 text-xs font-bold text-gold-200">
-              المحدد: {location}
-            </span>
-          ) : (
-            <span className="text-xs text-zinc-500">لم يتم اختيار موقع بعد</span>
-          )}
-        </div>
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Tactical scenario grid */}
+        <Card className="lg:col-span-3">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold gold-text">
+              <Crosshair size={18} /> اختر موقع السيناريو
+            </h2>
+            {location ? (
+              <span className="rounded-full border border-gold-400/40 bg-gold-400/15 px-3 py-1 text-xs font-bold text-gold-200">
+                المحدد: {location}
+              </span>
+            ) : (
+              <span className="text-xs text-zinc-500">لم يتم اختيار موقع بعد</span>
+            )}
+          </div>
 
-        <div className="space-y-5">
-          {GROUPS.map((g) => (
-            <div key={g.name}>
-              <div className="mb-2 flex items-center gap-2">
-                <span className="h-px w-5 bg-gradient-to-l from-gold-400/60 to-transparent" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-500">
-                  {g.name}
-                </span>
-                <span className="h-px flex-1 bg-gold-400/10" />
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                {g.items.map((l) => {
-                  const active = location === l;
-                  return (
-                    <button
-                      key={l}
-                      onClick={() => {
-                        setLocation(l);
-                        setPhase("idle");
-                        setError("");
-                      }}
-                      className={cn(
-                        "group relative flex items-center gap-2 overflow-hidden rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200",
-                        active
-                          ? "border-gold-300/80 bg-gold-400/20 text-gold-100 shadow-[0_0_18px_-4px_rgba(var(--accent-rgb),0.6)]"
-                          : "border-gold-400/15 bg-obsidian-900/50 text-zinc-300 hover:border-gold-400/50 hover:bg-gold-400/5"
-                      )}
-                    >
-                      <Target
-                        size={14}
+          <div className="space-y-5">
+            {GROUPS.map((g) => (
+              <div key={g.name}>
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="h-px w-5 bg-gradient-to-l from-gold-400/60 to-transparent" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+                    {g.name}
+                  </span>
+                  <span className="h-px flex-1 bg-gold-400/10" />
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
+                  {g.items.map((l) => {
+                    const active = location === l;
+                    return (
+                      <button
+                        key={l}
+                        onClick={() => {
+                          setLocation(l);
+                          setPhase("idle");
+                          setError("");
+                        }}
                         className={cn(
-                          "shrink-0 transition-colors",
-                          active ? "text-gold-200" : "text-zinc-500 group-hover:text-gold-300"
+                          "group relative flex items-center gap-2 overflow-hidden rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                          active
+                            ? "border-gold-300/80 bg-gold-400/20 text-gold-100 shadow-[0_0_18px_-4px_rgba(var(--accent-rgb),0.6)]"
+                            : "border-gold-400/15 bg-obsidian-900/50 text-zinc-300 hover:border-gold-400/50 hover:bg-gold-400/5"
                         )}
-                      />
-                      <span className="truncate">{l}</span>
-                      {active && (
-                        <span className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-gold-300 to-transparent" />
-                      )}
-                    </button>
-                  );
-                })}
+                      >
+                        <Target
+                          size={14}
+                          className={cn(
+                            "shrink-0 transition-colors",
+                            active ? "text-gold-200" : "text-zinc-500 group-hover:text-gold-300"
+                          )}
+                        />
+                        <span className="truncate">{l}</span>
+                        {active && (
+                          <span className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-gold-300 to-transparent" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Dispatch console */}
-        <div className="mt-6 border-t border-gold-400/15 pt-5">
-          <div className="flex flex-col items-stretch gap-3 sm:flex-row">
-            <Button
-              onClick={submit}
-              disabled={phase === "sending"}
-              className="flex-1 py-3.5 text-base font-extrabold tracking-wide"
+          {/* Dispatch console */}
+          <div className="mt-6 border-t border-gold-400/15 pt-5">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row">
+              <Button
+                onClick={submit}
+                disabled={phase === "sending"}
+                className="flex-1 py-3.5 text-base font-extrabold tracking-wide"
+              >
+                {phase === "sending" ? (
+                  <>
+                    <Loader2 size={18} className="ml-2 animate-spin" />
+                    جارٍ إرسال التنبيه...
+                  </>
+                ) : (
+                  <>
+                    <Send size={18} className="ml-2" />
+                    إرسال تنبيه الميدان ({selected.size})
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <motion.div
+              initial={false}
+              animate={{
+                height: phase === "idle" ? 0 : "auto",
+                opacity: phase === "idle" ? 0 : 1,
+              }}
+              transition={{ duration: 0.25 }}
+              className="overflow-hidden"
             >
-              {phase === "sending" ? (
-                <>
-                  <Loader2 size={18} className="ml-2 animate-spin" />
-                  جارٍ إرسال التنبيه...
-                </>
-              ) : (
-                <>
-                  <Send size={18} className="ml-2" />
-                  إرسال تنبيه الميدان
-                </>
+              {phase === "sent" && (
+                <div className="mt-4 flex items-start gap-3 rounded-xl border border-gold-300/40 bg-gold-400/10 p-4 text-sm text-gold-100">
+                  <CheckCircle2 size={20} className="mt-0.5 shrink-0" />
+                  <div>
+                    <div className="font-bold">تم إرسال التنبيه بنجاح</div>
+                    <div className="mt-0.5 text-xs text-zinc-300">
+                      نُشر أمر التحرك لموقع <span className="font-bold text-gold-200">{location}</span> في قناة الميدان مع منشن
+                      الأعضاء المحددين ورتبهم.
+                    </div>
+                  </div>
+                </div>
               )}
+              {phase === "error" && (
+                <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+                  <AlertTriangle size={20} className="mt-0.5 shrink-0" />
+                  <div className="font-bold">فشل التنبيه: {error}</div>
+                </div>
+              )}
+            </motion.div>
+
+            {phase === "idle" && !location && (
+              <EmptyState message="اختر موقعاً من الشبكة أعلاه وحدّد الأعضاء ثم اضغط زر الإرسال" />
+            )}
+          </div>
+        </Card>
+
+        {/* Member selection panel */}
+        <Card className="lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold gold-text">
+              <Users size={18} /> أعضاء الأمن العام
+            </h2>
+            <Button variant="outline" onClick={loadMembers} disabled={membersLoading} className="!px-2.5 !py-1.5 !text-xs">
+              {membersLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
             </Button>
           </div>
 
-          <motion.div
-            initial={false}
-            animate={{
-              height: phase === "idle" ? 0 : "auto",
-              opacity: phase === "idle" ? 0 : 1,
-            }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden"
-          >
-            {phase === "sent" && (
-              <div className="mt-4 flex items-start gap-3 rounded-xl border border-gold-300/40 bg-gold-400/10 p-4 text-sm text-gold-100">
-                <CheckCircle2 size={20} className="mt-0.5 shrink-0" />
-                <div>
-                  <div className="font-bold">تم إرسال التنبيه بنجاح</div>
-                  <div className="mt-0.5 text-xs text-zinc-300">
-                    نُشر أمر التحرك لموقع <span className="font-bold text-gold-200">{location}</span> في قناة الميدان — تم نصح الضباط والأفراد المتواجدين بالانتقال فوراً.
-                  </div>
+          {membersError ? (
+            <div className="mb-3 rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">
+              {membersError}
+            </div>
+          ) : null}
+
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={selectAllConnected} className="!px-2.5 !py-1.5 !text-xs">
+              <Wifi size={13} /> اختيار المتصلين ({connected.length})
+            </Button>
+            <Button variant="ghost" onClick={clearAll} className="!px-2.5 !py-1.5 !text-xs">
+              إلغاء الكل
+            </Button>
+            <span className="mr-auto text-xs text-zinc-500">
+              المحدد: <span className="font-bold text-gold-200">{selected.size}</span>
+            </span>
+          </div>
+
+          {membersLoading ? (
+            <div className="flex items-center justify-center gap-2 py-10 text-zinc-400">
+              <Loader2 size={18} className="animate-spin" /> جارٍ جلب القائمة من ديسكورد...
+            </div>
+          ) : members.length === 0 ? (
+            <EmptyState message="لا يوجد أعضاء بتصنيفات أمنية — حدّد التصنيفات من الإعدادات" />
+          ) : (
+            <div className="max-h-[28rem] space-y-4 overflow-y-auto pr-1 scrollbar-thin">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-300" />
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                    متصلون ({connected.length})
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {connected.map((m) => (
+                    <MemberRow key={m.id} m={m} />
+                  ))}
                 </div>
               </div>
-            )}
-            {phase === "error" && (
-              <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
-                <AlertTriangle size={20} className="mt-0.5 shrink-0" />
-                <div className="font-bold">فشل التنبيه: {error}</div>
-              </div>
-            )}
-          </motion.div>
 
-          {phase === "idle" && !location && (
-            <EmptyState message="اختر موقعاً من الشبكة أعلاه ثم اضغط زر الإرسال" />
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <WifiOff size={12} className="text-zinc-500" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                    غير متصلين ({offline.length})
+                  </span>
+                </div>
+                <div className="space-y-1.5 opacity-80">
+                  {offline.map((m) => (
+                    <MemberRow key={m.id} m={m} />
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

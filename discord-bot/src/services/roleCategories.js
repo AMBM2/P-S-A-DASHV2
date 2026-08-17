@@ -48,31 +48,37 @@ export async function loadRoleCategories(client) {
   return map;
 }
 
-// Categorize the members currently connected to a voice channel and resolve
-// their military rank. Precise when the configured VOICE_ROOM_ID is visible;
-// otherwise falls back to ANY security member (officer/enlisted category role)
-// currently connected to a visible voice channel — so dispatch keeps mentioning
-// the sector members present even without access to the primary room.
-export async function scanVoiceRoom(client) {
+// Short-lived cache so the field UI doesn't hammer Discord's members.fetch
+// (large guild → opcode 8 rate limits). 25s TTL keeps presence reasonably fresh.
+let fieldCache = { at: 0, data: null };
+const FIELD_CACHE_TTL_MS = 25_000;
+
+// Full Public Security member list for the field dispatch UI: every guild
+// member holding an officer/enlisted category role, with rank + presence
+// (connected = online/idle/dnd, plus whether they are in a voice channel).
+export async function getFieldMembers(client) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
 
-  const categoryMap = await loadRoleCategories(client);
-  const roomId = config.voiceRoomId || config.voiceRoomIds[0] || "";
-  const room = roomId ? guild.channels.cache.get(roomId) : null;
-
-  // Collect currently-present members (primary room first, then any voice room).
-  const members = new Map();
-  if (room && room.isVoiceBased()) {
-    for (const member of room.members.values()) members.set(member.id, member);
-  } else {
-    for (const ch of guild.channels.cache.filter((c) => c.isVoiceBased()).values()) {
-      for (const member of ch.members.values()) members.set(member.id, member);
-    }
+  if (fieldCache.data && Date.now() - fieldCache.at < FIELD_CACHE_TTL_MS) {
+    return fieldCache.data;
   }
 
-  let officers = [];
-  let enlisted = [];
+  const categoryMap = await loadRoleCategories(client);
+
+  let members;
+  try {
+    members = await guild.members.fetch();
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+
+  const voiceIds = new Set();
+  for (const ch of guild.channels.cache.filter((c) => c.isVoiceBased()).values()) {
+    for (const m of ch.members.values()) voiceIds.add(m.id);
+  }
+
+  const list = [];
   for (const member of members.values()) {
     let cat = null;
     for (const roleId of member.roles.cache.keys()) {
@@ -86,30 +92,25 @@ export async function scanVoiceRoom(client) {
     if (!cat) continue;
 
     const rank = getHighestRank(member);
-    const entry = {
+    const status = member.presence?.status || "offline";
+    list.push({
       id: member.id,
       name: member.displayName || member.user.username,
-      mention: `<@${member.id}>`,
       rankAr: rank?.titleAr || "",
       rankLevel: rank?.level ?? -1,
-    };
-    if (cat === "officer") officers.push(entry);
-    else enlisted.push(entry);
+      category: cat,
+      connected: status !== "offline",
+      inVoice: voiceIds.has(member.id),
+    });
   }
 
-  const sortRank = (a, b) =>
-    (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name);
-  officers.sort(sortRank);
-  enlisted.sort(sortRank);
+  list.sort(
+    (a, b) => (b.rankLevel ?? -1) - (a.rankLevel ?? -1) || a.name.localeCompare(b.name)
+  );
 
-  return {
-    ok: true,
-    roomId: room?.id || null,
-    roomName: room?.name || null,
-    total: officers.length + enlisted.length,
-    officers,
-    enlisted,
-  };
+  const result = { ok: true, members: list };
+  fieldCache = { at: Date.now(), data: result };
+  return result;
 }
 
 // Full role listing for the settings UI: every guild role with its rank info,

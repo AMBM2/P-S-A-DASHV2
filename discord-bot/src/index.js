@@ -13,7 +13,7 @@ import { dispatchPatrol } from "./services/patrol.js";
 import { resolveAccessLevel, bootstrapMaster, hasGrant } from "./services/rbac.js";
 import { dischargeMember } from "./services/discharge.js";
 import { badgePoolStats } from "./services/badge.js";
-import { getRoleCategories, setRoleCategory, syncDetectedCategories } from "./services/roleCategories.js";
+import { getRoleCategories, setRoleCategory, syncDetectedCategories, getFieldMembers } from "./services/roleCategories.js";
 import { notifyCollege, enrollCadet } from "./services/college.js";
 import { reconcileMemberRoles } from "./services/rolesync.js";
 import { supabase } from "./supabase.js";
@@ -108,6 +108,13 @@ http
     if (req.method === "POST" && url.pathname === "/dispatch") {
       const body = await readBody();
       const data = await dispatchPatrol(client, body);
+      return send(200, data);
+    }
+
+    // Public Security member list (connected / offline, with ranks) for the
+    // field dispatch UI — the user selects who to mention, no room scanning.
+    if (req.method === "GET" && url.pathname === "/field/members") {
+      const data = await getFieldMembers(client);
       return send(200, data);
     }
 
