@@ -207,6 +207,7 @@ export default function FieldPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          actor: session?.discordId || "",
           location,
           memberIds: [...selected],
           ...(imageUrl ? { imageUrl } : {}),

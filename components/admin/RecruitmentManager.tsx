@@ -79,7 +79,7 @@ export function RecruitmentManager() {
       const r = await fetch("/api/approval", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ applicationId: app.id, decision }),
+        body: JSON.stringify({ applicationId: app.id, decision, reviewedBy: session?.discordId || "" }),
       });
       await r.json();
       await load();

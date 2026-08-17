@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Loader2, CheckCircle2, AlertTriangle, FileQuestion } from "lucide-react";
 import { Button, Badge } from "@/components/ui";
 import { cn } from "@/lib/format";
+import { useStore } from "@/lib/store";
 import type { ExamQuestion } from "@/lib/types";
 
 // Military College entrance exam — reviewer selects the applicant's answers,
@@ -15,6 +16,7 @@ export function ExamPanel({
   applicationId: string;
   onScored?: (score: number, total: number) => void;
 }) {
+  const { session } = useStore();
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [answers, setAnswers] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +56,7 @@ export function ExamPanel({
       const r = await fetch("/api/exam/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ applicationId, answers }),
+        body: JSON.stringify({ applicationId, answers, actor: session?.discordId || "" }),
       });
       const d = await r.json();
       setResult({ ok: d.ok, score: d.score ?? 0, total: d.total ?? 0, error: d.error });
