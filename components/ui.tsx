@@ -118,7 +118,7 @@ export function Field({
 }
 
 export const inputClass =
-  "w-full rounded-lg border border-gold-400/20 bg-obsidian-800/80 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-gold-300/70 focus:ring-2 focus:ring-gold-400/35";
+  "w-full rounded-xl border border-gold-400/20 bg-obsidian-800/80 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition duration-150 focus:border-gold-300/80 focus:ring-2 focus:ring-gold-400/40 focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2),0_0_22px_-8px_rgba(var(--accent-rgb),0.55)]";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClass, props.className)} />;
@@ -145,7 +145,7 @@ export function Select({
       >
         {children}
       </select>
-      <span className="pointer-events-none absolute inset-y-0 left-0 flex w-9 items-center justify-center border-l border-gold-400/15 text-gold-300/80">
+      <span className="pointer-events-none absolute inset-y-0 left-0 flex w-9 items-center justify-center rounded-l-xl border-l border-gold-400/15 text-gold-300/80">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="6 9 12 15 18 9" />
         </svg>

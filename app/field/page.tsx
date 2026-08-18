@@ -78,7 +78,7 @@ type FieldMember = {
 };
 
 export default function FieldPage() {
-  const { session, officers } = useStore();
+  const { session, officers, logout } = useStore();
   const [grants, setGrants] = useState<Grant[]>([]);
   const [resolving, setResolving] = useState(true);
   const [location, setLocation] = useState("");
@@ -104,6 +104,26 @@ export default function FieldPage() {
     };
     reader.readAsDataURL(file);
   };
+
+  useEffect(() => {
+    if (!session) {
+      setResolving(false);
+      return;
+    }
+    // Stale httpOnly cookie → every protected call 401s. Drop the local
+    // session so the user sees the login prompt instead of confusing errors.
+    let active = true;
+    fetch("/api/session", { cache: "no-store" })
+      .then((r) => {
+        if (active && r.status === 401) logout();
+      })
+      .catch(() => {
+        if (active) logout();
+      });
+    return () => {
+      active = false;
+    };
+  }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!session) {

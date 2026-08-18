@@ -74,6 +74,26 @@ export default function AdminPage() {
   const [resolving, setResolving] = useState(false);
   const [levelError, setLevelError] = useState<string | null>(null);
 
+  // If the httpOnly session cookie is missing/invalid (e.g. it was signed with
+  // an older secret), the localStorage session alone is useless — every admin
+  // write would fail with 401. Detect it up-front and force a fresh login.
+  useEffect(() => {
+    if (!session) return;
+    let active = true;
+    (async () => {
+      try {
+        const r = await fetch("/api/session", { cache: "no-store" });
+        if (active && r.status === 401) logout();
+      } catch {
+        if (active) logout();
+      }
+    })();
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.discordId]);
+
   useEffect(() => {
     if (!session) return;
     let active = true;

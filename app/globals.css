@@ -361,7 +361,7 @@ textarea:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #17181d inset;
   -webkit-text-fill-color: #f3f1ea;
   caret-color: #f3f1ea;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
 }
 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
   color-scheme: dark;
@@ -370,4 +370,24 @@ input[type="checkbox"],
 input[type="radio"] {
   accent-color: var(--accent);
   background-color: transparent;
+}
+
+/* ============ SOFT ROUNDED FORM FIELDS ============ */
+/* Every text field should read as a gentle rounded rectangle, not a sharp box.
+   This lifts any raw input/select/textarea still using rounded-lg (8px) up to a
+   softer 0.75rem curve, and gives raw fields a golden focus glow to match the
+   shared Input component in components/ui.tsx. */
+input.rounded-lg,
+select.rounded-lg,
+textarea.rounded-lg {
+  border-radius: 0.75rem;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.2),
+    0 0 22px -8px rgba(var(--accent-rgb), 0.5);
 }

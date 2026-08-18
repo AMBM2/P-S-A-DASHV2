@@ -10,7 +10,7 @@ import { cn } from "@/lib/format";
 type MemberRole = { id: string; name: string; rankAr?: string | null };
 
 export function DischargeManager() {
-  const { officers, session } = useStore();
+  const { officers, session, logout } = useStore();
   const [q, setQ] = useState("");
   const [discharging, setDischarging] = useState<string | null>(null);
   const [type, setType] = useState("");
@@ -110,6 +110,13 @@ export function DischargeManager() {
         }),
       });
       const d = await r.json();
+      if (r.status === 401) {
+        // Session cookie expired/invalid — force a fresh login instead of
+        // leaving the user staring at a confusing "unauthenticated" error.
+        logout();
+        setMsg({ ok: false, text: "انتهت الجلسة — سجّل الدخول من جديد" });
+        return;
+      }
       setMsg({
         ok: d.ok,
         text: d.ok
