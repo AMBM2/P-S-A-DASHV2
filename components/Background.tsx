@@ -1,7 +1,7 @@
 import { ParticlesBackground } from "@/components/ParticlesBackground";
 
 export function Background() {
-  const dust = Array.from({ length: 28 }, (_, i) => i);
+  const dust = Array.from({ length: 16 }, (_, i) => i);
   const stars = Array.from({ length: 70 }, (_, i) => {
     const gold = i % 5 === 0;
     return {

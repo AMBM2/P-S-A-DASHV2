@@ -48,8 +48,8 @@ export function Navbar() {
       {/* Official ministry strip */}
       <div className="glass-strong sticky top-0 z-40 border-b border-gold-400/20">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-400/60 to-transparent" />
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex max-w-[1500px] items-center gap-4 px-4 py-3">
+          <div className="flex shrink-0 items-center gap-3">
             <Link href="/" className="group flex items-center gap-3">
               <div className="relative flex h-12 w-12 items-center justify-center">
                 <div className="absolute inset-0 rounded-full border border-gold-400/35 bg-gold-400/5 shadow-[0_0_22px_rgba(217,180,91,0.35)]" />
@@ -74,7 +74,9 @@ export function Navbar() {
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-7 lg:flex">
+          {/* Horizontal carousel-style nav: scrolls within the bar when items
+              overflow; native scrollbar hidden; edges fade to hint more items. */}
+          <nav className="scrollbar-hide nav-fade-mask relative hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto py-1 md:flex">
             {NAV.map((item) => {
               const active = pathname === item.href;
               return (
@@ -82,7 +84,7 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "group relative flex items-center gap-1.5 py-1.5 text-sm font-medium transition-colors",
+                    "group relative flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active ? "text-gold-200" : "text-zinc-400 hover:text-gold-200"
                   )}
                 >
@@ -90,7 +92,7 @@ export function Navbar() {
                   {item.label}
                   <span
                     className={cn(
-                      "absolute inset-x-0 -bottom-1 h-[2px] rounded-full bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 transition-all duration-300",
+                      "absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 transition-all duration-300",
                       active ? "opacity-100" : "opacity-0 group-hover:opacity-70"
                     )}
                   />
@@ -99,7 +101,7 @@ export function Navbar() {
             })}
           </nav>
 
-          <div className="hidden items-center gap-4 md:flex">
+          <div className="hidden shrink-0 items-center gap-4 md:flex">
             <div className="flex flex-col items-end leading-tight">
               <span className="font-display text-base font-bold tabular-nums gold-text">
                 {timeStr}
@@ -118,7 +120,7 @@ export function Navbar() {
             <AudioPlayer />
             <button
               onClick={() => setOpen(!open)}
-              className="rounded-lg border border-gold-400/20 p-2 text-zinc-300 lg:hidden"
+              className="rounded-lg border border-gold-400/20 p-2 text-zinc-300 md:hidden"
             >
               {open ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -126,7 +128,7 @@ export function Navbar() {
         </div>
 
         {open && (
-          <div className="border-t border-gold-400/20 lg:hidden">
+          <div className="border-t border-gold-400/20 md:hidden">
             <nav className="mx-auto grid max-w-[1500px] grid-cols-2 gap-1 p-3">
               {NAV.map((item) => (
                 <Link

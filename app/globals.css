@@ -31,6 +31,28 @@
 
   --line: rgba(217, 180, 91, 0.16);
   --line-strong: rgba(217, 180, 91, 0.3);
+
+  /* ============ shadcn/ui DESIGN TOKENS (HSL) ============ */
+  --background: 226 12% 4%;
+  --foreground: 40 26% 92%;
+  --card: 226 12% 6%;
+  --card-foreground: 40 26% 92%;
+  --popover: 226 12% 7%;
+  --popover-foreground: 40 26% 92%;
+  --primary: 40 58% 58%;
+  --primary-foreground: 226 24% 8%;
+  --secondary: 226 10% 13%;
+  --secondary-foreground: 40 20% 88%;
+  --muted: 226 10% 13%;
+  --muted-foreground: 40 6% 62%;
+  --accent-token: 40 58% 58%;
+  --accent-foreground: 226 24% 8%;
+  --destructive: 0 62% 55%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 40 28% 22%;
+  --input: 40 26% 16%;
+  --ring: 40 68% 55%;
+  --radius: 0.75rem;
 }
 
 /* ============ GLOBAL ============ */
@@ -63,15 +85,16 @@ body {
 }
 
 /* ============ FINE GRID BACKDROP ============ */
+/* Kept intentionally faint so form fields (not the backdrop) stay the focus. */
 .grid-backdrop {
   position: fixed;
   inset: 0;
   z-index: -3;
   background-image:
-    linear-gradient(rgba(var(--accent-rgb), 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(var(--accent-rgb), 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.02) 1px, transparent 1px);
   background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse at 50% 0%, black 28%, transparent 76%);
+  mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 78%);
 }
 
 /* ============ AMBIENT GOLD DUST ============ */
@@ -87,9 +110,9 @@ body {
   bottom: -10px;
   width: 3px;
   height: 3px;
-  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.9), rgba(var(--accent-rgb), 0.08));
+  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.6), rgba(var(--accent-rgb), 0.06));
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.55);
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.3);
   animation: dust 13s linear infinite;
 }
 
@@ -246,20 +269,21 @@ body {
   overflow: hidden;
 }
 
-/* Twinkling stars */
+/* Twinkling stars — dimmed so they never compete with UI controls */
 .space-star {
   position: absolute;
   border-radius: 50%;
   background: #fff;
   animation: twinkle 3.5s ease-in-out infinite;
+  opacity: 0.55;
 }
 .space-star.gold-star {
-  background: rgba(var(--accent-bright-rgb), 0.95);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.8);
+  background: rgba(var(--accent-bright-rgb), 0.8);
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
 }
 @keyframes twinkle {
-  0%, 100% { opacity: 0.18; transform: scale(0.75); }
-  50% { opacity: 1; transform: scale(1.2); }
+  0%, 100% { opacity: 0.08; transform: scale(0.7); }
+  50% { opacity: 0.4; transform: scale(1.05); }
 }
 
 /* Shooting star */
@@ -330,6 +354,21 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ============ HORIZONTAL SCROLL NAV (hide native scrollbar) ============ */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Soft fade on both edges — hints there is more content when overflowing. */
+.nav-fade-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
 
 input[type="range"].gold-range {

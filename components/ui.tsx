@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { X } from "lucide-react";
-import { cn } from "@/lib/format";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, ChevronDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /* ============================= BUTTON ============================= */
 export function Button({
@@ -16,19 +17,19 @@ export function Button({
 }) {
   const styles: Record<string, string> = {
     primary:
-      "gold-shimmer border border-gold-200/50 bg-gradient-to-b from-gold-100 via-gold-300 to-gold-500 text-black font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(var(--accent-rgb),0.6)] hover:from-gold-50 hover:to-gold-400 focus-visible:ring-2 focus-visible:ring-gold-200/70",
+      "gold-shimmer relative border border-gold-300/40 bg-gradient-to-b from-gold-100 via-gold-400 to-gold-600 text-black font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_10px_30px_-10px_rgba(var(--accent-rgb),0.7),0_4px_14px_-6px_rgba(var(--accent-rgb),0.45)] hover:from-gold-50 hover:to-gold-500 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_14px_38px_-10px_rgba(var(--accent-rgb),0.85)]",
     ghost: "text-zinc-300 hover:bg-white/5 hover:text-gold-200",
     outline:
-      "border border-gold-400/35 text-gold-200 hover:border-gold-300/70 hover:bg-gold-400/10 focus-visible:ring-2 focus-visible:ring-gold-300/40",
+      "border border-gold-400/35 text-gold-200 hover:border-gold-300/70 hover:bg-gold-400/10 hover:shadow-[0_8px_24px_-10px_rgba(var(--accent-rgb),0.5)] focus-visible:ring-2 focus-visible:ring-gold-300/40",
     danger:
-      "gold-shimmer border border-rose-500/40 bg-gradient-to-b from-rose-500 to-red-700 text-white hover:from-rose-400 hover:to-red-600",
+      "gold-shimmer relative border border-rose-500/40 bg-gradient-to-b from-rose-500 to-red-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_26px_-12px_rgba(244,63,94,0.6)] hover:from-rose-400 hover:to-red-600",
     success:
-      "gold-shimmer border border-emerald-500/40 bg-gradient-to-b from-emerald-500 to-emerald-700 text-white hover:from-emerald-400 hover:to-emerald-600",
+      "gold-shimmer relative border border-emerald-500/40 bg-gradient-to-b from-emerald-500 to-emerald-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_26px_-12px_rgba(16,185,129,0.6)] hover:from-emerald-400 hover:to-emerald-600",
   };
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none outline-none",
+        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:ring-2 focus-visible:ring-gold-300/50",
         styles[variant],
         className
       )}
@@ -52,15 +53,14 @@ export function Card({
   return (
     <div
       className={cn(
-        "gold-shimmer group/card relative overflow-hidden rounded-xl border border-gold-400/20 bg-[rgba(var(--glass),0.62)] p-5 backdrop-blur-xl",
+        "gold-shimmer group/card relative overflow-hidden rounded-xl border border-gold-400/20 bg-[rgba(var(--glass),0.62)] p-5 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.75),0_0_0_1px_rgba(var(--accent-rgb),0.05)]",
         "before:pointer-events-none before:absolute before:left-2 before:top-2 before:h-3.5 before:w-3.5 before:border-l-2 before:border-t-2 before:border-gold-300/70 before:rounded-tl",
         "after:pointer-events-none after:absolute after:right-2 after:bottom-2 after:h-3.5 after:w-3.5 after:border-r-2 after:border-b-2 after:border-gold-300/70 after:rounded-br",
         hover &&
-          "transition-all duration-300 hover:-translate-y-1 hover:border-gold-300/50 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25),0_18px_55px_-18px_rgba(var(--accent-rgb),0.55),0_0_45px_-10px_rgba(var(--accent-rgb),0.35)]",
+          "transition-all duration-300 hover:-translate-y-1 hover:border-gold-300/50 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25),0_22px_60px_-20px_rgba(var(--accent-rgb),0.55),0_0_45px_-10px_rgba(var(--accent-rgb),0.35)]",
         className
       )}
     >
-      {/* corner ornaments */}
       <span className="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5 rounded-tr border-r-2 border-t-2 border-gold-300/70" />
       <span className="pointer-events-none absolute bottom-2 left-2 h-3.5 w-3.5 rounded-bl border-b-2 border-l-2 border-gold-300/70" />
       {children}
@@ -111,14 +111,15 @@ export function Field({
 }) {
   return (
     <label className={cn("flex flex-col gap-1.5", className)}>
-      <span className="text-xs uppercase tracking-wider text-zinc-400">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-zinc-300">{label}</span>
       {children}
     </label>
   );
 }
 
+/* ============================= INPUT / TEXTAREA ============================= */
 export const inputClass =
-  "w-full rounded-xl border border-gold-400/20 bg-obsidian-800/80 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition duration-150 focus:border-gold-300/80 focus:ring-2 focus:ring-gold-400/40 focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.2),0_0_22px_-8px_rgba(var(--accent-rgb),0.55)]";
+  "w-full rounded-xl border border-gold-400/20 bg-obsidian-800/80 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)] outline-none transition duration-150 focus:border-gold-300/70 focus:bg-obsidian-800 focus:ring-2 focus:ring-gold-400/30 focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_0_22px_-8px_rgba(var(--accent-rgb),0.5)]";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClass, props.className)} />;
@@ -128,28 +129,206 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return <textarea {...props} className={cn(inputClass, "min-h-[90px]", props.className)} />;
 }
 
+/* ============================= SELECT (custom, headless) ============================= */
+/* Replaces the native <select> (whose options render as OS-browser-blue) with a
+   fully themed, animated dropdown that matches the dark premium theme. */
+type SelectOption = { value: string; label: React.ReactNode; disabled?: boolean };
+
 export function Select({
   children,
+  value,
+  onChange,
   className,
-  ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  disabled,
+  placeholder = "— اختر —",
+  title,
+}: React.SelectHTMLAttributes<HTMLSelectElement> & { placeholder?: string }) {
+  const options = useMemo<SelectOption[]>(
+    () =>
+      React.Children.toArray(children)
+        .filter((c): c is React.ReactElement<React.HTMLProps<HTMLOptionElement>> => React.isValidElement(c))
+        .map((c) => ({
+          value: String(c.props.value ?? ""),
+          label: c.props.children,
+          disabled: c.props.disabled,
+        })),
+    [children]
+  );
+  const current = options.find((o) => o.value === value) || options.find((o) => o.value === "");
+
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const measure = () => {
+    const el = btnRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const est = Math.min(options.length || 1, 8) * 40 + 14;
+    const openUp = r.bottom + est + 12 > window.innerHeight && r.top - est - 12 > 0;
+    setPos({ top: openUp ? r.top - 8 : r.bottom + 6, left: r.left, width: r.width });
+  };
+
+  const openMenu = () => {
+    if (disabled) return;
+    measure();
+    setActive(Math.max(0, options.findIndex((o) => o.value === value)));
+    setOpen(true);
+  };
+
+  const select = (opt: SelectOption) => {
+    setOpen(false);
+    if (opt.disabled || opt.value === value) return;
+    onChange?.({ target: { value: opt.value } } as React.ChangeEvent<HTMLSelectElement>);
+  };
+
+  // Close on outside click / Escape / reposition on scroll & resize.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (btnRef.current?.contains(e.target as Node) || listRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onScroll = () => measure();
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onScroll);
+    window.addEventListener("scroll", onScroll, true);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", onScroll, true);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Keep the highlighted option in view.
+  useEffect(() => {
+    if (!open) return;
+    const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`);
+    el?.scrollIntoView({ block: "nearest" });
+  }, [active, open]);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (!open) {
+      if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
+        e.preventDefault();
+        openMenu();
+      }
+      return;
+    }
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setActive((a) => Math.min(options.length - 1, a + 1));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setActive((a) => Math.max(0, a - 1));
+        break;
+      case "Home":
+        e.preventDefault();
+        setActive(0);
+        break;
+      case "End":
+        e.preventDefault();
+        setActive(options.length - 1);
+        break;
+      case "Enter":
+      case " ": {
+        e.preventDefault();
+        const opt = options[active];
+        if (opt) select(opt);
+        break;
+      }
+      case "Escape":
+        e.preventDefault();
+        setOpen(false);
+        break;
+      case "Tab":
+        setOpen(false);
+        break;
+    }
+  };
+
   return (
-    <div className="relative w-full">
-      <select
-        {...props}
+    <div className={cn("relative w-full", className)}>
+      <button
+        ref={btnRef}
+        type="button"
+        disabled={disabled}
+        onClick={() => (open ? setOpen(false) : openMenu())}
+        onKeyDown={onKeyDown}
+        title={title}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className={cn(
           inputClass,
-          "appearance-none cursor-pointer bg-obsidian-800/80 pl-9 pr-3",
-          className
+          "flex items-center justify-between gap-2 text-left rtl:text-right disabled:cursor-not-allowed disabled:opacity-60"
         )}
       >
-        {children}
-      </select>
-      <span className="pointer-events-none absolute inset-y-0 left-0 flex w-9 items-center justify-center rounded-l-xl border-l border-gold-400/15 text-gold-300/80">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </span>
+        <span className={cn("truncate", !current && "text-zinc-500")}>
+          {current ? current.label : placeholder}
+        </span>
+        <ChevronDown
+          size={15}
+          className={cn("shrink-0 text-gold-300/80 transition-transform duration-200", open && "rotate-180")}
+        />
+      </button>
+
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {open && pos && (
+              <motion.div
+                ref={listRef}
+                role="listbox"
+                initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                transition={{ duration: 0.15 }}
+                style={{ position: "fixed", top: pos.top, left: pos.left, width: pos.width }}
+                className="z-[100] max-h-72 overflow-y-auto scrollbar-thin rounded-xl border border-gold-400/25 bg-[#14161b]/95 p-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.85),0_0_0_1px_rgba(var(--accent-rgb),0.08),0_0_40px_-18px_rgba(var(--accent-rgb),0.4)] backdrop-blur-xl"
+              >
+                {options.map((opt, i) => {
+                  const sel = opt.value === value;
+                  const act = i === active;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      role="option"
+                      aria-selected={sel}
+                      data-index={i}
+                      disabled={opt.disabled}
+                      onMouseEnter={() => setActive(i)}
+                      onClick={() => select(opt)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left rtl:text-right text-sm transition-colors",
+                        sel
+                          ? "bg-gold-400/15 text-gold-100"
+                          : act
+                            ? "bg-white/5 text-zinc-100"
+                            : "text-zinc-300 hover:bg-white/5",
+                        opt.disabled && "cursor-not-allowed opacity-40"
+                      )}
+                    >
+                      <span className="truncate">{opt.label}</span>
+                      {sel && <Check size={14} className="shrink-0 text-gold-300" />}
+                    </button>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }
@@ -173,11 +352,11 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        initial={{ opacity: 0, scale: 0.95, y: 14 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "glass-strong relative w-full overflow-hidden rounded-2xl p-6 max-h-[90vh] overflow-y-auto scrollbar-thin",
+          "glass-strong relative w-full overflow-hidden rounded-2xl border border-gold-400/20 p-6 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95),0_0_0_1px_rgba(var(--accent-rgb),0.1),0_0_70px_-25px_rgba(var(--accent-rgb),0.35)] max-h-[90vh] overflow-y-auto scrollbar-thin",
           wide ? "max-w-3xl" : "max-w-lg"
         )}
       >
@@ -186,7 +365,7 @@ export function Modal({
           <h3 className="font-display text-lg font-bold gold-text">{title}</h3>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
           >
             <X size={20} />
           </button>
