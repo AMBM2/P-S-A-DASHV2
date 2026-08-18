@@ -215,7 +215,7 @@ export default function AdminPage() {
         </div>
       ) : (
         <>
-          <div className="mb-6 flex gap-1 overflow-x-auto no-scrollbar rounded-xl border border-gold-400/15 bg-obsidian-900/50 p-1">
+          <div className="mb-6 flex flex-wrap gap-1 rounded-xl border border-gold-400/15 bg-obsidian-900/50 p-1">
             {allowed.map((t) => (
               <button
                 key={t.id}
