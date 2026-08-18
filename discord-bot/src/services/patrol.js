@@ -34,11 +34,11 @@ function rankSection(header, entries) {
 }
 
 // Officer tier by rank level (from ranks.js):
-//   command 24+ → رئاسة الوزراء  | 22-23 → وزراء الداخلية
+//   command 24+ → القيادة العليا  | 22-23 → وزراء الحكومة
 //   17-21 → القادة | 11-16 → ضباط | else → أفراد
 const OFFICER_TIERS = [
-  { key: "command", levelMin: 24, header: `                                  - ⭐👮🏻  رئاســـــــة الــــــوزراء  👮🏻⭐ -` },
-  { key: "ministers", levelMin: 22, header: `                                         - ⭐👮🏻  وزراء الداخلية   👮🏻⭐ -` },
+  { key: "command", levelMin: 24, header: `                                        - ⭐👮🏻  القيــادة العليــا  👮🏻⭐ -` },
+  { key: "ministers", levelMin: 22, header: `                                         - ⭐👮🏻  وزراء الحكومة   👮🏻⭐ -` },
   { key: "leaders", levelMin: 17, header: `                                       - ⭐👮🏻  قـــادة الأمن العام  👮🏻⭐ -` },
   { key: "officers", levelMin: 11, header: `                                          - ⚔  ضـبـاط الأمن العام  ⚔ - ` },
 ];
