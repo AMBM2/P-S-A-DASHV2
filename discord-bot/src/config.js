@@ -94,10 +94,10 @@ export const config = {
   // Only sync members who hold this role (empty = sync everyone)
   memberRoleId: process.env.MEMBER_ROLE_ID || null,
 
-  // Field dispatch UI: optionally restrict to members holding this Public
-  // Security role (empty = list every member with an officer/enlisted rank,
-  // including the leadership / ministry / presidency roles).
-  fieldMemberRoleId: process.env.FIELD_MEMBER_ROLE_ID || "",
+  // Field dispatch UI: restrict to members holding the Public Security role
+  // (empty = list every member with an officer/enlisted rank, including the
+  // leadership / ministry / presidency roles).
+  fieldMemberRoleId: process.env.FIELD_MEMBER_ROLE_ID || "1527321813325971577",
 
   portalUrl: process.env.PORTAL_URL || "http://localhost:3000",
 };
