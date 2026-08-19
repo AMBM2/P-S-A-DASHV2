@@ -56,6 +56,9 @@ const FIELD_CACHE_TTL_MS = 25_000;
 // Full Public Security member list for the field dispatch UI: every guild
 // member holding an officer/enlisted category role, with rank + presence
 // (connected = online/idle/dnd, plus whether they are in a voice channel).
+// Besides الأمن العام role holders, command ranks (القادة مثل نائب المدير +
+// الرئاسة / القيادة العليا) are listed so they can be mentioned in the
+// field dispatch even when they don't hold the الأمن العام role.
 export async function getFieldMembers(client) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
@@ -81,11 +84,14 @@ export async function getFieldMembers(client) {
 
   const list = [];
   for (const member of members.values()) {
-    // Only Public Security role holders (the field dispatch target group).
-    if (config.fieldMemberRoleId && !member.roles.cache.has(config.fieldMemberRoleId)) continue;
+    const rank = getHighestRank(member);
+    // الأمن العام role holders are always listed; command ranks (القادة مثل
+    // نائب المدير + الرئاسة / القيادة العليا) are included as well.
+    const isPublicSecurity =
+      !config.fieldMemberRoleId || member.roles.cache.has(config.fieldMemberRoleId);
+    if (!isPublicSecurity && rank?.division !== "command") continue;
 
     let cat = null;
-    const rank = getHighestRank(member);
     if (rank && (rank.division === "command" || rank.division === "officer")) cat = "officer";
     else if (rank && rank.division === "troop") cat = "enlisted";
     if (!cat) {
