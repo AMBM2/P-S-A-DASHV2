@@ -45,26 +45,30 @@ export function Navbar() {
 
   return (
     <>
-      {/* Official ministry strip */}
+      {/* Official command strip */}
       <div className="glass-strong sticky top-0 z-40 border-b border-gold-400/20">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-400/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] hazard-stripes opacity-40" />
         <div className="mx-auto flex max-w-[1500px] items-center gap-4 px-4 py-3">
           <div className="flex shrink-0 items-center gap-3">
             <Link href="/" className="group flex items-center gap-3">
               <div className="relative flex h-12 w-12 items-center justify-center">
-                <div className="absolute inset-0 rounded-full border border-gold-400/35 bg-gold-400/5 shadow-[0_0_22px_rgba(217,180,91,0.35)]" />
-                <div className="absolute inset-0 rounded-full border border-gold-200/20" />
+                <div className="clip-hex absolute inset-0 bg-gradient-to-b from-gold-400/40 to-gold-600/10 border border-gold-400/40 shadow-[0_0_22px_rgba(220,180,94,0.35)]" />
+                <div className="clip-hex absolute inset-[3px] bg-obsidian-900/90" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/psa-logo.png"
                   alt="PSA"
-                  className="relative h-9 w-9 rounded-full object-contain"
-                  style={{ filter: "drop-shadow(0 0 10px rgba(217,180,91,0.4))" }}
+                  className="relative h-8 w-8 rounded-full object-contain"
+                  style={{ filter: "drop-shadow(0 0 10px rgba(220,180,94,0.4))" }}
                 />
               </div>
               <div className="leading-tight">
-                <div className="font-display text-lg font-bold tracking-widest gold-text">
-                  الأمن العام
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-lg font-bold tracking-widest gold-text">
+                    الأمن العام
+                  </span>
+                  <span className="v100-badge">V100</span>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-gold-300/70">
                   <ShieldCheck size={11} />
@@ -84,7 +88,7 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "group relative flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "group relative flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors",
                     active ? "text-gold-200" : "text-zinc-400 hover:text-gold-200"
                   )}
                 >
@@ -92,8 +96,14 @@ export function Navbar() {
                   {item.label}
                   <span
                     className={cn(
-                      "absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 transition-all duration-300",
+                      "absolute inset-x-3 -bottom-0.5 h-[2px] bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 transition-all duration-300",
                       active ? "opacity-100" : "opacity-0 group-hover:opacity-70"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "pointer-events-none absolute -bottom-px left-0 h-2 w-2 border-b-2 border-l-2 border-gold-400/60 transition-all duration-300 rtl:left-auto rtl:right-0 rtl:border-b-2 rtl:border-r-2 rtl:border-l-0",
+                      active ? "opacity-100" : "opacity-0 group-hover:opacity-60"
                     )}
                   />
                 </Link>
@@ -110,7 +120,7 @@ export function Navbar() {
                 {now.toLocaleDateString("ar-SA", { weekday: "long" })}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full border border-gold-400/30 bg-gold-400/10 px-3 py-1">
+            <div className="clip-notch-sm flex items-center gap-1.5 border border-gold-400/30 bg-gold-400/10 px-3 py-1">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-300 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-gold-300" />
@@ -120,7 +130,7 @@ export function Navbar() {
             <AudioPlayer />
             <button
               onClick={() => setOpen(!open)}
-              className="rounded-lg border border-gold-400/20 p-2 text-zinc-300 md:hidden"
+              className="clip-notch-sm border border-gold-400/20 p-2 text-zinc-300 md:hidden"
             >
               {open ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -136,7 +146,7 @@ export function Navbar() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm",
+                    "flex items-center gap-2 px-3 py-2.5 text-sm",
                     pathname === item.href
                       ? "bg-gold-400/15 text-gold-200"
                       : "text-zinc-300 hover:bg-white/5"

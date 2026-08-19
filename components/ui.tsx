@@ -29,7 +29,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:ring-2 focus-visible:ring-gold-300/50",
+        "clip-notch-sm inline-flex items-center justify-center gap-2 rounded-[5px] px-4 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:ring-2 focus-visible:ring-gold-300/50",
         styles[variant],
         className
       )}
@@ -53,16 +53,12 @@ export function Card({
   return (
     <div
       className={cn(
-        "gold-shimmer group/card relative overflow-hidden rounded-xl border border-gold-400/20 bg-[rgba(var(--glass),0.62)] p-5 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.75),0_0_0_1px_rgba(var(--accent-rgb),0.05)]",
-        "before:pointer-events-none before:absolute before:left-2 before:top-2 before:h-3.5 before:w-3.5 before:border-l-2 before:border-t-2 before:border-gold-300/70 before:rounded-tl",
-        "after:pointer-events-none after:absolute after:right-2 after:bottom-2 after:h-3.5 after:w-3.5 after:border-r-2 after:border-b-2 after:border-gold-300/70 after:rounded-br",
+        "clip-notch hud-frame gold-shimmer group/card relative overflow-hidden border border-gold-400/20 bg-[rgba(var(--glass),0.66)] p-5 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.8),0_0_0_1px_rgba(var(--accent-rgb),0.05)]",
         hover &&
           "transition-all duration-300 hover:-translate-y-1 hover:border-gold-300/50 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25),0_22px_60px_-20px_rgba(var(--accent-rgb),0.55),0_0_45px_-10px_rgba(var(--accent-rgb),0.35)]",
         className
       )}
     >
-      <span className="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5 rounded-tr border-r-2 border-t-2 border-gold-300/70" />
-      <span className="pointer-events-none absolute bottom-2 left-2 h-3.5 w-3.5 rounded-bl border-b-2 border-l-2 border-gold-300/70" />
       {children}
     </div>
   );
@@ -89,7 +85,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+        "clip-notch-sm inline-flex items-center gap-1 rounded-[4px] border px-2.5 py-0.5 text-xs font-medium",
         tones[tone],
         className
       )}
@@ -119,7 +115,7 @@ export function Field({
 
 /* ============================= INPUT / TEXTAREA ============================= */
 export const inputClass =
-  "w-full rounded-xl border border-gold-400/20 bg-obsidian-800/80 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)] outline-none transition duration-150 focus:border-gold-300/70 focus:bg-obsidian-800 focus:ring-2 focus:ring-gold-400/30 focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_0_22px_-8px_rgba(var(--accent-rgb),0.5)]";
+  "w-full rounded-[6px] border border-gold-400/20 bg-obsidian-800/80 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)] outline-none transition duration-150 focus:border-gold-300/70 focus:bg-obsidian-800 focus:ring-2 focus:ring-gold-400/30 focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_0_22px_-8px_rgba(var(--accent-rgb),0.5)]";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClass, props.className)} />;
@@ -356,7 +352,7 @@ export function Modal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "glass-strong relative w-full overflow-hidden rounded-2xl border border-gold-400/20 p-6 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95),0_0_0_1px_rgba(var(--accent-rgb),0.1),0_0_70px_-25px_rgba(var(--accent-rgb),0.35)] max-h-[90vh] overflow-y-auto scrollbar-thin",
+          "glass-strong clip-notch hud-frame relative w-full overflow-hidden border border-gold-400/20 p-6 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95),0_0_0_1px_rgba(var(--accent-rgb),0.1),0_0_70px_-25px_rgba(var(--accent-rgb),0.35)] max-h-[90vh] overflow-y-auto scrollbar-thin",
           wide ? "max-w-3xl" : "max-w-lg"
         )}
       >

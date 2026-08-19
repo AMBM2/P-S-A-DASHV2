@@ -47,23 +47,21 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Prestige Hero Banner */}
-      <div className="gold-shimmer relative mb-10 overflow-hidden rounded-2xl border border-gold-400/25 bg-gradient-to-br from-obsidian-800 via-obsidian-900 to-black p-10 md:p-14">
-        <div className="pointer-events-none absolute left-3 top-3 h-6 w-6 border-l-2 border-t-2 border-gold-300/60" />
-        <div className="pointer-events-none absolute right-3 bottom-3 h-6 w-6 border-r-2 border-b-2 border-gold-300/60" />
-        <div className="pointer-events-none absolute left-3 bottom-3 h-6 w-6 border-l-2 border-b-2 border-gold-300/40" />
-        <div className="pointer-events-none absolute right-3 top-3 h-6 w-6 border-r-2 border-t-2 border-gold-300/40" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{
+      {/* Tactical Command Hero Banner */}
+      <div className="clip-notch hud-frame gold-shimmer relative mb-10 overflow-hidden border border-gold-400/25 bg-gradient-to-br from-obsidian-800 via-obsidian-900 to-black p-10 md:p-14">
+        <div className="pointer-events-none absolute inset-0 hazard-stripes opacity-20" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{
           backgroundImage: "radial-gradient(circle at 1px 1px, var(--accent) 1px, transparent 0)",
           backgroundSize: "26px 26px",
         }} />
         <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-gold-400/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-gold-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-gold-400/70 to-transparent" />
 
         <div className="relative flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-right">
           <div>
-            {/* Official government ribbon */}
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-200">
+            {/* Command classification ribbon */}
+            <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-200">
               <ShieldCheck size={14} />
               {lang === "ar" ? "المنصة الرسمية لقوات الأمن العام" : "Official Public Security Command"}
             </div>
@@ -84,19 +82,27 @@ export default function HomePage() {
                 ? "المنصة الإدارية الموحدة لأخبار القيادة، الأفراد في الخدمة، والتوزيع حسب الرتب."
                 : "The unified administrative platform for command news, on-duty personnel and rank distribution."}
             </p>
+
+            <div className="mt-6 flex items-center justify-center gap-3 md:justify-start">
+              <span className="v100-badge">V100</span>
+              <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-olive-400">
+                <span className="h-1.5 w-1.5 rotate-45 bg-gold-400/80" />
+                Command Operations
+              </span>
+            </div>
           </div>
 
-          {/* Official emblem in glowing glass ring */}
+          {/* Official emblem in clipped hexagon frame */}
           <div className="relative shrink-0">
-            <div className="absolute -inset-3 rounded-full border border-gold-400/20" />
-            <div className="absolute -inset-3 rounded-full border border-dashed border-gold-400/20 animate-[spin_40s_linear_infinite]" />
-            <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-gold-400/25 bg-gold-400/5 backdrop-blur-md gold-glow-strong animate-[goldPulse_4s_ease-in-out_infinite]">
+            <div className="clip-hex absolute -inset-3 border border-gold-400/25" />
+            <div className="clip-hex absolute -inset-3 border border-dashed border-gold-400/20 animate-[spin_40s_linear_infinite]" />
+            <div className="clip-hex relative flex h-36 w-36 items-center justify-center border border-gold-400/30 bg-gold-400/5 backdrop-blur-md gold-glow-strong animate-[goldPulse_4s_ease-in-out_infinite]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/psa-logo.png"
                 alt="PSA"
                 className="h-28 w-28 rounded-full object-contain"
-                style={{ filter: "drop-shadow(0 0 12px rgba(217,180,91,0.4))" }}
+                style={{ filter: "drop-shadow(0 0 12px rgba(220,180,94,0.4))" }}
               />
             </div>
           </div>
@@ -202,7 +208,7 @@ export default function HomePage() {
                       )}
                       {!n.images?.[0] && !n.image && n.video && (
                         <div className="relative flex h-40 items-center justify-center bg-black sm:h-44">
-                          <span className="flex h-14 w-14 items-center justify-center rounded-full border border-gold-400/40 bg-gold-400/10">
+                          <span className="clip-hex flex h-14 w-14 items-center justify-center border border-gold-400/40 bg-gold-400/10">
                             <Play size={24} className="text-gold-300" />
                           </span>
                           <div className="absolute right-3 top-3 flex gap-2">
@@ -261,7 +267,7 @@ export default function HomePage() {
         {/* Module 2 + 3: On-Duty Counter & Rank Distribution */}
         <div className="space-y-6">
           <Card className="text-center">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 gold-pulse">
+            <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-gold-400/30 bg-gold-400/10 gold-pulse">
               <ShieldCheck className="h-7 w-7 text-gold-300" />
             </div>
             <div className="font-display text-5xl font-bold gold-text">{onDuty}</div>

@@ -58,6 +58,12 @@ const config: Config = {
           600: "var(--accent-600)",
           700: "var(--accent-700)",
         },
+        olive: {
+          DEFAULT: "var(--olive)",
+          400: "var(--olive)",
+          500: "var(--olive)",
+        },
+        steel: "var(--steel)",
       },
       fontFamily: {
         sans: ["var(--font-cairo)", "var(--font-tajawal)", "system-ui", "sans-serif"],
@@ -67,6 +73,7 @@ const config: Config = {
         gold: "0 0 25px rgba(var(--accent-rgb), 0.15)",
         "gold-lg": "0 0 45px rgba(var(--accent-rgb), 0.25)",
         "gold-glow": "0 4px 30px -4px rgba(var(--accent-rgb), 0.4)",
+        brass: "0 18px 50px -22px rgba(var(--accent-rgb), 0.6)",
       },
       keyframes: {
         ticker: {
@@ -86,12 +93,17 @@ const config: Config = {
           "20%": { opacity: "1" },
           "100%": { transform: "translateY(-100vh) translateX(40px)", opacity: "0" },
         },
+        scan: {
+          "0%": { transform: "translateX(-110%)" },
+          "100%": { transform: "translateX(110%)" },
+        },
       },
       animation: {
         ticker: "ticker 40s linear infinite",
         shimmer: "shimmer 2.5s infinite",
         float: "float 6s ease-in-out infinite",
         dust: "dust 12s linear infinite",
+        scan: "scan 7s ease-in-out infinite",
       },
     },
   },

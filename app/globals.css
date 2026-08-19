@@ -3,56 +3,62 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   IMPERIAL OBSIDIAN & CHAMPAGNE GOLD — Premium Government Design System
+   V100 — TACTICAL COMMAND DESIGN SYSTEM
+   Obsidian Command HQ · Champagne Brass · Olive Steel
+   Angular clipped panels, HUD corner frames, brushed-carbon backdrop.
    ========================================================================== */
 :root {
   color-scheme: dark;
 
-  --accent-100: #f7ecd2;
+  --accent-100: #f8efd8;
   --accent-200: #f0ddab;
-  --accent-300: #e6c97d;
-  --accent-400: #d9b45b;
-  --accent-500: #c29a44;
-  --accent-600: #a37e32;
-  --accent-700: #7d5f26;
-  --accent: #d9b45b;
-  --accent-bright: #f3d489;
-  --accent-rgb: 217, 180, 91;
-  --accent-bright-rgb: 243, 212, 137;
+  --accent-300: #e7cb85;
+  --accent-400: #dcb45e;
+  --accent-500: #c49a46;
+  --accent-600: #a27c33;
+  --accent-700: #7c5f28;
+  --accent: #dcb45e;
+  --accent-bright: #f4d78f;
+  --accent-rgb: 220, 180, 94;
+  --accent-bright-rgb: 244, 215, 143;
 
   --foreground: #efe9dc;
   --muted: #9a9387;
 
-  --glass: 23, 24, 29;
-  --bg: #0a0a0c;
-  --bg-2: #101014;
-  --bg-800: #17181d;
-  --bg-700: #1f2026;
+  --glass: 19, 22, 16;
+  --bg: #070807;
+  --bg-2: #0b0d0a;
+  --bg-800: #121410;
+  --bg-700: #1a1d16;
 
-  --line: rgba(217, 180, 91, 0.16);
-  --line-strong: rgba(217, 180, 91, 0.3);
+  --olive: #96a06b;
+  --olive-rgb: 150, 160, 107;
+  --steel: #9aa4a6;
+
+  --line: rgba(220, 180, 94, 0.16);
+  --line-strong: rgba(220, 180, 94, 0.3);
 
   /* ============ shadcn/ui DESIGN TOKENS (HSL) ============ */
-  --background: 226 12% 4%;
+  --background: 100 10% 4%;
   --foreground: 40 26% 92%;
-  --card: 226 12% 6%;
+  --card: 100 12% 6%;
   --card-foreground: 40 26% 92%;
-  --popover: 226 12% 7%;
+  --popover: 100 12% 7%;
   --popover-foreground: 40 26% 92%;
   --primary: 40 58% 58%;
-  --primary-foreground: 226 24% 8%;
-  --secondary: 226 10% 13%;
+  --primary-foreground: 100 24% 8%;
+  --secondary: 100 10% 13%;
   --secondary-foreground: 40 20% 88%;
-  --muted: 226 10% 13%;
+  --muted: 100 10% 13%;
   --muted-foreground: 40 6% 62%;
   --accent-token: 40 58% 58%;
-  --accent-foreground: 226 24% 8%;
+  --accent-foreground: 100 24% 8%;
   --destructive: 0 62% 55%;
   --destructive-foreground: 0 0% 98%;
   --border: 40 28% 22%;
   --input: 40 26% 16%;
   --ring: 40 68% 55%;
-  --radius: 0.75rem;
+  --radius: 0.35rem;
 }
 
 /* ============ GLOBAL ============ */
@@ -68,9 +74,9 @@ body {
   margin: 0;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 70% 46% at 50% -12%, rgba(var(--accent-rgb), 0.12), transparent),
-    radial-gradient(ellipse 34% 24% at 90% 20%, rgba(var(--accent-rgb), 0.05), transparent),
-    radial-gradient(ellipse 42% 32% at 6% 84%, rgba(var(--accent-rgb), 0.045), transparent);
+    radial-gradient(ellipse 70% 46% at 50% -12%, rgba(var(--accent-rgb), 0.1), transparent),
+    radial-gradient(ellipse 34% 24% at 90% 20%, rgba(var(--olive-rgb), 0.05), transparent),
+    radial-gradient(ellipse 42% 32% at 6% 84%, rgba(var(--olive-rgb), 0.04), transparent);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-cairo), var(--font-tajawal), system-ui, sans-serif;
@@ -84,36 +90,40 @@ body {
   color: #fff;
 }
 
-/* ============ FINE GRID BACKDROP ============ */
-/* Kept intentionally faint so form fields (not the backdrop) stay the focus. */
+/* ============ COMMAND GRID BACKDROP ============ */
 .grid-backdrop {
   position: fixed;
   inset: 0;
   z-index: -3;
   background-image:
-    linear-gradient(rgba(var(--accent-rgb), 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.02) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 78%);
+    linear-gradient(rgba(var(--accent-rgb), 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 34%, transparent 82%);
 }
 
-/* ============ AMBIENT GOLD DUST ============ */
-.gold-dust {
+/* ============ BRUSHED CARBON OVERLAY ============ */
+.carbon-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -4;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.014) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.008) 0 2px, transparent 2px 4px);
+}
+
+/* ============ TACTICAL SCANLINES ============ */
+.tactical-grid {
   position: fixed;
   inset: 0;
   z-index: -2;
-  overflow: hidden;
   pointer-events: none;
-}
-.gold-dust span {
-  position: absolute;
-  bottom: -10px;
-  width: 3px;
-  height: 3px;
-  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.6), rgba(var(--accent-rgb), 0.06));
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.3);
-  animation: dust 13s linear infinite;
+  background:
+    repeating-linear-gradient(0deg, rgba(150, 160, 107, 0.03) 0 1px, transparent 1px 4px),
+    linear-gradient(115deg, transparent 42%, rgba(220, 180, 94, 0.05) 50%, transparent 58%);
+  background-size: 100% 100%, 100% 100%;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 85%);
 }
 
 /* ============ GLOWING AMBIENT ORBS ============ */
@@ -132,23 +142,68 @@ body {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 120% 90% at 50% 0%, transparent 52%, rgba(0, 0, 0, 0.6) 100%),
+    radial-gradient(ellipse 120% 90% at 50% 0%, transparent 52%, rgba(0, 0, 0, 0.62) 100%),
     radial-gradient(ellipse 90% 80% at 100% 100%, rgba(0, 0, 0, 0.5), transparent 70%);
 }
 
-/* ============ GLASS PANELS ============ */
+/* ============ COMMAND PANELS ============ */
 .glass {
-  background: rgba(var(--glass), 0.68);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(var(--glass), 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--line);
 }
 
 .glass-strong {
-  background: rgba(var(--glass), 0.84);
-  backdrop-filter: blur(26px);
-  -webkit-backdrop-filter: blur(26px);
+  background: rgba(var(--glass), 0.86);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--line-strong);
+}
+
+/* ============ CLIPPED CORNERS (military cut) ============ */
+.clip-notch {
+  clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+
+.clip-notch-sm {
+  clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+
+/* ============ HUD CORNER FRAME ============ */
+.hud-frame {
+  position: relative;
+}
+.hud-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 18px 2px,
+    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 2px 18px,
+    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 18px 2px,
+    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 2px 18px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 18px 2px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 2px 18px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 18px 2px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 2px 18px;
+  background-repeat: no-repeat;
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+.hud-frame:hover::before {
+  opacity: 0.95;
+}
+
+/* ============ HAZARD STRIPES ============ */
+.hazard-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(var(--accent-rgb), 0.12) 0 10px,
+    transparent 10px 20px
+  );
 }
 
 /* ============ GOLDEN SHIMMER SWEEP ============ */
@@ -190,6 +245,21 @@ body {
   color: transparent;
 }
 
+/* ============ BRUSHED STEEL TEXT ============ */
+.steel-text {
+  background: linear-gradient(
+    100deg,
+    #c9d1cf 0%,
+    #f2f6f4 30%,
+    #8d9a9b 55%,
+    #dbe3e2 80%,
+    #9aa4a6 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* ============ BORDER GLOWS ============ */
 .gold-border-glow {
   border: 1px solid rgba(var(--accent-rgb), 0.3);
@@ -202,7 +272,6 @@ body {
 }
 
 /* ============ ACCESSORIES: GLOWING GOLD EFFECTS ============ */
-/* Pulsing golden glow (badges, chips, active states) */
 .gold-pulse {
   animation: goldPulse 2.6s ease-in-out infinite;
 }
@@ -215,17 +284,14 @@ body {
   }
 }
 
-/* Default soft golden glow on cards */
 .gold-glow {
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 10px 40px -18px rgba(var(--accent-rgb), 0.35);
 }
 
-/* Strong glow ring around key elements (hero emblem, stats) */
 .gold-glow-strong {
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.35), 0 0 35px -6px rgba(var(--accent-rgb), 0.55), 0 0 80px -20px rgba(var(--accent-rgb), 0.4);
 }
 
-/* Inner golden frame ornament */
 .gold-inner-frame {
   position: relative;
 }
@@ -238,7 +304,6 @@ body {
   border-radius: inherit;
 }
 
-/* Ornamental horizontal flourish divider */
 .gold-flourish {
   display: flex;
   align-items: center;
@@ -260,7 +325,25 @@ body {
   background: rgba(var(--accent-rgb), 0.12);
 }
 
-/* ============ SPACE BACKGROUND ACCESSORIES ============ */
+/* ============ V100 COMMAND BADGE ============ */
+.v100-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  background:
+    linear-gradient(115deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent-rgb), 0.05)),
+    repeating-linear-gradient(-45deg, rgba(var(--accent-rgb), 0.05) 0 6px, transparent 6px 12px);
+  color: var(--accent-300);
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+/* ============ LEGACY SPACE ACCESSORIES (kept for background components) ============ */
 .space-layer {
   position: fixed;
   inset: 0;
@@ -268,8 +351,6 @@ body {
   pointer-events: none;
   overflow: hidden;
 }
-
-/* Twinkling stars — dimmed so they never compete with UI controls */
 .space-star {
   position: absolute;
   border-radius: 50%;
@@ -285,8 +366,6 @@ body {
   0%, 100% { opacity: 0.08; transform: scale(0.7); }
   50% { opacity: 0.4; transform: scale(1.05); }
 }
-
-/* Shooting star */
 .space-shooting {
   position: absolute;
   width: 2px;
@@ -303,16 +382,12 @@ body {
   12% { transform: translate(-260px, 260px) rotate(-45deg); opacity: 0; }
   100% { transform: translate(-260px, 260px) rotate(-45deg); opacity: 0; }
 }
-
-/* Nebula clouds */
 .space-nebula {
   position: absolute;
   border-radius: 9999px;
   filter: blur(85px);
   opacity: 0.6;
 }
-
-/* Planet with ring */
 .space-planet {
   position: absolute;
   border-radius: 9999px;
@@ -328,6 +403,25 @@ body {
   border-radius: 50%;
   transform: rotate(-16deg);
   box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.18), inset 0 0 30px rgba(var(--accent-rgb), 0.1);
+}
+
+/* ============ LEGACY GOLD DUST ============ */
+.gold-dust {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.gold-dust span {
+  position: absolute;
+  bottom: -10px;
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.6), rgba(var(--accent-rgb), 0.06));
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.3);
+  animation: dust 13s linear infinite;
 }
 
 /* ============ DECORATIVE ============ */
@@ -356,7 +450,6 @@ body {
   scrollbar-width: none;
 }
 
-/* ============ HORIZONTAL SCROLL NAV (hide native scrollbar) ============ */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -365,7 +458,6 @@ body {
   scrollbar-width: none;
 }
 
-/* Soft fade on both edges — hints there is more content when overflowing. */
 .nav-fade-mask {
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
@@ -378,16 +470,15 @@ input[type="range"].gold-range {
 /* ============ NATIVE SELECT DROPDOWN ============ */
 select option,
 select optgroup {
-  background-color: #17181d;
-  color: #efe9dc;
+  background-color: var(--bg-800);
+  color: var(--foreground);
 }
 select option:checked {
-  background-color: rgba(217, 180, 91, 0.25);
-  color: #f0ddab;
+  background-color: rgba(220, 180, 94, 0.25);
+  color: var(--accent-200);
 }
 
 /* ============ NATIVE FORM CONTROLS (DARK) ============ */
-/* Ensure checkboxes, radios, date/number pickers and selects never render white */
 input,
 select,
 textarea {
@@ -397,10 +488,10 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #17181d inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-800) inset;
   -webkit-text-fill-color: #f3f1ea;
   caret-color: #f3f1ea;
-  border-radius: 0.75rem;
+  border-radius: 0.35rem;
 }
 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
   color-scheme: dark;
@@ -411,15 +502,11 @@ input[type="radio"] {
   background-color: transparent;
 }
 
-/* ============ SOFT ROUNDED FORM FIELDS ============ */
-/* Every text field should read as a gentle rounded rectangle, not a sharp box.
-   This lifts any raw input/select/textarea still using rounded-lg (8px) up to a
-   softer 0.75rem curve, and gives raw fields a golden focus glow to match the
-   shared Input component in components/ui.tsx. */
+/* ============ FIELD-ISSUE FORM FIELDS ============ */
 input.rounded-lg,
 select.rounded-lg,
 textarea.rounded-lg {
-  border-radius: 0.75rem;
+  border-radius: 0.4rem;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
