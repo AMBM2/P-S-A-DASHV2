@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import { config } from "../config.js";
 import { supabase } from "../supabase.js";
-import { getGuild, buildNickname } from "./nickname.js";
+import { getGuild, applyBadgeNickname } from "./nickname.js";
 import { findRankByLevel } from "../ranks.js";
 
 function findRoleForLevel(guild, level) {
@@ -86,12 +86,8 @@ export async function enrollCadet(client, cadet) {
       }
     }
 
-    try {
-      const nick = buildNickname({ nameAr: cadet.nameAr, name: cadet.name, badge: cadet.badge || "" });
-      if (member.nickname !== nick && member.manageable) {
-        await member.setNickname(nick, "Military College enrollment");
-      }
-    } catch {}
+    // 2b. Non-destructive nickname: [badge] + existing server nickname
+    await applyBadgeNickname(member, cadet.badge || "", "Military College enrollment");
 
     try {
       await member.send(

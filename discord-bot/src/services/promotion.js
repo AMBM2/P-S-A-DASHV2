@@ -1,7 +1,7 @@
 import { supabase } from "../supabase.js";
-import { getGuild, buildNickname } from "./nickname.js";
+import { getGuild, applyBadgeNickname } from "./nickname.js";
 import { RANKS, findRoleByRank } from "../ranks.js";
-import { nextBadge, matchesPool } from "./badge.js";
+import { nextBadge, matchesPool, assignMilitaryBadge, nhRangeForRank } from "./badge.js";
 
 function rankById(id) {
   return RANKS.find((r) => r.id === id) || null;
@@ -24,9 +24,15 @@ export async function handlePromotion(client, officer, prevRankId) {
 
   const results = { badgeChanged: false, roleChanged: false };
 
-  // 1. Re-assign badge code from the new rank's pool
+  // 1. Re-assign badge code from the new rank's pool. جندي/جندي أول members of
+  //    الأمن العام use the strict NH dual-role badge (rank role + department role).
   if (!matchesPool(officer.badge, newRank)) {
-    const newBadge = await nextBadge(newRank);
+    let newBadge = null;
+    if (nhRangeForRank(newRank)) {
+      const nh = await assignMilitaryBadge(member);
+      if (nh.ok) newBadge = nh.badge;
+    }
+    if (!newBadge) newBadge = await nextBadge(newRank);
     await supabase.from("officers").update({ badge: newBadge }).eq("id", officer.id);
     officer.badge = newBadge;
     results.badgeChanged = true;
@@ -47,15 +53,8 @@ export async function handlePromotion(client, officer, prevRankId) {
     results.roleChanged = true;
   }
 
-  // 3. Update nickname
-  try {
-    const nick = buildNickname(officer);
-    if (member.nickname !== nick && member.manageable) {
-      await member.setNickname(nick, "Promotion badge sync");
-    }
-  } catch (e) {
-    console.warn("[promo] nickname failed:", e.message);
-  }
+  // 3. Update nickname non-destructively (preserve the member's display name)
+  await applyBadgeNickname(member, officer.badge, "Promotion badge sync");
 
   return { ok: true, ...results };
 }

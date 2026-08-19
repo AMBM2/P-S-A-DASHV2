@@ -1,6 +1,6 @@
 import { config } from "../config.js";
 import { supabase } from "../supabase.js";
-import { getGuild, buildNickname } from "./nickname.js";
+import { getGuild, applyBadgeNickname } from "./nickname.js";
 import { findRankByLevel } from "../ranks.js";
 import { nextBadge } from "./badge.js";
 
@@ -42,15 +42,8 @@ export async function onboardRecruit(client, officer) {
     }
   }
 
-  // 1b. Update nickname immediately to [badge] name
-  try {
-    const nick = buildNickname(officer);
-    if (member.nickname !== nick && member.manageable) {
-      await member.setNickname(nick, "Recruit onboarding");
-    }
-  } catch (e) {
-    console.warn("[recruit] nickname failed:", e.message);
-  }
+  // 1b. Update nickname non-destructively: [badge] + existing server nickname
+  await applyBadgeNickname(member, officer.badge, "Recruit onboarding");
 
   // 2. Send welcome DM with badge + portal instructions
   const badge = (officer.badge || "").trim() || "غير محدد";

@@ -19,6 +19,7 @@ type Stats = {
   pools: Pool[];
   N: Pool;
   NT: Pool;
+  NH?: Pool[];
 };
 
 export function BadgeCodesManager() {
@@ -105,6 +106,16 @@ export function BadgeCodesManager() {
             desc="يبدأ من NT-100 ويتصاعد؛ تُعاد تدوير الأكواد تلقائياً عند الترقية أو الفصل"
             p={stats.NT}
           />
+          <div className="grid gap-3 sm:grid-cols-2">
+            {stats.NH?.map((p: any) => (
+              <PoolCard
+                key={p.rankId}
+                title={`جندي الأمن العام — ${p.labelAr} (${p.prefix}-)`}
+                desc={`نطاق صارم NH-${p.start} إلى NH-${p.end} بشرط رول الأمن العام + رتبة ${p.labelAr}`}
+                p={p}
+              />
+            ))}
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {stats.pools.map((p) => (
               <span key={p.rankId} className={cn("rounded-md px-2 py-0.5 font-mono text-[11px]", p.available === 0 ? "bg-rose-500/10 text-rose-300" : "bg-gold-400/10 text-gold-200")}>

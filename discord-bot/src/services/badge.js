@@ -1,4 +1,54 @@
 import { supabase } from "../supabase.js";
+import { config } from "../config.js";
+import { getHighestRank } from "../ranks.js";
+
+// ---- NH military badge ranges (strict dual-role system) ----
+// A member qualifies for an NH- code ONLY when they hold BOTH the rank role
+// AND the "الأمن العام" department role simultaneously. Members of other
+// departments (الاستخبارات / الطوارئ …) holding the same rank never receive
+// an NH- prefix code.
+export const NH_RANGES = {
+  "r-pvt": { labelAr: "جندي", start: 120, end: 150 },
+  "r-pfc": { labelAr: "جندي أول", start: 90, end: 119 },
+};
+
+export function nhRangeForRank(rank) {
+  return rank ? NH_RANGES[rank.id] || null : null;
+}
+
+// Highest active NH badge number already issued within a rank range.
+async function highestNHInRange(range) {
+  const { data } = await supabase.from("officers").select("badge");
+  let max = -1;
+  for (const row of data || []) {
+    const m = String(row.badge || "").match(/^NH-(\d+)$/);
+    if (!m) continue;
+    const n = parseInt(m[1], 10);
+    if (n >= range.start && n <= range.end && n > max) max = n;
+  }
+  return max;
+}
+
+// Automated badge sequence generator with strict role-checking rules:
+//   1. Mandatory dual-role: rank role + "الأمن العام" department role.
+//   2. Sequential ranges by rank: جندي NH-120..NH-150, جندي أول NH-90..NH-119.
+//   3. Highest active badge in the range +1; else the lowest boundary.
+export async function assignMilitaryBadge(guildMember) {
+  const rank = getHighestRank(guildMember);
+  const range = nhRangeForRank(rank);
+  if (!range) return { ok: false, reason: "rank-not-eligible" };
+
+  const departmentRoleId = config.fieldMemberRoleId;
+  if (!departmentRoleId || !guildMember.roles.cache.has(departmentRoleId)) {
+    return { ok: false, reason: "not-public-security" };
+  }
+
+  const max = await highestNHInRange(range);
+  const next = max < 0 ? range.start : max + 1;
+  if (next > range.end) return { ok: false, reason: "range-exhausted" };
+
+  return { ok: true, badge: `NH-${next}`, rank: rank.id, range: `${range.start}–${range.end}` };
+}
 
 // ---- Rank badge code pools (military code assignment) ----
 // Command/officer ranks own a sequential range of C- codes (higher rank =
@@ -114,6 +164,12 @@ export function badgePrefix(badge) {
 
 // True if the officer's current badge belongs to the given rank's pool.
 export function matchesPool(badge, rank) {
+  // NH military badges (جندي / جندي أول + الأمن العام) match their rank range.
+  const nhRange = nhRangeForRank(rank);
+  if (nhRange) {
+    const m = String(badge || "").match(/^NH-(\d+)$/);
+    return !!m && parseInt(m[1], 10) >= nhRange.start && parseInt(m[1], 10) <= nhRange.end;
+  }
   const pool = BADGE_POOLS.find((p) => p.rankId === rank?.id);
   if (pool) {
     const m = String(badge || "").match(/^C-(\d+)$/);
@@ -163,6 +219,22 @@ export async function badgePoolStats() {
   const ntCodes = parse(/^NT-(\d+)$/).sort((a, b) => a - b);
   const ntEnd = ntCodes.length ? ntCodes[ntCodes.length - 1] : NT_START - 1;
 
+  const nhCodes = parse(/^NH-(\d+)$/).sort((a, b) => a - b);
+  const NH = Object.entries(NH_RANGES).map(([rankId, range]) => {
+    const used = nhCodes.filter((n) => n >= range.start && n <= range.end).sort((a, b) => a - b);
+    const max = used.length ? used[used.length - 1] : range.start - 1;
+    return {
+      rankId,
+      labelAr: range.labelAr,
+      prefix: "NH",
+      start: range.start,
+      end: range.end,
+      used: used.length,
+      available: Math.max(0, range.end - range.start + 1 - used.length),
+      next: max >= range.end ? null : `NH-${max + 1}`,
+    };
+  });
+
   return {
     pools,
     N: {
@@ -179,5 +251,6 @@ export async function badgePoolStats() {
       used: ntCodes.length,
       next: `NT-${ntEnd + 1}`,
     },
+    NH,
   };
 }

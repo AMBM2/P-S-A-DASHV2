@@ -9,15 +9,44 @@ export function getGuild(client) {
   return client.guilds.cache.first() || null;
 }
 
-// [Badge ID] Name  =>  e.g. [A-101] عبدالكريم
-export function buildNickname(officer) {
-  const badge = (officer.badge || "").trim();
-  const name = (officer.nameAr || officer.name || "").trim();
-  const nick = badge ? `[${badge}] ${name}` : name;
+// Strip a leading [XXX] code prefix so re-running never doubles the bracket.
+export function stripBadgePrefix(nick) {
+  return String(nick || "").replace(/^\s*\[[^\]]*\]\s*/, "").trim();
+}
+
+// [Badge ID] DisplayName  =>  e.g. [NH-120] F7M
+// Non-destructive: prefers an explicit displayName and preserves it exactly.
+export function buildNickname({ badge, nameAr, name, displayName } = {}) {
+  const badgeText = String(badge || "").trim();
+  const base = stripBadgePrefix(displayName || nameAr || name || "");
+  const nick = badgeText ? `[${badgeText}] ${base}` : base;
   return nick.trim();
 }
 
+// Non-destructive Discord nickname sync: prepends [code] to the member's
+// EXISTING server nickname / display name without ever overwriting it with
+// their real first/last name. setNickname is wrapped so higher-privilege
+// members (Owner/Admins) log a warning without breaking the flow.
+export async function applyBadgeNickname(guildMember, badge, reason = "Badge assignment") {
+  if (!guildMember) return { ok: false, reason: "no-member" };
+  const base = stripBadgePrefix(guildMember.nickname || guildMember.displayName || "");
+  const nick = badge ? `[${badge}] ${base}` : base;
+  if (guildMember.nickname === nick) return { ok: true, changed: false, nick };
+  if (!guildMember.manageable) {
+    console.warn(`[nickname] skipped ${guildMember.id} — member is not manageable (higher privilege).`);
+    return { ok: false, reason: "not-manageable" };
+  }
+  try {
+    await guildMember.setNickname(nick, reason);
+    return { ok: true, changed: true, nick };
+  } catch (e) {
+    console.warn(`[nickname] rename failed for ${guildMember.id} (${reason}): ${e?.message}`);
+    return { ok: false, reason: e?.message };
+  }
+}
+
 // Auto-rename an officer's Discord nickname from their portal record.
+// Non-destructive: preserves the member's existing server nickname.
 export async function syncNickname(client, officer) {
   const guild = getGuild(client);
   if (!guild || !officer.discordId) return { ok: false, reason: "no-guild-or-discord" };
@@ -29,7 +58,10 @@ export async function syncNickname(client, officer) {
   }
   if (!member.manageable) return { ok: false, reason: "not-manageable" };
 
-  const nick = buildNickname(officer);
+  const nick = buildNickname({
+    badge: officer.badge,
+    displayName: member.nickname || member.displayName,
+  });
   if (member.nickname === nick) return { ok: true, changed: false };
 
   try {

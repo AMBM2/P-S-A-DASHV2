@@ -1,8 +1,17 @@
 import { supabase } from "../supabase.js";
 import { getGuild } from "./nickname.js";
 import { getHighestRank, isOnDuty, findDepartment } from "../ranks.js";
-import { nextBadge, matchesPool } from "./badge.js";
+import { nextBadge, matchesPool, assignMilitaryBadge, nhRangeForRank } from "./badge.js";
 import { config } from "../config.js";
+
+// NH badge for جندي/جندي أول الأمن العام members, else the rank's normal pool.
+async function resolveBadge(member, rank) {
+  if (nhRangeForRank(rank)) {
+    const nh = await assignMilitaryBadge(member);
+    if (nh.ok) return nh.badge;
+  }
+  return nextBadge(rank);
+}
 
 // ---- member → officer record ----
 async function upsertOfficerFromMember(member) {
@@ -41,7 +50,7 @@ async function upsertOfficerFromMember(member) {
     if (department) patch.departmentId = department.id;
     const effectiveRank = rank || (await import("../ranks.js")).findRankByLevel(0);
     if (!cur?.badge || !matchesPool(cur.badge, effectiveRank)) {
-      patch.badge = await nextBadge(effectiveRank);
+      patch.badge = await resolveBadge(member, effectiveRank);
     }
     await supabase.from("officers").update(patch).eq("id", existing.id);
     return { officerId: existing.id, created: false };
@@ -49,7 +58,7 @@ async function upsertOfficerFromMember(member) {
 
   // Auto-create for members not yet in the portal
   const recruitRank = (await import("../ranks.js")).findRankByLevel(0);
-  const badge = await nextBadge(rank || recruitRank);
+  const badge = await resolveBadge(member, rank || recruitRank);
   const { data: created } = await supabase
     .from("officers")
     .insert({
