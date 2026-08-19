@@ -11,3 +11,7 @@ vercel
 .vercel
 *.tsbuildinfo
 next-env.d.ts
+
+discord-bot/bot*.log
+discord-bot/bot*.log.err
+

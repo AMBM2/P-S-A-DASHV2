@@ -1,7 +1,0 @@
-[bot] HTTP endpoints: http://localhost:4000/health, /live
-[bot] ✅ Logged in as PSD#8098 (1538531925059309588)
-[bot] Servers: 1
-[realtime] subscription status: SUBSCRIBED
-[rank] a5xrhqj -> none (undefined)
-[nickname] Da 🕵🏻⭐ G-18 A  35934 -> "[C-41] Da 🕵🏻⭐ G-18 A  35934"
-[recruit] onboard result: { ok: true, roleAssigned: false, badgeGenerated: false, dmSent: true }
