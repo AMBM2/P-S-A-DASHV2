@@ -44,16 +44,10 @@ export const RANKS = [
   { id: "r-tr1", title: "Recruit Trainee", titleAr: "جندي تحت التدريب", level: 0, division: "training" },
 ];
 
-// Departments (units) — mirrors lib/seed.ts in the Web Portal.
-// Detected from the member's Discord roles by normalized name.
+// Departments (units) — unified: every military unit is treated as
+// الأمن العام. Mirrors lib/seed.ts in the Web Portal.
 export const DEPARTMENTS = [
-  { id: "d-hq", name: "Headquarters", nameAr: "القيادة العامة", color: "#D9B45B" },
-  { id: "d-patrol", name: "Patrol Division", nameAr: "قسم الدوريات", color: "#E6C97D" },
-  { id: "d-traffic", name: "Traffic Unit", nameAr: "وحدة المرور", color: "#C29A44" },
-  { id: "d-k9", name: "K9 Unit", nameAr: "وحدة الكلاب", color: "#F3D489" },
-  { id: "d-swats", name: "SWAT", nameAr: "مكافحة الشغب", color: "#A37E32" },
-  { id: "d-inv", name: "Investigations", nameAr: "التحقيقات", color: "#B9A05A" },
-  { id: "d-int", name: "Internal Affairs", nameAr: "الشؤون الداخلية", color: "#D9B45B" },
+  { id: "d-hq", name: "Public Security", nameAr: "الأمن العام", color: "#D9B45B" },
 ];
 
 export function findDepartment(member) {

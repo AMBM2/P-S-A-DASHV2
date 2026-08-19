@@ -52,13 +52,7 @@ export const RANKS: Rank[] = [
 ];
 
 export const DEPARTMENTS: Department[] = [
-  { id: "d-hq", name: "Headquarters", nameAr: "القيادة العامة", color: "#D9B45B" },
-  { id: "d-patrol", name: "Patrol Division", nameAr: "قسم الدوريات", color: "#E6C97D" },
-  { id: "d-traffic", name: "Traffic Unit", nameAr: "وحدة المرور", color: "#C29A44" },
-  { id: "d-k9", name: "K9 Unit", nameAr: "وحدة الكلاب", color: "#F3D489" },
-  { id: "d-swats", name: "SWAT", nameAr: "مكافحة الشغب", color: "#A37E32" },
-  { id: "d-inv", name: "Investigations", nameAr: "التحقيقات", color: "#B9A05A" },
-  { id: "d-int", name: "Internal Affairs", nameAr: "الشؤون الداخلية", color: "#D9B45B" },
+  { id: "d-hq", name: "Public Security", nameAr: "الأمن العام", color: "#D9B45B" },
 ];
 
 // All records now live in Supabase — these seed arrays are intentionally empty.
