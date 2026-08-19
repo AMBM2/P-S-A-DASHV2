@@ -51,11 +51,11 @@ type TabDef = {
 const TABS: TabDef[] = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
   { id: "news", label: "الأخبار", icon: Newspaper, cats: ["master", "executive"], perms: ["NEWS_ADMIN"] },
+  { id: "recruit", label: "التوظيف", icon: UserPlus, cats: ["master", "executive", "hr"], perms: ["RECRUITMENT_ADMIN"] },
   { id: "roster", label: "الأفراد", icon: Users, cats: ["master", "executive", "personnel"], perms: ["SITE_ADMIN"] },
   { id: "roles", label: "الرتب العسكرية", icon: Shield, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
   { id: "leadership", label: "القيادة", icon: Crown, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
   { id: "codes", label: "الأكواد", icon: Radio, cats: ["master", "executive", "hr"], perms: ["SITE_ADMIN"] },
-  { id: "recruit", label: "التوظيف", icon: UserPlus, cats: ["master", "executive", "hr"], perms: ["RECRUITMENT_ADMIN"] },
   { id: "college", label: "الكلية العسكرية", icon: GraduationCap, cats: ["master", "executive", "hr"], perms: ["RECRUITMENT_ADMIN"] },
   { id: "exams", label: "بناء الاختبارات", icon: FileBadge, cats: ["master", "executive"], perms: ["EXAMS_ADMIN"] },
   { id: "discharge", label: "الفصل", icon: UserX, cats: ["master", "executive"], perms: ["DISCHARGE_ADMIN"] },
