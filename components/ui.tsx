@@ -1,10 +1,20 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { X, ChevronDown, Check } from "lucide-react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import * as SwitchPrimitive from "@radix-ui/react-switch";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import * as SeparatorPrimitive from "@radix-ui/react-separator";
+import * as LabelPrimitive from "@radix-ui/react-label";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
+import * as ProgressPrimitive from "@radix-ui/react-progress";
+import { X, ChevronDown, ChevronUp, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ============================= BUTTON ============================= */
@@ -96,7 +106,7 @@ export function Badge({
   );
 }
 
-/* ============================= FIELD ============================= */
+/* ============================= FIELD / LABEL (Radix) ============================= */
 export function Field({
   label,
   children,
@@ -107,12 +117,24 @@ export function Field({
   className?: string;
 }) {
   return (
-    <label className={cn("flex flex-col gap-1.5", className)}>
+    <LabelPrimitive.Root className={cn("flex flex-col gap-1.5", className)}>
       <span className="text-xs font-semibold uppercase tracking-wider text-zinc-300">{label}</span>
       {children}
-    </label>
+    </LabelPrimitive.Root>
   );
 }
+
+export const Label = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <LabelPrimitive.Root
+    ref={ref}
+    className={cn("text-xs font-semibold uppercase tracking-wider text-zinc-300", className)}
+    {...props}
+  />
+));
+Label.displayName = "Label";
 
 /* ============================= INPUT / TEXTAREA ============================= */
 export const inputClass =
@@ -126,9 +148,10 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return <textarea {...props} className={cn(inputClass, "min-h-[90px]", props.className)} />;
 }
 
-/* ============================= SELECT (custom, headless) ============================= */
-/* Replaces the native <select> (whose options render as OS-browser-blue) with a
-   fully themed, animated dropdown that matches the dark premium theme. */
+/* ============================= SELECT (Radix) ============================= */
+/* Drop-in replacement for native <select> backed by Radix primitives. Keeps the
+   same API (<option> children + value/onChange) so every existing caller works
+   unchanged. Options with an empty value render as the "placeholder" state. */
 type SelectOption = { value: string; label: React.ReactNode; disabled?: boolean };
 
 export function Select({
@@ -151,186 +174,64 @@ export function Select({
         })),
     [children]
   );
-  const current = options.find((o) => o.value === value) || options.find((o) => o.value === "");
-
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
-  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const measure = () => {
-    const el = btnRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const est = Math.min(options.length || 1, 8) * 40 + 14;
-    const openUp = r.bottom + est + 12 > window.innerHeight && r.top - est - 12 > 0;
-    setPos({ top: openUp ? r.top - 8 : r.bottom + 6, left: r.left, width: r.width });
-  };
-
-  const openMenu = () => {
-    if (disabled) return;
-    measure();
-    setActive(Math.max(0, options.findIndex((o) => o.value === value)));
-    setOpen(true);
-  };
-
-  const select = (opt: SelectOption) => {
-    setOpen(false);
-    if (opt.disabled || opt.value === value) return;
-    onChange?.({ target: { value: opt.value } } as React.ChangeEvent<HTMLSelectElement>);
-  };
-
-  // Close on outside click / Escape / reposition on scroll & resize.
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      if (btnRef.current?.contains(e.target as Node) || listRef.current?.contains(e.target as Node)) return;
-      setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    const onScroll = () => measure();
-    document.addEventListener("pointerdown", onDown);
-    document.addEventListener("keydown", onKey);
-    window.addEventListener("resize", onScroll);
-    window.addEventListener("scroll", onScroll, true);
-    return () => {
-      document.removeEventListener("pointerdown", onDown);
-      document.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", onScroll);
-      window.removeEventListener("scroll", onScroll, true);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  // Keep the highlighted option in view.
-  useEffect(() => {
-    if (!open) return;
-    const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`);
-    el?.scrollIntoView({ block: "nearest" });
-  }, [active, open]);
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (!open) {
-      if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
-        e.preventDefault();
-        openMenu();
-      }
-      return;
-    }
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setActive((a) => Math.min(options.length - 1, a + 1));
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setActive((a) => Math.max(0, a - 1));
-        break;
-      case "Home":
-        e.preventDefault();
-        setActive(0);
-        break;
-      case "End":
-        e.preventDefault();
-        setActive(options.length - 1);
-        break;
-      case "Enter":
-      case " ": {
-        e.preventDefault();
-        const opt = options[active];
-        if (opt) select(opt);
-        break;
-      }
-      case "Escape":
-        e.preventDefault();
-        setOpen(false);
-        break;
-      case "Tab":
-        setOpen(false);
-        break;
-    }
-  };
+  const empty = options.find((o) => o.value === "");
+  const current = options.find((o) => o.value === value && o.value !== "");
+  const items = options.filter((o) => o.value !== "");
 
   return (
-    <div className={cn("relative w-full", className)}>
-      <button
-        ref={btnRef}
-        type="button"
-        disabled={disabled}
-        onClick={() => (open ? setOpen(false) : openMenu())}
-        onKeyDown={onKeyDown}
+    <SelectPrimitive.Root value={String(value ?? "")} onValueChange={(v) => onChange?.({ target: { value: v } } as React.ChangeEvent<HTMLSelectElement>)} disabled={disabled}>
+      <SelectPrimitive.Trigger
         title={title}
-        aria-haspopup="listbox"
-        aria-expanded={open}
         className={cn(
           inputClass,
           "flex items-center justify-between gap-2 text-left rtl:text-right disabled:cursor-not-allowed disabled:opacity-60"
         )}
       >
-        <span className={cn("truncate", !current && "text-zinc-500")}>
-          {current ? current.label : placeholder}
-        </span>
-        <ChevronDown
-          size={15}
-          className={cn("shrink-0 text-gold-300/80 transition-transform duration-200", open && "rotate-180")}
-        />
-      </button>
-
-      {typeof document !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {open && pos && (
-              <motion.div
-                ref={listRef}
-                role="listbox"
-                initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.98 }}
-                transition={{ duration: 0.15 }}
-                style={{ position: "fixed", top: pos.top, left: pos.left, width: pos.width }}
-                className="z-[100] max-h-72 overflow-y-auto scrollbar-thin rounded-xl border border-gold-400/25 bg-[#14161b]/95 p-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.85),0_0_0_1px_rgba(var(--accent-rgb),0.08),0_0_40px_-18px_rgba(var(--accent-rgb),0.4)] backdrop-blur-xl"
+        <SelectPrimitive.Value>
+          <span className={cn("truncate", !current && !empty && "text-zinc-500")}>
+            {current?.label ?? (value === "" && empty ? empty.label : placeholder)}
+          </span>
+        </SelectPrimitive.Value>
+        <SelectPrimitive.Icon>
+          <ChevronDown size={15} className="shrink-0 text-gold-300/80" />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Content
+          position="popper"
+          sideOffset={6}
+          className="z-[100] max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-xl border border-gold-400/25 bg-[#14161b]/95 p-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.85),0_0_0_1px_rgba(var(--accent-rgb),0.08),0_0_40px_-18px_rgba(var(--accent-rgb),0.4)] backdrop-blur-xl"
+        >
+          <SelectPrimitive.ScrollUpButton className="flex items-center justify-center py-1 text-gold-300/70">
+            <ChevronUp size={13} />
+          </SelectPrimitive.ScrollUpButton>
+          <SelectPrimitive.Viewport className="p-0.5">
+            {items.map((opt) => (
+              <SelectPrimitive.Item
+                key={opt.value}
+                value={opt.value}
+                disabled={opt.disabled}
+                className="flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-right text-sm outline-none data-[highlighted]:bg-gold-400/15 data-[highlighted]:text-gold-100 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40"
               >
-                {options.map((opt, i) => {
-                  const sel = opt.value === value;
-                  const act = i === active;
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      role="option"
-                      aria-selected={sel}
-                      data-index={i}
-                      disabled={opt.disabled}
-                      onMouseEnter={() => setActive(i)}
-                      onClick={() => select(opt)}
-                      className={cn(
-                        "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left rtl:text-right text-sm transition-colors",
-                        sel
-                          ? "bg-gold-400/15 text-gold-100"
-                          : act
-                            ? "bg-white/5 text-zinc-100"
-                            : "text-zinc-300 hover:bg-white/5",
-                        opt.disabled && "cursor-not-allowed opacity-40"
-                      )}
-                    >
-                      <span className="truncate">{opt.label}</span>
-                      {sel && <Check size={14} className="shrink-0 text-gold-300" />}
-                    </button>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
-    </div>
+                <SelectPrimitive.ItemText>
+                  <span className="truncate">{opt.label}</span>
+                </SelectPrimitive.ItemText>
+                <SelectPrimitive.ItemIndicator>
+                  <Check size={14} className="shrink-0 text-gold-300" />
+                </SelectPrimitive.ItemIndicator>
+              </SelectPrimitive.Item>
+            ))}
+          </SelectPrimitive.Viewport>
+          <SelectPrimitive.ScrollDownButton className="flex items-center justify-center py-1 text-gold-300/70">
+            <ChevronDown size={13} />
+          </SelectPrimitive.ScrollDownButton>
+        </SelectPrimitive.Content>
+      </SelectPrimitive.Portal>
+    </SelectPrimitive.Root>
   );
 }
 
-/* ============================= MODAL ============================= */
+/* ============================= MODAL (Radix Dialog + Framer) ============================= */
 export function Modal({
   open,
   onClose,
@@ -344,36 +245,221 @@ export function Modal({
   children: React.ReactNode;
   wide?: boolean;
 }) {
-  if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 14 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className={cn(
-          "glass-strong clip-notch hud-frame relative w-full overflow-hidden border border-gold-400/20 p-6 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95),0_0_0_1px_rgba(var(--accent-rgb),0.1),0_0_70px_-25px_rgba(var(--accent-rgb),0.35)] max-h-[90vh] overflow-y-auto scrollbar-thin",
-          wide ? "max-w-3xl" : "max-w-lg"
+    <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
+      <AnimatePresence>
+        {open && (
+          <DialogPrimitive.Portal forceMount>
+            <DialogPrimitive.Overlay asChild forceMount>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
+                onClick={onClose}
+              />
+            </DialogPrimitive.Overlay>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <DialogPrimitive.Content asChild forceMount>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 14 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: 10 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className={cn(
+                    "glass-strong clip-notch hud-frame relative w-full overflow-hidden border border-gold-400/20 p-6 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95),0_0_0_1px_rgba(var(--accent-rgb),0.1),0_0_70px_-25px_rgba(var(--accent-rgb),0.35)] max-h-[90vh] overflow-y-auto scrollbar-thin",
+                    wide ? "max-w-3xl" : "max-w-lg"
+                  )}
+                >
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/55 to-transparent" />
+                  <div className="mb-4 flex items-center justify-between">
+                    <DialogPrimitive.Title className="font-display text-lg font-bold gold-text">
+                      {title}
+                    </DialogPrimitive.Title>
+                    <DialogPrimitive.Close asChild>
+                      <button
+                        onClick={onClose}
+                        className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
+                        aria-label="إغلاق"
+                      >
+                        <X size={20} />
+                      </button>
+                    </DialogPrimitive.Close>
+                  </div>
+                  {children}
+                </motion.div>
+              </DialogPrimitive.Content>
+            </div>
+          </DialogPrimitive.Portal>
         )}
-      >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/55 to-transparent" />
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-display text-lg font-bold gold-text">{title}</h3>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        {children}
-      </motion.div>
-    </div>
+      </AnimatePresence>
+    </DialogPrimitive.Root>
   );
 }
 
-/* ============================= PROGRESS BAR ============================= */
+/* ============================= TABS (Radix) ============================= */
+export const Tabs = TabsPrimitive.Root;
+
+export const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn("flex flex-wrap gap-1 rounded-xl border border-gold-400/15 bg-obsidian-900/50 p-1", className)}
+    {...props}
+  />
+));
+TabsList.displayName = "TabsList";
+
+export const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm transition-all outline-none data-[state=active]:bg-gold-400/15 data-[state=active]:text-gold-200 text-zinc-400 hover:bg-white/5 hover:text-zinc-200",
+      className
+    )}
+    {...props}
+  />
+));
+TabsTrigger.displayName = "TabsTrigger";
+
+export const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content ref={ref} className={cn("mt-2 outline-none", className)} {...props} />
+));
+TabsContent.displayName = "TabsContent";
+
+/* ============================= TOOLTIP (Radix) ============================= */
+export const TooltipProvider = TooltipPrimitive.Provider;
+export const Tooltip = TooltipPrimitive.Root;
+export const TooltipTrigger = TooltipPrimitive.Trigger;
+
+export const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 8, ...props }, ref) => (
+  <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "glass-strong clip-notch-sm z-[130] border border-gold-400/25 px-3 py-1.5 text-xs text-zinc-200 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)]",
+        className
+      )}
+      {...props}
+    />
+  </TooltipPrimitive.Portal>
+));
+TooltipContent.displayName = "TooltipContent";
+
+/* ============================= SWITCH (Radix) ============================= */
+export const Switch = React.forwardRef<
+  React.ElementRef<typeof SwitchPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SwitchPrimitive.Root
+    ref={ref}
+    className={cn(
+      "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-gold-400/30 bg-obsidian-800 transition-colors data-[state=checked]:bg-gold-400 data-[state=checked]:border-gold-400 outline-none disabled:cursor-not-allowed disabled:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    <SwitchPrimitive.Thumb className="pointer-events-none block h-4 w-4 rounded-full bg-zinc-200 shadow-lg transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0 rtl:data-[state=checked]:-translate-x-4" />
+  </SwitchPrimitive.Root>
+));
+Switch.displayName = "Switch";
+
+/* ============================= CHECKBOX (Radix) ============================= */
+export const Checkbox = React.forwardRef<
+  React.ElementRef<typeof CheckboxPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <CheckboxPrimitive.Root
+    ref={ref}
+    className={cn(
+      "flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border border-gold-400/40 bg-obsidian-800 outline-none transition-colors data-[state=checked]:bg-gold-400 data-[state=checked]:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    <CheckboxPrimitive.Indicator>
+      <Check size={12} strokeWidth={3} />
+    </CheckboxPrimitive.Indicator>
+  </CheckboxPrimitive.Root>
+));
+Checkbox.displayName = "Checkbox";
+
+/* ============================= SEPARATOR (Radix) ============================= */
+export const Separator = React.forwardRef<
+  React.ElementRef<typeof SeparatorPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+>(({ className, orientation = "horizontal", ...props }, ref) => (
+  <SeparatorPrimitive.Root
+    ref={ref}
+    orientation={orientation}
+    className={cn("shrink-0 bg-gold-400/15", orientation === "horizontal" ? "h-px w-full" : "h-full w-px", className)}
+    {...props}
+  />
+));
+Separator.displayName = "Separator";
+
+/* ============================= ACCORDION (Radix) ============================= */
+export const Accordion = AccordionPrimitive.Root;
+
+export const AccordionItem = React.forwardRef<
+  React.ElementRef<typeof AccordionPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
+>(({ className, ...props }, ref) => (
+  <AccordionPrimitive.Item
+    ref={ref}
+    className={cn("rounded-xl border border-gold-400/15 bg-obsidian-900/40", className)}
+    {...props}
+  />
+));
+AccordionItem.displayName = "AccordionItem";
+
+export const AccordionTrigger = React.forwardRef<
+  React.ElementRef<typeof AccordionPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <AccordionPrimitive.Header className="flex">
+    <AccordionPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "flex flex-1 items-center justify-between gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-zinc-200 transition-colors outline-none hover:text-gold-200 [&[data-state=open]>svg]:rotate-180",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <ChevronDown size={15} className="shrink-0 text-gold-300/80 transition-transform duration-200" />
+    </AccordionPrimitive.Trigger>
+  </AccordionPrimitive.Header>
+));
+AccordionTrigger.displayName = "AccordionTrigger";
+
+export const AccordionContent = React.forwardRef<
+  React.ElementRef<typeof AccordionPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <AccordionPrimitive.Content
+    ref={ref}
+    className="overflow-hidden text-sm data-[state=closed]:animate-none"
+    {...props}
+  >
+    <div className={cn("px-4 pb-4 pt-0 text-zinc-400", className)}>{children}</div>
+  </AccordionPrimitive.Content>
+));
+AccordionContent.displayName = "AccordionContent";
+
+/* ============================= PROGRESS (Radix) ============================= */
 export function ProgressBar({
   value,
   color = "var(--accent)",
@@ -384,55 +470,16 @@ export function ProgressBar({
   className?: string;
 }) {
   return (
-    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-white/8", className)}>
-      <div
+    <ProgressPrimitive.Root
+      value={value}
+      className={cn("h-2 w-full overflow-hidden rounded-full bg-white/8", className)}
+      style={{ boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)" }}
+    >
+      <ProgressPrimitive.Indicator
         className="h-full rounded-full transition-all duration-500"
-        style={{
-          width: `${Math.min(100, Math.max(0, value))}%`,
-          background: color,
-          boxShadow: `0 0 10px ${color}`,
-        }}
+        style={{ width: `${Math.min(100, Math.max(0, value))}%`, background: color, boxShadow: `0 0 10px ${color}` }}
       />
-    </div>
-  );
-}
-
-/* ============================= STAT ============================= */
-export function Stat({
-  label,
-  value,
-  icon,
-  tone = "gold",
-}: {
-  label: string;
-  value: React.ReactNode;
-  icon?: React.ReactNode;
-  tone?: string;
-}) {
-  const colors: Record<string, string> = {
-    gold: "text-gold-300",
-    green: "text-emerald-300",
-    rose: "text-rose-300",
-    indigo: "text-indigo-300",
-  };
-  return (
-    <Card className="flex items-center gap-4">
-      {icon && <div className={cn("text-2xl", colors[tone])}>{icon}</div>}
-      <div>
-        <div className="text-xs uppercase tracking-wider text-zinc-400">{label}</div>
-        <div className={cn("font-display text-2xl font-bold", colors[tone])}>{value}</div>
-      </div>
-    </Card>
-  );
-}
-
-/* ============================= EMPTY STATE ============================= */
-export function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-3 h-12 w-12 rounded-full border border-dashed border-gold-400/40" />
-      <p className="text-zinc-400">{message}</p>
-    </div>
+    </ProgressPrimitive.Root>
   );
 }
 
@@ -497,3 +544,42 @@ export const DropdownMenuSeparator = React.forwardRef<
   />
 ));
 DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
+
+/* ============================= STAT ============================= */
+export function Stat({
+  label,
+  value,
+  icon,
+  tone = "gold",
+}: {
+  label: string;
+  value: React.ReactNode;
+  icon?: React.ReactNode;
+  tone?: string;
+}) {
+  const colors: Record<string, string> = {
+    gold: "text-gold-300",
+    green: "text-emerald-300",
+    rose: "text-rose-300",
+    indigo: "text-indigo-300",
+  };
+  return (
+    <Card className="flex items-center gap-4">
+      {icon && <div className={cn("text-2xl", colors[tone])}>{icon}</div>}
+      <div>
+        <div className="text-xs uppercase tracking-wider text-zinc-400">{label}</div>
+        <div className={cn("font-display text-2xl font-bold", colors[tone])}>{value}</div>
+      </div>
+    </Card>
+  );
+}
+
+/* ============================= EMPTY STATE ============================= */
+export function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="mb-3 h-12 w-12 rounded-full border border-dashed border-gold-400/40" />
+      <p className="text-zinc-400">{message}</p>
+    </div>
+  );
+}

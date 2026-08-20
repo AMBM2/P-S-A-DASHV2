@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui";
 import { cn } from "@/lib/format";
 import useEmblaCarousel from "embla-carousel-react";
+import { Transition } from "@headlessui/react";
 
 const NAV = [
   { href: "/", label: "الرئيسية", icon: Home },
@@ -143,7 +145,14 @@ export function Navbar() {
               </span>
               <span className="text-xs font-bold text-gold-200">{onDuty} في الخدمة</span>
             </div>
-            <AudioPlayer />
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AudioPlayer />
+                </TooltipTrigger>
+                <TooltipContent side="bottom">النشيد الرسمي</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <button
               onClick={() => setOpen(!open)}
               className="clip-notch-sm border border-gold-400/20 p-2 text-zinc-300 md:hidden"
@@ -153,7 +162,15 @@ export function Navbar() {
           </div>
         </div>
 
-        {open && (
+        <Transition
+          show={open}
+          enter="transition-all duration-200 ease-out"
+          enterFrom="opacity-0 -translate-y-2"
+          enterTo="opacity-100 translate-y-0"
+          leave="transition-all duration-150 ease-in"
+          leaveFrom="opacity-100 translate-y-0"
+          leaveTo="opacity-0 -translate-y-2"
+        >
           <div className="border-t border-gold-400/20 md:hidden">
             <nav className="mx-auto grid max-w-[1500px] grid-cols-2 gap-1 p-3">
               {NAV.map((item) => (
@@ -174,7 +191,7 @@ export function Navbar() {
               ))}
             </nav>
           </div>
-        )}
+        </Transition>
       </div>
     </>
   );

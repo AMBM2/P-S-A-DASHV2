@@ -33,7 +33,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { Button, Card, Stat, Badge } from "@/components/ui";
+import { Button, Card, Stat, Badge, Switch } from "@/components/ui";
 import { formatDate, cn } from "@/lib/format";
 import { uploadMedia, isYoutubeUrl } from "@/lib/upload";
 import type { AuditEntry } from "@/lib/types";
@@ -465,11 +465,10 @@ export function AdminOverview() {
         </p>
 
         <label className="mb-3 flex cursor-pointer items-center gap-2 text-sm text-zinc-200">
-          <input
-            type="checkbox"
+          <Switch
             checked={!!settings.welcome?.enabled}
-            onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, enabled: e.target.checked } })}
-            className="h-4 w-4 accent-emerald-400"
+            onCheckedChange={(checked) => updateSettings({ welcome: { ...settings.welcome!, enabled: checked } })}
+            aria-label="تفعيل النافذة المنبثقة"
           />
           تفعيل النافذة المنبثقة
         </label>

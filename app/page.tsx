@@ -8,6 +8,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft, Play } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, ProgressBar, EmptyState } from "@/components/ui";
+import { AuroraBackground, GlowCard } from "@/components/effects";
 import { timeAgo, number } from "@/lib/format";
 import { AR } from "@/lib/ar";
 import { RANKS } from "@/lib/seed";
@@ -52,6 +53,7 @@ export default function HomePage() {
     <div>
       {/* Tactical Command Hero Banner */}
       <div className="clip-notch hud-frame gold-shimmer relative mb-10 overflow-hidden border border-gold-400/25 bg-gradient-to-br from-obsidian-800 via-obsidian-900 to-black p-10 md:p-14">
+        <AuroraBackground />
         <div className="pointer-events-none absolute inset-0 hazard-stripes opacity-20" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{
           backgroundImage: "radial-gradient(circle at 1px 1px, var(--accent) 1px, transparent 0)",
@@ -282,7 +284,7 @@ export default function HomePage() {
 
         {/* Module 2 + 3: On-Duty Counter & Rank Distribution */}
         <div className="space-y-6">
-          <Card className="text-center">
+          <GlowCard intensity={0.6} className="text-center">
             <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-gold-400/30 bg-gold-400/10 gold-pulse">
               <ShieldCheck className="h-7 w-7 text-gold-300" />
             </div>
@@ -297,7 +299,7 @@ export default function HomePage() {
               </span>
               {lang === "ar" ? "الخدمة الآن" : "On shift"}
             </span>
-          </Card>
+          </GlowCard>
 
           <Card>
             <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-bold gold-text">

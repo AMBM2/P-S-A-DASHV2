@@ -13,7 +13,7 @@ import {
   RefreshCw,
   ClipboardCheck,
 } from "lucide-react";
-import { Button, Card, Badge, Modal, Field, EmptyState } from "@/components/ui";
+import { Button, Card, Badge, Modal, Field, EmptyState, Tabs, TabsList, TabsTrigger } from "@/components/ui";
 import { supabase } from "@/lib/supabase";
 import { useStore } from "@/lib/store";
 import { ExamPanel } from "./ExamPanel";
@@ -125,20 +125,15 @@ export function RecruitmentManager() {
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-display text-lg font-bold gold-text">طلبات التجنيد</h3>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-gold-400/15 bg-obsidian-900/60 p-1">
-            {(["pending", "approved", "denied", "all"] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-                  filter === f ? "bg-gold-400/15 text-gold-200" : "text-zinc-400 hover:text-zinc-200"
-                )}
-              >
-                {f === "pending" ? "قيد المراجعة" : f === "approved" ? "مقبول" : f === "denied" ? "مرفوض" : "الكل"}
-              </button>
-            ))}
-          </div>
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)} className="rounded-lg border border-gold-400/15 bg-obsidian-900/60 p-1">
+            <TabsList className="border-0 bg-transparent p-0">
+              {(["pending", "approved", "denied", "all"] as const).map((f) => (
+                <TabsTrigger key={f} value={f} className="rounded-md px-3 py-1.5 text-xs">
+                  {f === "pending" ? "قيد المراجعة" : f === "approved" ? "مقبول" : f === "denied" ? "مرفوض" : "الكل"}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
           <div className="relative">
             <Search size={15} className="absolute top-1/2 -translate-y-1/2 text-zinc-500 ltr:left-3 rtl:right-3" />
             <input

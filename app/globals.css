@@ -208,6 +208,12 @@ body {
   }
 }
 
+@keyframes aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  33% { transform: translate(3%, -2%) scale(1.06); opacity: 0.85; }
+  66% { transform: translate(-3%, 2%) scale(0.97); opacity: 1.05; }
+}
+
 .gold-glow {
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.16), 0 12px 44px -18px rgba(var(--accent-rgb), 0.3);
 }
