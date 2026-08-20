@@ -3,62 +3,62 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   V100 — TACTICAL COMMAND DESIGN SYSTEM
-   Obsidian Command HQ · Champagne Brass · Olive Steel
-   Angular clipped panels, HUD corner frames, brushed-carbon backdrop.
+   V200 — LUXE GLASS DESIGN SYSTEM
+   Deep-emerald obsidian · Frosted crystal glass · Jade accents
+   Smooth rounded panels, soft glows, luminous jade backdrop.
    ========================================================================== */
 :root {
   color-scheme: dark;
 
-  --accent-100: #f8efd8;
-  --accent-200: #f0ddab;
-  --accent-300: #e7cb85;
-  --accent-400: #dcb45e;
-  --accent-500: #c49a46;
-  --accent-600: #a27c33;
-  --accent-700: #7c5f28;
-  --accent: #dcb45e;
-  --accent-bright: #f4d78f;
-  --accent-rgb: 220, 180, 94;
-  --accent-bright-rgb: 244, 215, 143;
+  --accent-100: #d1fae5;
+  --accent-200: #a7f3d0;
+  --accent-300: #6ee7b7;
+  --accent-400: #34d399;
+  --accent-500: #10b981;
+  --accent-600: #059669;
+  --accent-700: #047857;
+  --accent: #34d399;
+  --accent-bright: #6ee7b7;
+  --accent-rgb: 52, 211, 153;
+  --accent-bright-rgb: 110, 231, 183;
 
-  --foreground: #efe9dc;
-  --muted: #9a9387;
+  --foreground: #ecf7f2;
+  --muted: #8aa79e;
 
-  --glass: 19, 22, 16;
-  --bg: #070807;
-  --bg-2: #0b0d0a;
-  --bg-800: #121410;
-  --bg-700: #1a1d16;
+  --glass: 11, 24, 20;
+  --bg: #050a09;
+  --bg-2: #081210;
+  --bg-800: #0d1a16;
+  --bg-700: #14251f;
 
-  --olive: #96a06b;
-  --olive-rgb: 150, 160, 107;
-  --steel: #9aa4a6;
+  --jade: #2dd4bf;
+  --jade-rgb: 45, 212, 191;
+  --silver: #a5c0b8;
 
-  --line: rgba(220, 180, 94, 0.16);
-  --line-strong: rgba(220, 180, 94, 0.3);
+  --line: rgba(52, 211, 153, 0.16);
+  --line-strong: rgba(52, 211, 153, 0.32);
 
   /* ============ shadcn/ui DESIGN TOKENS (HSL) ============ */
-  --background: 100 10% 4%;
-  --foreground: 40 26% 92%;
-  --card: 100 12% 6%;
-  --card-foreground: 40 26% 92%;
-  --popover: 100 12% 7%;
-  --popover-foreground: 40 26% 92%;
-  --primary: 40 58% 58%;
-  --primary-foreground: 100 24% 8%;
-  --secondary: 100 10% 13%;
-  --secondary-foreground: 40 20% 88%;
-  --muted: 100 10% 13%;
-  --muted-foreground: 40 6% 62%;
-  --accent-token: 40 58% 58%;
-  --accent-foreground: 100 24% 8%;
+  --background: 165 12% 4%;
+  --foreground: 160 30% 92%;
+  --card: 165 14% 6%;
+  --card-foreground: 160 30% 92%;
+  --popover: 165 14% 7%;
+  --popover-foreground: 160 30% 92%;
+  --primary: 160 66% 52%;
+  --primary-foreground: 165 30% 6%;
+  --secondary: 165 10% 13%;
+  --secondary-foreground: 160 20% 88%;
+  --muted: 165 10% 13%;
+  --muted-foreground: 160 8% 62%;
+  --accent-token: 160 66% 52%;
+  --accent-foreground: 165 30% 6%;
   --destructive: 0 62% 55%;
   --destructive-foreground: 0 0% 98%;
-  --border: 40 28% 22%;
-  --input: 40 26% 16%;
-  --ring: 40 68% 55%;
-  --radius: 0.35rem;
+  --border: 160 28% 22%;
+  --input: 160 24% 16%;
+  --ring: 160 70% 55%;
+  --radius: 0.85rem;
 }
 
 /* ============ GLOBAL ============ */
@@ -74,9 +74,9 @@ body {
   margin: 0;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 70% 46% at 50% -12%, rgba(var(--accent-rgb), 0.1), transparent),
-    radial-gradient(ellipse 34% 24% at 90% 20%, rgba(var(--olive-rgb), 0.05), transparent),
-    radial-gradient(ellipse 42% 32% at 6% 84%, rgba(var(--olive-rgb), 0.04), transparent);
+    radial-gradient(ellipse 72% 48% at 50% -14%, rgba(var(--accent-rgb), 0.12), transparent),
+    radial-gradient(ellipse 38% 26% at 92% 18%, rgba(var(--jade-rgb), 0.06), transparent),
+    radial-gradient(ellipse 44% 34% at 4% 86%, rgba(var(--jade-rgb), 0.05), transparent);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-cairo), var(--font-tajawal), system-ui, sans-serif;
@@ -86,44 +86,42 @@ body {
 }
 
 ::selection {
-  background: rgba(var(--accent-rgb), 0.28);
+  background: rgba(var(--accent-rgb), 0.32);
   color: #fff;
 }
 
-/* ============ COMMAND GRID BACKDROP ============ */
+/* ============ LUMINOUS GRID BACKDROP ============ */
 .grid-backdrop {
   position: fixed;
   inset: 0;
   z-index: -3;
   background-image:
-    linear-gradient(rgba(var(--accent-rgb), 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.025) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse at 50% 0%, black 34%, transparent 82%);
+    linear-gradient(rgba(var(--accent-rgb), 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.03) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 84%);
 }
 
-/* ============ BRUSHED CARBON OVERLAY ============ */
+/* ============ SILK OVERLAY ============ */
 .carbon-bg {
   position: fixed;
   inset: 0;
   z-index: -4;
   pointer-events: none;
   background-image:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.014) 0 2px, transparent 2px 4px),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.008) 0 2px, transparent 2px 4px);
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(var(--accent-rgb), 0.05), transparent 60%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.35) 100%);
 }
 
-/* ============ TACTICAL SCANLINES ============ */
+/* ============ SOFT AMBIENT DRIFT ============ */
 .tactical-grid {
   position: fixed;
   inset: 0;
   z-index: -2;
   pointer-events: none;
   background:
-    repeating-linear-gradient(0deg, rgba(150, 160, 107, 0.03) 0 1px, transparent 1px 4px),
-    linear-gradient(115deg, transparent 42%, rgba(220, 180, 94, 0.05) 50%, transparent 58%);
-  background-size: 100% 100%, 100% 100%;
-  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 85%);
+    radial-gradient(circle at 18% 22%, rgba(var(--jade-rgb), 0.05), transparent 42%),
+    radial-gradient(circle at 84% 78%, rgba(var(--accent-rgb), 0.05), transparent 46%);
 }
 
 /* ============ GLOWING AMBIENT ORBS ============ */
@@ -131,8 +129,9 @@ body {
   position: fixed;
   z-index: -1;
   border-radius: 9999px;
-  filter: blur(90px);
+  filter: blur(100px);
   pointer-events: none;
+  background: rgba(var(--accent-rgb), 0.1);
 }
 
 /* ============ ELEGANT EDGE VIGNETTE ============ */
@@ -142,35 +141,35 @@ body {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 120% 90% at 50% 0%, transparent 52%, rgba(0, 0, 0, 0.62) 100%),
-    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(0, 0, 0, 0.5), transparent 70%);
+    radial-gradient(ellipse 120% 90% at 50% 0%, transparent 58%, rgba(0, 0, 0, 0.55) 100%),
+    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(0, 0, 0, 0.45), transparent 70%);
 }
 
-/* ============ COMMAND PANELS ============ */
+/* ============ FROSTED CRYSTAL PANELS ============ */
 .glass {
-  background: rgba(var(--glass), 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(var(--glass), 0.68);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--line);
 }
 
 .glass-strong {
-  background: rgba(var(--glass), 0.86);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(var(--glass), 0.88);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border: 1px solid var(--line-strong);
 }
 
-/* ============ CLIPPED CORNERS (military cut) ============ */
+/* ============ SMOOTH SOFT CORNERS (luxe — no military cuts) ============ */
 .clip-notch {
-  clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  border-radius: 1.25rem;
 }
 
 .clip-notch-sm {
-  clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  border-radius: 0.7rem;
 }
 
-/* ============ HUD CORNER FRAME ============ */
+/* ============ JADE FRAME GLOW ============ */
 .hud-frame {
   position: relative;
 }
@@ -180,33 +179,34 @@ body {
   inset: 0;
   z-index: 5;
   pointer-events: none;
+  border-radius: inherit;
   background:
-    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 18px 2px,
-    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 2px 18px,
-    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 18px 2px,
-    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 2px 18px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 18px 2px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 2px 18px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 18px 2px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 2px 18px;
+    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 26px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 1.5px 26px,
+    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 26px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 1.5px 26px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 26px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 1.5px 26px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 26px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 1.5px 26px;
   background-repeat: no-repeat;
-  opacity: 0.55;
+  opacity: 0.4;
   transition: opacity 0.25s ease;
 }
 .hud-frame:hover::before {
-  opacity: 0.95;
+  opacity: 0.9;
 }
 
-/* ============ HAZARD STRIPES ============ */
+/* ============ JADE VEIN STRIPES ============ */
 .hazard-stripes {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(var(--accent-rgb), 0.12) 0 10px,
+    rgba(var(--accent-rgb), 0.1) 0 10px,
     transparent 10px 20px
   );
 }
 
-/* ============ GOLDEN SHIMMER SWEEP ============ */
+/* ============ JADE SHIMMER SWEEP ============ */
 .gold-shimmer {
   position: relative;
   overflow: hidden;
@@ -219,9 +219,9 @@ body {
   background: linear-gradient(
     105deg,
     transparent 22%,
-    rgba(var(--accent-bright-rgb), 0.09) 45%,
+    rgba(var(--accent-bright-rgb), 0.08) 45%,
     rgba(var(--accent-bright-rgb), 0.16) 50%,
-    rgba(var(--accent-bright-rgb), 0.09) 55%,
+    rgba(var(--accent-bright-rgb), 0.08) 55%,
     transparent 78%
   );
   transition: transform 0.95s ease;
@@ -231,13 +231,13 @@ body {
   transform: translateX(110%);
 }
 
-/* ============ GOLD TEXT ============ */
+/* ============ JADE GRADIENT TEXT ============ */
 .gold-text {
   background: linear-gradient(
     118deg,
     var(--accent-200) 0%,
     var(--accent-bright) 38%,
-    var(--accent) 62%,
+    var(--accent-400) 62%,
     var(--accent-200) 88%
   );
   -webkit-background-clip: text;
@@ -245,15 +245,15 @@ body {
   color: transparent;
 }
 
-/* ============ BRUSHED STEEL TEXT ============ */
+/* ============ SILVER-WASH TEXT ============ */
 .steel-text {
   background: linear-gradient(
     100deg,
-    #c9d1cf 0%,
-    #f2f6f4 30%,
-    #8d9a9b 55%,
-    #dbe3e2 80%,
-    #9aa4a6 100%
+    #a5c0b8 0%,
+    #eef7f3 30%,
+    #6f9188 55%,
+    #cfe2dc 80%,
+    #a5c0b8 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -262,34 +262,34 @@ body {
 
 /* ============ BORDER GLOWS ============ */
 .gold-border-glow {
-  border: 1px solid rgba(var(--accent-rgb), 0.3);
-  box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.15);
+  border: 1px solid rgba(var(--accent-rgb), 0.32);
+  box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.14);
 }
 
 .neon-border {
-  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border: 1px solid rgba(var(--accent-rgb), 0.26);
   box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.14) inset;
 }
 
-/* ============ ACCESSORIES: GLOWING GOLD EFFECTS ============ */
+/* ============ ACCESSORIES: LUMINOUS JADE EFFECTS ============ */
 .gold-pulse {
   animation: goldPulse 2.6s ease-in-out infinite;
 }
 @keyframes goldPulse {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.25), 0 0 22px rgba(var(--accent-rgb), 0.18);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.22), 0 0 22px rgba(var(--accent-rgb), 0.16);
   }
   50% {
-    box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.55), 0 0 40px rgba(var(--accent-rgb), 0.35);
+    box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.5), 0 0 40px rgba(var(--accent-rgb), 0.32);
   }
 }
 
 .gold-glow {
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 10px 40px -18px rgba(var(--accent-rgb), 0.35);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.16), 0 12px 44px -18px rgba(var(--accent-rgb), 0.35);
 }
 
 .gold-glow-strong {
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.35), 0 0 35px -6px rgba(var(--accent-rgb), 0.55), 0 0 80px -20px rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.34), 0 0 35px -6px rgba(var(--accent-rgb), 0.5), 0 0 80px -20px rgba(var(--accent-rgb), 0.38);
 }
 
 .gold-inner-frame {
@@ -298,9 +298,9 @@ body {
 .gold-inner-frame::before {
   content: "";
   position: absolute;
-  inset: 6px;
+  inset: 7px;
   pointer-events: none;
-  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
   border-radius: inherit;
 }
 
@@ -317,30 +317,28 @@ body {
   background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.5), transparent);
 }
 .gold-flourish .diamond {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   transform: rotate(45deg);
   border: 1px solid rgba(var(--accent-rgb), 0.7);
   box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
   background: rgba(var(--accent-rgb), 0.12);
 }
 
-/* ============ V100 COMMAND BADGE ============ */
+/* ============ V200 LUXE BADGE ============ */
 .v100-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border: 1px solid rgba(var(--accent-rgb), 0.4);
-  background:
-    linear-gradient(115deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent-rgb), 0.05)),
-    repeating-linear-gradient(-45deg, rgba(var(--accent-rgb), 0.05) 0 6px, transparent 6px 12px);
+  border-radius: 9999px;
+  background: linear-gradient(115deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent-rgb), 0.05));
   color: var(--accent-300);
-  font-family: var(--font-orbitron), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  letter-spacing: 0.14em;
 }
 
 /* ============ LEGACY SPACE ACCESSORIES (kept for background components) ============ */
@@ -391,7 +389,7 @@ body {
 .space-planet {
   position: absolute;
   border-radius: 9999px;
-  background: radial-gradient(circle at 32% 28%, #34343f, #14141c 52%, #07070a 100%);
+  background: radial-gradient(circle at 32% 28%, #0f332b, #081712 52%, #02090a 100%);
   box-shadow:
     inset -18px -14px 50px rgba(0, 0, 0, 0.9),
     0 0 70px rgba(var(--accent-rgb), 0.16);
@@ -405,7 +403,7 @@ body {
   box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.18), inset 0 0 30px rgba(var(--accent-rgb), 0.1);
 }
 
-/* ============ LEGACY GOLD DUST ============ */
+/* ============ LEGACY JADE DUST ============ */
 .gold-dust {
   position: fixed;
   inset: 0;
@@ -418,7 +416,7 @@ body {
   bottom: -10px;
   width: 3px;
   height: 3px;
-  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.6), rgba(var(--accent-rgb), 0.06));
+  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.55), rgba(var(--accent-rgb), 0.06));
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.3);
   animation: dust 13s linear infinite;
@@ -474,7 +472,7 @@ select optgroup {
   color: var(--foreground);
 }
 select option:checked {
-  background-color: rgba(220, 180, 94, 0.25);
+  background-color: rgba(52, 211, 153, 0.25);
   color: var(--accent-200);
 }
 
@@ -489,9 +487,9 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px var(--bg-800) inset;
-  -webkit-text-fill-color: #f3f1ea;
-  caret-color: #f3f1ea;
-  border-radius: 0.35rem;
+  -webkit-text-fill-color: #f0faf5;
+  caret-color: #f0faf5;
+  border-radius: 0.85rem;
 }
 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
   color-scheme: dark;
@@ -506,7 +504,7 @@ input[type="radio"] {
 input.rounded-lg,
 select.rounded-lg,
 textarea.rounded-lg {
-  border-radius: 0.4rem;
+  border-radius: 0.85rem;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
@@ -514,6 +512,6 @@ select:focus,
 textarea:focus {
   outline: none;
   box-shadow:
-    0 0 0 1px rgba(var(--accent-rgb), 0.2),
-    0 0 22px -8px rgba(var(--accent-rgb), 0.5);
+    0 0 0 1px rgba(var(--accent-rgb), 0.22),
+    0 0 24px -8px rgba(var(--accent-rgb), 0.5);
 }

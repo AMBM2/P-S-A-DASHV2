@@ -53,14 +53,14 @@ export function Navbar() {
           <div className="flex shrink-0 items-center gap-3">
             <Link href="/" className="group flex items-center gap-3">
               <div className="relative flex h-12 w-12 items-center justify-center">
-                <div className="clip-hex absolute inset-0 bg-gradient-to-b from-gold-400/40 to-gold-600/10 border border-gold-400/40 shadow-[0_0_22px_rgba(220,180,94,0.35)]" />
+                <div className="clip-hex absolute inset-0 bg-gradient-to-b from-gold-400/40 to-gold-600/10 border border-gold-400/40 shadow-[0_0_22px_rgba(var(--accent-rgb),0.35)]" />
                 <div className="clip-hex absolute inset-[3px] bg-obsidian-900/90" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/psa-logo.png"
                   alt="PSA"
                   className="relative h-8 w-8 rounded-full object-contain"
-                  style={{ filter: "drop-shadow(0 0 10px rgba(220,180,94,0.4))" }}
+                  style={{ filter: "drop-shadow(0 0 10px rgba(var(--accent-rgb),0.4))" }}
                 />
               </div>
               <div className="leading-tight">
@@ -68,7 +68,7 @@ export function Navbar() {
                   <span className="font-display text-lg font-bold tracking-widest gold-text">
                     الأمن العام
                   </span>
-                  <span className="v100-badge">V100</span>
+                  <span className="v100-badge">V200</span>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-gold-300/70">
                   <ShieldCheck size={11} />

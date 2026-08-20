@@ -281,14 +281,14 @@ export default function LookupPage() {
                         key={r.id}
                         className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold"
                         style={{
-                          borderColor: r.color === "#000000" ? "rgba(217,180,91,.35)" : `${r.color}88`,
+                          borderColor: r.color === "#000000" ? "rgba(var(--accent-rgb),.35)" : `${r.color}88`,
                           color: r.color === "#000000" ? "#e4e4e7" : r.color,
                           background: `${r.color}14`,
                         }}
                       >
                         <span
                           className="h-2 w-2 rounded-full"
-                          style={{ background: r.color === "#000000" ? "#d9b45b" : r.color }}
+                          style={{ background: r.color === "#000000" ? "rgb(var(--accent-rgb))" : r.color }}
                         />
                         {rank!.titleAr}
                       </span>

@@ -67,7 +67,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-cairo)", "var(--font-tajawal)", "system-ui", "sans-serif"],
-        display: ["var(--font-orbitron)", "var(--font-cairo)", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-cairo)", "sans-serif"],
       },
       boxShadow: {
         gold: "0 0 25px rgba(var(--accent-rgb), 0.15)",

@@ -100,7 +100,7 @@ export function AudioPlayer() {
 
           {/* Track info */}
           <div className="mb-3 flex items-center gap-3">
-            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-gold-300/40 bg-obsidian-800 shadow-[0_0_14px_rgba(217,180,91,0.3)]">
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-gold-300/40 bg-obsidian-800 shadow-[0_0_14px_rgba(var(--accent-rgb),0.3)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/psa-logo.png" alt="النشيد" className="h-full w-full object-cover" />
             </div>
@@ -117,7 +117,7 @@ export function AudioPlayer() {
           <div className="mb-2 flex items-center gap-3">
             <button
               onClick={togglePlay}
-              className="gold-shimmer flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold-300/50 bg-gradient-to-b from-gold-200 via-gold-400 to-gold-600 text-black shadow-[0_4px_16px_-4px_rgba(217,180,91,0.6)] transition-transform active:scale-95"
+              className="gold-shimmer flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-emerald-300/50 bg-gradient-to-b from-emerald-300 via-emerald-400 to-emerald-600 text-white shadow-[0_4px_16px_-4px_rgba(var(--accent-rgb),0.6)] transition-transform active:scale-95"
             >
               {playing ? <Pause size={15} /> : <Play size={15} className="mr-0.5" />}
             </button>
@@ -151,7 +151,7 @@ export function AudioPlayer() {
                 style={{
                   width: `${progress}%`,
                   background: "linear-gradient(90deg, var(--accent-500), var(--accent-bright))",
-                  boxShadow: "0 0 8px rgba(217,180,91,0.6)",
+                  boxShadow: "0 0 8px rgba(var(--accent-rgb),0.6)",
                 }}
               />
             </div>

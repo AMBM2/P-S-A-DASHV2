@@ -84,7 +84,7 @@ export default function HomePage() {
             </p>
 
             <div className="mt-6 flex items-center justify-center gap-3 md:justify-start">
-              <span className="v100-badge">V100</span>
+              <span className="v100-badge">V200</span>
               <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-olive-400">
                 <span className="h-1.5 w-1.5 rotate-45 bg-gold-400/80" />
                 Command Operations
@@ -102,7 +102,7 @@ export default function HomePage() {
                 src="/psa-logo.png"
                 alt="PSA"
                 className="h-28 w-28 rounded-full object-contain"
-                style={{ filter: "drop-shadow(0 0 12px rgba(220,180,94,0.4))" }}
+                style={{ filter: "drop-shadow(0 0 12px rgba(var(--accent-rgb),0.4))" }}
               />
             </div>
           </div>

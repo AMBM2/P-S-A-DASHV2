@@ -17,7 +17,7 @@ export function Button({
 }) {
   const styles: Record<string, string> = {
     primary:
-      "gold-shimmer relative border border-gold-300/40 bg-gradient-to-b from-gold-100 via-gold-400 to-gold-600 text-black font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_10px_30px_-10px_rgba(var(--accent-rgb),0.7),0_4px_14px_-6px_rgba(var(--accent-rgb),0.45)] hover:from-gold-50 hover:to-gold-500 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_14px_38px_-10px_rgba(var(--accent-rgb),0.85)]",
+      "gold-shimmer relative border border-emerald-300/40 bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-600 text-white font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(var(--accent-rgb),0.7),0_4px_14px_-6px_rgba(var(--accent-rgb),0.45)] hover:from-emerald-300 hover:to-emerald-500 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_14px_38px_-10px_rgba(var(--accent-rgb),0.85)]",
     ghost: "text-zinc-300 hover:bg-white/5 hover:text-gold-200",
     outline:
       "border border-gold-400/35 text-gold-200 hover:border-gold-300/70 hover:bg-gold-400/10 hover:shadow-[0_8px_24px_-10px_rgba(var(--accent-rgb),0.5)] focus-visible:ring-2 focus-visible:ring-gold-300/40",

@@ -355,7 +355,7 @@ export function AdminOverview() {
             type="checkbox"
             checked={!!settings.welcome?.enabled}
             onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, enabled: e.target.checked } })}
-            className="h-4 w-4 accent-[#d9b45b]"
+            className="h-4 w-4 accent-emerald-400"
           />
           تفعيل النافذة المنبثقة
         </label>

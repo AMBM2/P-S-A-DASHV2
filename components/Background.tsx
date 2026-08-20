@@ -9,15 +9,15 @@ export function Background() {
       <div className="hazard-stripes fixed inset-x-0 top-0 z-[5] h-[3px] opacity-60" aria-hidden />
       <div
         className="cyber-orb"
-        style={{ top: "-12%", left: "-8%", width: "460px", height: "460px", background: "rgba(220,180,94,0.12)" }}
+        style={{ top: "-12%", left: "-8%", width: "460px", height: "460px", background: "rgba(var(--accent-rgb),0.12)" }}
       />
       <div
         className="cyber-orb"
-        style={{ bottom: "-14%", right: "-6%", width: "520px", height: "520px", background: "rgba(150,160,107,0.09)" }}
+        style={{ bottom: "-14%", right: "-6%", width: "520px", height: "520px", background: "rgba(var(--jade-rgb),0.09)" }}
       />
       <div
         className="cyber-orb"
-        style={{ top: "26%", right: "16%", width: "320px", height: "320px", background: "rgba(220,180,94,0.08)" }}
+        style={{ top: "26%", right: "16%", width: "320px", height: "320px", background: "rgba(var(--accent-rgb),0.08)" }}
       />
       <div className="lux-vignette" />
       <ParticlesBackground />
