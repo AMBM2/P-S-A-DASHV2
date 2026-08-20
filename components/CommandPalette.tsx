@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "@mantine/hooks";
 import { Command } from "cmdk";
@@ -33,6 +33,12 @@ export function CommandPalette() {
     ["mod+K", () => setOpen((o) => !o)],
     ["Escape", () => setOpen(false)],
   ]);
+
+  useEffect(() => {
+    const open = () => setOpen(true);
+    window.addEventListener("open-command-palette", open);
+    return () => window.removeEventListener("open-command-palette", open);
+  }, []);
 
   if (!open) return null;
 

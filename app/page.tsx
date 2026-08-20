@@ -7,8 +7,8 @@ import Atropos from "atropos/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft, Play } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { Card, Badge, ProgressBar, EmptyState } from "@/components/ui";
-import { AuroraBackground, GlowCard } from "@/components/effects";
+import { Card, Badge, ProgressBar, EmptyState, SectionTitle } from "@/components/ui";
+import { AuroraBackground, GlowCard, BorderBeam } from "@/components/effects";
 import { timeAgo, number } from "@/lib/format";
 import { AR } from "@/lib/ar";
 import { RANKS } from "@/lib/seed";
@@ -51,46 +51,37 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Tactical Command Hero Banner */}
-      <div className="clip-notch hud-frame gold-shimmer relative mb-10 overflow-hidden border border-gold-400/25 bg-gradient-to-br from-obsidian-800 via-obsidian-900 to-black p-10 md:p-14">
+      {/* Command Hero */}
+      <div className="clip-notch relative mb-10 overflow-hidden border border-gold-400/20 bg-[rgba(var(--glass),0.6)] p-8 backdrop-blur-xl md:p-12">
         <AuroraBackground />
-        <div className="pointer-events-none absolute inset-0 hazard-stripes opacity-20" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{
-          backgroundImage: "radial-gradient(circle at 1px 1px, var(--accent) 1px, transparent 0)",
-          backgroundSize: "26px 26px",
-        }} />
-        <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-gold-400/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-gold-600/10 blur-3xl" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-gold-400/70 to-transparent" />
+        <BorderBeam size={280} duration={9} />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: "radial-gradient(circle at 1px 1px, var(--accent) 1px, transparent 0)",
+            backgroundSize: "26px 26px",
+          }}
+        />
 
-        <div className="relative flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-right">
-          <div>
-            {/* Command classification ribbon */}
+        <div className="relative flex flex-col items-center gap-8 text-center md:flex-row md:justify-between md:text-right">
+          <div className="max-w-xl">
             <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-200">
               <ShieldCheck size={14} />
               {lang === "ar" ? "المنصة الرسمية لقوات الأمن العام" : "Official Public Security Command"}
             </div>
 
-            <div className="mb-4 flex items-center justify-center gap-3 md:justify-start">
-              <span className="h-px w-10 bg-gradient-to-l from-gold-400/60 to-transparent" />
-              <span className="text-gold-300">{lang === "ar" ? "— رئيس الوزراء —" : "— Prime Minister —"}</span>
-              <span className="h-px w-10 bg-gradient-to-r from-gold-400/60 to-transparent" />
-            </div>
-
-            <h1 className="font-display text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-              <span className="bg-gradient-to-r from-gold-200 via-gold-400 to-gold-600 bg-clip-text text-transparent">
-                {lang === "ar" ? "بوابة الأمن العام" : "Public Security Portal"}
-              </span>
+            <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight gold-text md:text-6xl">
+              {lang === "ar" ? "بوابة الأمن العام" : "Public Security Portal"}
             </h1>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 md:text-base">
+            <p className="mt-4 text-sm leading-relaxed text-zinc-400 md:text-base">
               {lang === "ar"
                 ? "المنصة الإدارية الموحدة لأخبار القيادة، الأفراد في الخدمة، والتوزيع حسب الرتب."
                 : "The unified administrative platform for command news, on-duty personnel and rank distribution."}
             </p>
 
             <div className="mt-6 flex items-center justify-center gap-3 md:justify-start">
-              <span className="v100-badge">V200</span>
-              <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-olive-400">
+              <span className="v100-badge">V300</span>
+              <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-gold-300/80">
                 <span className="h-1.5 w-1.5 rotate-45 bg-gold-400/80" />
                 Command Operations
               </span>
@@ -125,55 +116,40 @@ export default function HomePage() {
             </div>
           </Atropos>
         </div>
-
-        <div className="relative mb-10 mt-2 flex items-center justify-center gap-4">
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-400/40 to-gold-400/60" />
-          <div className="flex items-center gap-1 text-gold-400">
-            <span className="block h-1.5 w-1.5 rotate-45 border border-gold-400/70" />
-            <span className="block h-2.5 w-2.5 rotate-45 bg-gold-400/30" />
-            <span className="block h-1.5 w-1.5 rotate-45 border border-gold-400/70" />
-          </div>
-          <span className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-400/40 to-gold-400/60" />
-        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Module 1: News Feed */}
         <div className="lg:col-span-2">
           <div className="mb-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="flex items-center gap-2 font-display text-xl font-bold gold-text">
-                <Newspaper size={20} /> {lang === "ar" ? "أخبار الأمن العام" : "Directives & News"}
-              </h2>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative">
-                  <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-zinc-500 ltr:left-3 rtl:right-3" />
-                  <input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder={lang === "ar" ? "بحث..." : "Search..."}
-                    className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-1.5 pl-8 pr-3 text-xs text-zinc-100 outline-none focus:border-gold-400/70"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {[{ id: "all", labelAr: "الكل", label: "All" }, ...cats].map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => setCat(c.id)}
-                      className={`rounded-full border px-3 py-1 text-xs transition-all ${
-                        cat === c.id
-                          ? "border-gold-400/60 bg-gold-400/15 text-gold-200"
-                          : "border-gold-400/15 text-zinc-400 hover:border-gold-400/40 hover:text-zinc-200"
-                      }`}
-                    >
-                      {lang === "ar" ? c.labelAr : c.label}
-                    </button>
-                  ))}
-                </div>
+            <SectionTitle icon={Newspaper}>
+              {lang === "ar" ? "أخبار الأمن العام" : "Directives & News"}
+            </SectionTitle>
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <div className="relative">
+                <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-zinc-500 ltr:left-3 rtl:right-3" />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder={lang === "ar" ? "بحث..." : "Search..."}
+                  className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-1.5 pl-8 pr-3 text-xs text-zinc-100 outline-none focus:border-gold-400/70"
+                />
               </div>
-            </div>
-            <div className="gold-flourish mt-3 w-full">
-              <span className="diamond" />
+              <div className="flex flex-wrap gap-2">
+                {[{ id: "all", labelAr: "الكل", label: "All" }, ...cats].map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setCat(c.id)}
+                    className={`rounded-full border px-3 py-1 text-xs transition-all ${
+                      cat === c.id
+                        ? "border-gold-400/60 bg-gold-400/15 text-gold-200"
+                        : "border-gold-400/15 text-zinc-400 hover:border-gold-400/40 hover:text-zinc-200"
+                    }`}
+                  >
+                    {lang === "ar" ? c.labelAr : c.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -302,9 +278,9 @@ export default function HomePage() {
           </GlowCard>
 
           <Card>
-            <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-bold gold-text">
-              <Crown size={18} /> {lang === "ar" ? "التوزيع حسب الرتب" : "Rank Distribution"}
-            </h2>
+            <SectionTitle icon={Crown}>
+              {lang === "ar" ? "التوزيع حسب الرتب" : "Rank Distribution"}
+            </SectionTitle>
             <div className="space-y-4">
               {RANKS.map((r) => {
                 const count = officers.filter((o) => o.rankId === r.id).length;

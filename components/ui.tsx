@@ -14,7 +14,7 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
-import { X, ChevronDown, ChevronUp, Check } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Check, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ============================= BUTTON ============================= */
@@ -71,6 +71,27 @@ export function Card({
       )}
     >
       {children}
+    </div>
+  );
+}
+
+/* ============================= SECTION TITLE ============================= */
+export function SectionTitle({
+  children,
+  icon: Icon,
+  className,
+}: {
+  children: React.ReactNode;
+  icon?: LucideIcon;
+  className?: string;
+}) {
+  return (
+    <div className={cn("mb-4 flex items-center gap-3", className)}>
+      <span className="clip-notch-sm flex h-8 w-8 shrink-0 items-center justify-center border border-gold-400/30 bg-gold-400/10 text-gold-200">
+        {Icon ? <Icon size={15} /> : <span className="h-2 w-2 rotate-45 bg-gold-300" />}
+      </span>
+      <h2 className="font-display text-xl font-bold text-zinc-100">{children}</h2>
+      <span className="gold-flourish flex-1" />
     </div>
   );
 }
