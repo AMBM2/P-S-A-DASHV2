@@ -3,6 +3,7 @@ import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
 import { attachSessionCookie } from "@/lib/auth";
+import { auditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
   if (checkOrigin(req)) {
@@ -49,6 +50,12 @@ export async function POST(req: Request) {
     const res = NextResponse.json(data, { status: r.status });
     if (data?.ok && userId) {
       attachSessionCookie(res, userId);
+      await auditLog({
+        action: "login.verify",
+        executor: userId,
+        target: userId,
+        metadata: { ok: true },
+      });
     }
     return res;
   } catch (e: any) {

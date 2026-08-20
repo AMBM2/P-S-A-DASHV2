@@ -4,6 +4,7 @@ import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
 const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");
 
@@ -72,6 +73,14 @@ export async function POST(req: Request) {
       data = await r.json();
     } catch {
       data = { ok: false, error: "استجابة غير متوقعة من البوت" };
+    }
+    if (data?.ok) {
+      await auditLog({
+        action: "role_categories.upsert",
+        executor: actor,
+        target: roleId,
+        metadata: { category: category || "إزالة التصنيف" },
+      });
     }
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {

@@ -3,6 +3,7 @@ import { requireGrants } from "@/lib/admin-gate";
 import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
+import { auditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
   if (checkOrigin(req)) {
@@ -27,6 +28,18 @@ export async function POST(req: Request) {
       cache: "no-store",
     });
     const data = await r.json();
+    if (data?.ok) {
+      await auditLog({
+        action: "officer.sync",
+        executor: gateActor.actor,
+        metadata: {
+          created: data?.created ?? 0,
+          updated: data?.updated ?? 0,
+          purged: data?.purged ?? 0,
+          membersTotal: data?.membersTotal ?? null,
+        },
+      });
+    }
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {
     return NextResponse.json(

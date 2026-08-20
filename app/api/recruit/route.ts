@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
 // Public recruitment survey submit. Creates a pending application + a Military
 // College cadet record assigned to the main military department (d-hq).
@@ -96,6 +97,14 @@ export async function POST(req: Request) {
         signal: AbortSignal.timeout(4000),
       }).catch((e) => console.warn(`[recruit] announce failed: ${e?.message}`));
     }
+
+    await auditLog({
+      action: "recruitment.create",
+      executor: "",
+      target: discordId,
+      targetName: (nameAr || name || "").trim() || undefined,
+      metadata: { applicationId: app?.id, ranks: ranks.length, name: (name || nameAr || "").trim() },
+    });
 
     return NextResponse.json({ ok: true, id: app?.id });
   } catch (e: any) {

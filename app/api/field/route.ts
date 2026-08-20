@@ -4,6 +4,7 @@ import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString, isSafeHttpUrl, isSafeDataImage } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
 // Field Patrol Live Dispatch: the portal collects the patrol location + the
 // selected member IDs; the bot builds the rich ANSI/fix payload mentioning
@@ -58,6 +59,18 @@ export async function POST(req: Request) {
         botResult = await r.json();
       } catch {
         botResult = { ok: false, error: "استجابة غير متوقعة من البوت" };
+      }
+      if (botResult?.ok) {
+        await auditLog({
+          action: "patrol.dispatch",
+          executor: actor,
+          metadata: {
+            location,
+            memberCount: memberIds.length,
+            officers: botResult?.officers ?? null,
+            enlisted: botResult?.enlisted ?? null,
+          },
+        });
       }
       return NextResponse.json(botResult, { status: r.status });
     } catch (e: any) {

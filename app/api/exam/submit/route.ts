@@ -6,6 +6,7 @@ import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
 // Score an exam: compare the submitted answers to the questions' correctIndex,
 // persist the score on the application + cadet records.
@@ -67,6 +68,13 @@ export async function POST(req: Request) {
       .update({ examScore: earned })
       .eq("applicationId", applicationId)
       .then(() => {});
+
+    await auditLog({
+      action: "exams.score",
+      executor: actor,
+      target: applicationId,
+      metadata: { score: earned, total, percentage: total ? Math.round((earned / total) * 100) : 0 },
+    });
 
     return NextResponse.json({ ok: true, score: earned, total, answers: submitted });
   } catch (e: any) {

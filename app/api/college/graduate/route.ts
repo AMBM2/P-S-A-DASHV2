@@ -6,6 +6,7 @@ import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
 // Graduate a Military College cadet: promote to a full officer record assigned
 // to the main military department (realtime onboarding gives badge/nickname/DM;
@@ -96,6 +97,14 @@ export async function POST(req: Request) {
         // best-effort
       }
     }
+
+    await auditLog({
+      action: "college.graduate",
+      executor: actor,
+      target: cadet.discordId || "",
+      targetName: cadet.nameAr || cadet.name || undefined,
+      metadata: { cadetId, rankId: finalRank },
+    });
 
     return NextResponse.json({ ok: true, officerId: created?.id, rankId: finalRank });
   } catch (e: any) {

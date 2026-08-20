@@ -6,6 +6,7 @@ import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
 // Drop a cadet from the Military College (keeps the record, strips roles if the
 // cadet already graduated into an officer record).
@@ -64,6 +65,14 @@ export async function POST(req: Request) {
         // best-effort
       }
     }
+
+    await auditLog({
+      action: "college.drop",
+      executor: actor,
+      target: cadet.discordId || "",
+      targetName: cadet.nameAr || cadet.name || undefined,
+      metadata: { cadetId, status: "discharged" },
+    });
 
     return NextResponse.json({ ok: true, status: "discharged" });
   } catch (e: any) {

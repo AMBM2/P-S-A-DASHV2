@@ -4,6 +4,7 @@ import { MASTER_ADMIN_ID } from "@/lib/permissions";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
 import { cleanString } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
 // Master-only: remove an admin entry.
 export async function POST(req: Request) {
@@ -46,6 +47,13 @@ export async function POST(req: Request) {
       data = await r.json();
     } catch {
       data = { ok: false, error: "استجابة غير متوقعة من البوت" };
+    }
+    if (data?.ok) {
+      await auditLog({
+        action: "admins.remove",
+        executor: actor,
+        target: discordId,
+      });
     }
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {

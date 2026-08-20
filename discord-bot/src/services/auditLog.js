@@ -36,7 +36,14 @@ const ACTION_LABELS = {
   "cadet.enroll": "تثبيت طالب الكلية العسكرية",
   "college.enroll": "تسجيل في الكلية العسكرية",
   "recruit.citizen": "توظيف مواطن",
+  "college.graduate": "تخريج طالب الكلية العسكرية",
+  "exams.score": "تصحيح اختبار مواطن",
+  // Admins / roles (warning · yellow)
+  "admins.upsert": "تحديث صلاحيات مدير",
+  "role_categories.sync": "مزامنة تصنيفات الرتب",
   // Discharge / bans / role removals (destructive · red)
+  "college.drop": "فصل طالب من الكلية العسكرية",
+  "admins.remove": "إزالة مدير من المنظومة",
   "officer.discharged": "فصل ضابط من الخدمة",
   "discharge.create": "إنشاء فصل من الخدمة",
   "blacklist.add": "إدراج في القائمة السوداء",
@@ -145,7 +152,8 @@ function classifyColor(action) {
     a.includes("promoted") ||
     a.startsWith("badge.assign") ||
     a.startsWith("cadet.") ||
-    a.startsWith("recruit.")
+    a.startsWith("recruit.") ||
+    a === "college.graduate"
   ) {
     return COLORS.positive;
   }
@@ -155,7 +163,9 @@ function classifyColor(action) {
     a.startsWith("blacklist.") ||
     a.startsWith("store.remove") ||
     a.startsWith("permissions.revoke") ||
-    a.includes("leave.remove")
+    a.includes("leave.remove") ||
+    a === "college.drop" ||
+    a.startsWith("admins.remove")
   ) {
     return COLORS.destructive;
   }
@@ -204,6 +214,16 @@ const META_LABELS = {
   new: "بعد",
   name: "الاسم",
   title: "العنوان",
+  filename: "اسم الملف",
+  contentType: "نوع الملف",
+  memberCount: "عدد الأفراد",
+  location: "موقع السيناريو",
+  category: "التصنيف",
+  role: "الصلاحية",
+  active: "مفعّل",
+  added: "عدد المضاف",
+  ok: "النتيجة",
+  cadetId: "رقم الطالب",
 };
 
 function formatValue(key, value) {

@@ -6,6 +6,7 @@ import { requireGrants } from "@/lib/admin-gate";
 import { requirePermission, PERMS } from "@/lib/permissions";
 import { requireActor } from "@/lib/auth";
 import type { PermissionKey } from "@/lib/types";
+import { auditLog } from "@/lib/audit";
 
 // Issue a one-time upload token for news media (images/videos). The browser
 // then uploads the file DIRECTLY to the bot (see /api/news/media/upload client
@@ -50,6 +51,12 @@ export async function POST(req: Request) {
     if (!d.ok) {
       return NextResponse.json({ ok: false, error: d.error || "تعذر بدء الرفع" }, { status: 502 });
     }
+
+    await auditLog({
+      action: "media.upload",
+      executor: actor,
+      metadata: { filename, contentType, status: "بدأ الرفع" },
+    });
 
     return NextResponse.json({
       ok: true,

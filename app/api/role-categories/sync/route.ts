@@ -3,6 +3,7 @@ import { requireGrants } from "@/lib/admin-gate";
 import { requireActor } from "@/lib/auth";
 import { rateLimit, tooMany } from "@/lib/rate-limit";
 import { checkOrigin } from "@/lib/csrf";
+import { auditLog } from "@/lib/audit";
 
 // Auto-configure role_categories from the detected military ranks.
 export async function POST(req: Request) {
@@ -38,6 +39,13 @@ export async function POST(req: Request) {
       data = await r.json();
     } catch {
       data = { ok: false, error: "استجابة غير متوقعة من البوت" };
+    }
+    if (data?.ok) {
+      await auditLog({
+        action: "role_categories.sync",
+        executor: actor,
+        metadata: { added: data?.added ?? 0 },
+      });
     }
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {
