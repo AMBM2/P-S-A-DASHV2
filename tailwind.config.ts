@@ -58,13 +58,7 @@ const config: Config = {
           600: "var(--accent-600)",
           700: "var(--accent-700)",
         },
-        olive: {
-          DEFAULT: "var(--olive)",
-          400: "var(--olive)",
-          500: "var(--olive)",
         },
-        steel: "var(--steel)",
-      },
       fontFamily: {
         sans: ["var(--font-cairo)", "var(--font-tajawal)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "var(--font-cairo)", "sans-serif"],

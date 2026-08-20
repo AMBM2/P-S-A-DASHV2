@@ -3,23 +3,31 @@ import { ParticlesBackground } from "@/components/ParticlesBackground";
 export function Background() {
   return (
     <>
-      <div className="carbon-bg" aria-hidden />
-      <div className="grid-backdrop" />
-      <div className="tactical-grid" aria-hidden />
+      {/* Ambiant tactical glows */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 38% at 18% -5%, rgba(234,179,8,0.13), transparent 62%)," +
+            "radial-gradient(ellipse 42% 34% at 88% 8%, rgba(16,185,129,0.08), transparent 58%)," +
+            "radial-gradient(ellipse 50% 45% at 50% 112%, rgba(234,179,8,0.07), transparent 62%)",
+        }}
+      />
+      {/* Static raster grid */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+          backgroundSize: "56px 56px",
+          maskImage: "radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent)",
+          WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent)",
+        }}
+      />
+      {/* Hazard top strip */}
       <div className="hazard-stripes fixed inset-x-0 top-0 z-[5] h-[3px] opacity-60" aria-hidden />
-      <div
-        className="cyber-orb"
-        style={{ top: "-12%", left: "-8%", width: "460px", height: "460px", background: "rgba(var(--accent-rgb),0.12)" }}
-      />
-      <div
-        className="cyber-orb"
-        style={{ bottom: "-14%", right: "-6%", width: "520px", height: "520px", background: "rgba(var(--jade-rgb),0.09)" }}
-      />
-      <div
-        className="cyber-orb"
-        style={{ top: "26%", right: "16%", width: "320px", height: "320px", background: "rgba(var(--accent-rgb),0.08)" }}
-      />
-      <div className="lux-vignette" />
       <ParticlesBackground />
     </>
   );

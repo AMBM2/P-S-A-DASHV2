@@ -18,6 +18,7 @@ import {
   FileBadge,
   ScrollText,
   KeyRound,
+  ChevronDown,
 } from "lucide-react";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { NewsManager } from "@/components/admin/NewsManager";
@@ -35,6 +36,14 @@ import { AuditLogs } from "@/components/admin/AuditLogs";
 import { RoleCategoriesManager } from "@/components/admin/RoleCategoriesManager";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { PageHeader } from "@/components/PageHeader";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/format";
 import { PERMISSION_DEFS } from "@/lib/permissions";
@@ -163,10 +172,39 @@ export default function AdminPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-end gap-3">
-        <span className="text-xs text-zinc-400">
-          الداخل:{" "}
-          <span className="font-bold text-gold-200">{session.officer?.nameAr || session.discordId}</span>
-        </span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="clip-notch-sm flex items-center gap-2 rounded-lg border border-gold-400/25 bg-obsidian-900/60 px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:border-gold-400/50">
+              <ShieldCheck size={14} className="text-gold-300" />
+              <span className="font-bold text-gold-200">{session.officer?.nameAr || session.discordId}</span>
+              <ChevronDown size={13} className="text-zinc-500" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>
+              {level === "master" ? "سوبر أدمن" : level === "admin" ? "أدمن" : "توظيف"}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setTab("overview")}>
+              <LayoutDashboard size={14} /> نظرة عامة
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTab("settings")}>
+              <Settings2 size={14} /> الإعدادات
+            </DropdownMenuItem>
+            {myPerms.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-3 py-1.5 text-[11px] leading-relaxed text-zinc-500">
+                  {myPerms.join(" • ")}
+                </div>
+              </>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem danger onClick={logout}>
+              <LogOut size={14} /> تسجيل الخروج
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {level && level !== "none" && (
           <span
             className={cn(
@@ -181,17 +219,6 @@ export default function AdminPage() {
             {level === "master" ? "سوبر أدمن" : level === "admin" ? "أدمن" : "توظيف"}
           </span>
         )}
-        {myPerms.length > 0 && (
-          <span className="hidden max-w-[260px] truncate rounded-full border border-gold-400/30 bg-gold-400/10 px-2.5 py-0.5 text-[11px] text-gold-200 sm:block">
-            {myPerms.join(" • ")}
-          </span>
-        )}
-        <button
-          onClick={logout}
-          className="flex items-center gap-1.5 rounded-lg border border-gold-400/25 px-3 py-1.5 text-xs font-bold text-zinc-300 transition-colors hover:border-rose-400/40 hover:text-rose-300"
-        >
-          <LogOut size={13} /> تسجيل الخروج
-        </button>
       </div>
 
       <PageHeader

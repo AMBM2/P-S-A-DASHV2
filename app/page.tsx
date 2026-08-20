@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Atropos from "atropos/react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft, Play } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, ProgressBar, EmptyState } from "@/components/ui";
@@ -21,6 +23,7 @@ export default function HomePage() {
   const { news, officers, settings } = useStore();
   const [cat, setCat] = useState("all");
   const [q, setQ] = useState("");
+  const [feedRef] = useAutoAnimate<HTMLDivElement>();
 
   const lang = settings.language;
   const onDuty = officers.filter((o) => o.status === "on-duty").length;
@@ -92,11 +95,24 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Official emblem in clipped hexagon frame */}
-          <div className="relative shrink-0">
-            <div className="clip-hex absolute -inset-3 border border-gold-400/25" />
-            <div className="clip-hex absolute -inset-3 border border-dashed border-gold-400/20 animate-[spin_40s_linear_infinite]" />
-            <div className="clip-hex relative flex h-36 w-36 items-center justify-center border border-gold-400/30 bg-gold-400/5 backdrop-blur-md gold-glow-strong animate-[goldPulse_4s_ease-in-out_infinite]">
+          {/* Official emblem — Atropos 3D parallax */}
+          <Atropos
+            className="relative shrink-0"
+            rotateXMax={16}
+            rotateYMax={16}
+            shadow={false}
+            highlight={false}
+          >
+            <div data-atropos-offset="-6">
+              <div className="clip-hex absolute -inset-3 border border-gold-400/25" />
+            </div>
+            <div data-atropos-offset="-3">
+              <div className="clip-hex absolute -inset-3 border border-dashed border-gold-400/20 animate-[spin_40s_linear_infinite]" />
+            </div>
+            <div
+              data-atropos-offset="5"
+              className="clip-hex relative flex h-36 w-36 items-center justify-center border border-gold-400/30 bg-gold-400/5 backdrop-blur-md gold-glow-strong animate-[goldPulse_4s_ease-in-out_infinite]"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/psa-logo.png"
@@ -105,7 +121,7 @@ export default function HomePage() {
                 style={{ filter: "drop-shadow(0 0 12px rgba(var(--accent-rgb),0.4))" }}
               />
             </div>
-          </div>
+          </Atropos>
         </div>
 
         <div className="relative mb-10 mt-2 flex items-center justify-center gap-4">
@@ -162,7 +178,7 @@ export default function HomePage() {
           {filtered.length === 0 ? (
             <EmptyState message={lang === "ar" ? "لا توجد أخبار مطابقة" : "No matching news"} />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4" ref={feedRef}>
               {filtered.map((n, i) => (
                 <motion.div
                   key={n.id}

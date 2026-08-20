@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import confetti from "canvas-confetti";
+import { toast } from "sonner";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   Eye,
   Check,
@@ -32,6 +35,7 @@ export function RecruitmentManager() {
   const [q, setQ] = useState("");
   const [viewing, setViewing] = useState<Application | null>(null);
   const [busy, setBusy] = useState(false);
+  const [gridRef] = useAutoAnimate<HTMLDivElement>();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -81,9 +85,26 @@ export function RecruitmentManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ applicationId: app.id, decision, reviewedBy: session?.discordId || "" }),
       });
-      await r.json();
+      const d = await r.json();
+      if (r.ok && d.ok) {
+        if (decision === "approved") {
+          confetti({
+            particleCount: 180,
+            spread: 85,
+            origin: { y: 0.7 },
+            colors: ["#eab308", "#facc15", "#10b981", "#ffffff"],
+          });
+          toast.success("تم قبول الطلب وتجنيده في الكلية", { description: app.nameAr || app.name });
+        } else {
+          toast.error("تم رفض الطلب", { description: app.nameAr || app.name });
+        }
+      } else {
+        toast.error(d.error || "فشلت العملية");
+      }
       await load();
       if (viewing?.id === app.id) setViewing({ ...viewing, status: decision });
+    } catch {
+      toast.error("تعذر الاتصال بالخادم");
     } finally {
       setBusy(false);
     }
@@ -136,7 +157,7 @@ export function RecruitmentManager() {
       {filtered.length === 0 ? (
         <EmptyState message="لا توجد طلبات" />
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2" ref={gridRef}>
           {filtered.map((a) => (
             <Card key={a.id} className="p-4">
               <div className="mb-2 flex items-start justify-between gap-2">

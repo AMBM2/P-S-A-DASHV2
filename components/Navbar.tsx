@@ -18,6 +18,7 @@ import {
 import { useStore } from "@/lib/store";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { cn } from "@/lib/format";
+import useEmblaCarousel from "embla-carousel-react";
 
 const NAV = [
   { href: "/", label: "الرئيسية", icon: Home },
@@ -34,6 +35,19 @@ export function Navbar() {
   const { officers } = useStore();
   const [now, setNow] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    direction: "rtl",
+    align: "start",
+    dragFree: true,
+    containScroll: "trimSnaps",
+  });
+
+  useEffect(() => {
+    const el = emblaApi?.rootNode();
+    if (!el || !pathname) return;
+    const active = el.querySelector<HTMLElement>('[data-active="true"]');
+    active?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  }, [pathname, emblaApi]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -68,7 +82,7 @@ export function Navbar() {
                   <span className="font-display text-lg font-bold tracking-widest gold-text">
                     الأمن العام
                   </span>
-                  <span className="v100-badge">V200</span>
+                  <span className="v100-badge">V300</span>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-gold-300/70">
                   <ShieldCheck size={11} />
@@ -78,37 +92,39 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Horizontal carousel-style nav: scrolls within the bar when items
-              overflow; native scrollbar hidden; edges fade to hint more items. */}
-          <nav className="scrollbar-hide nav-fade-mask relative hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto py-1 md:flex">
-            {NAV.map((item) => {
-              const active = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "group relative flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors",
-                    active ? "text-gold-200" : "text-zinc-400 hover:text-gold-200"
-                  )}
-                >
-                  <item.icon size={15} />
-                  {item.label}
-                  <span
+          {/* Embla carousel nav dock: horizontal, hidden scrollbar, swipeable */}
+          <nav className="nav-fade-mask relative hidden min-w-0 flex-1 md:block" ref={emblaRef}>
+            <div className="flex items-center gap-1 py-1">
+              {NAV.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    data-active={active}
                     className={cn(
-                      "absolute inset-x-3 -bottom-0.5 h-[2px] bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 transition-all duration-300",
-                      active ? "opacity-100" : "opacity-0 group-hover:opacity-70"
+                      "group relative flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors select-none",
+                      active ? "text-gold-200" : "text-zinc-400 hover:text-gold-200"
                     )}
-                  />
-                  <span
-                    className={cn(
-                      "pointer-events-none absolute -bottom-px left-0 h-2 w-2 border-b-2 border-l-2 border-gold-400/60 transition-all duration-300 rtl:left-auto rtl:right-0 rtl:border-b-2 rtl:border-r-2 rtl:border-l-0",
-                      active ? "opacity-100" : "opacity-0 group-hover:opacity-60"
-                    )}
-                  />
-                </Link>
-              );
-            })}
+                  >
+                    <item.icon size={15} />
+                    {item.label}
+                    <span
+                      className={cn(
+                        "absolute inset-x-3 -bottom-0.5 h-[2px] bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 transition-all duration-300",
+                        active ? "opacity-100" : "opacity-0 group-hover:opacity-70"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "pointer-events-none absolute -bottom-px left-0 h-2 w-2 border-b-2 border-l-2 border-gold-400/60 transition-all duration-300 rtl:left-auto rtl:right-0 rtl:border-b-2 rtl:border-r-2 rtl:border-l-0",
+                        active ? "opacity-100" : "opacity-0 group-hover:opacity-60"
+                      )}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
 
           <div className="hidden shrink-0 items-center gap-4 md:flex">

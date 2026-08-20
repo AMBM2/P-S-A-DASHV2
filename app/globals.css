@@ -3,61 +3,63 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   V200 — LUXE GLASS DESIGN SYSTEM
-   Deep-emerald obsidian · Frosted crystal glass · Jade accents
-   Smooth rounded panels, soft glows, luminous jade backdrop.
+   TACTICAL DARK — DESIGN SYSTEM
+   Obsidian slate (#09090B / #0B0F17) · glassmorphic zinc panels ·
+   Tactical Amber/Gold (#EAB308) accent · Cyber Emerald status
    ========================================================================== */
 :root {
   color-scheme: dark;
 
-  --accent-100: #d1fae5;
-  --accent-200: #a7f3d0;
-  --accent-300: #6ee7b7;
-  --accent-400: #34d399;
-  --accent-500: #10b981;
-  --accent-600: #059669;
-  --accent-700: #047857;
-  --accent: #34d399;
-  --accent-bright: #6ee7b7;
-  --accent-rgb: 52, 211, 153;
-  --accent-bright-rgb: 110, 231, 183;
+  /* Tactical amber / gold accent scale */
+  --accent-100: #fef3c7;
+  --accent-200: #fde68a;
+  --accent-300: #facc15;
+  --accent-400: #eab308;
+  --accent-500: #ca8a04;
+  --accent-600: #a16207;
+  --accent-700: #854d0e;
+  --accent: #eab308;
+  --accent-bright: #facc15;
+  --accent-rgb: 234, 179, 8;
+  --accent-bright-rgb: 250, 204, 21;
 
-  --foreground: #ecf7f2;
-  --muted: #8aa79e;
+  /* Cyber emerald — status/success indicators */
+  --emerald: #10b981;
+  --emerald-rgb: 16, 185, 129;
 
-  --glass: 11, 24, 20;
-  --bg: #050a09;
-  --bg-2: #081210;
-  --bg-800: #0d1a16;
-  --bg-700: #14251f;
+  --foreground: #e4e4e7;
+  --muted: #8b919e;
 
-  --jade: #2dd4bf;
-  --jade-rgb: 45, 212, 191;
-  --silver: #a5c0b8;
+  /* Glass surface (zinc-900/60) */
+  --glass: 24, 24, 27;
+  --bg: #09090b;
+  --bg-2: #0b0f17;
+  --bg-800: #12151d;
+  --bg-700: #1a1f2c;
 
-  --line: rgba(52, 211, 153, 0.16);
-  --line-strong: rgba(52, 211, 153, 0.32);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.16);
 
   /* ============ shadcn/ui DESIGN TOKENS (HSL) ============ */
-  --background: 165 12% 4%;
-  --foreground: 160 30% 92%;
-  --card: 165 14% 6%;
-  --card-foreground: 160 30% 92%;
-  --popover: 165 14% 7%;
-  --popover-foreground: 160 30% 92%;
-  --primary: 160 66% 52%;
-  --primary-foreground: 165 30% 6%;
-  --secondary: 165 10% 13%;
-  --secondary-foreground: 160 20% 88%;
-  --muted: 165 10% 13%;
-  --muted-foreground: 160 8% 62%;
-  --accent-token: 160 66% 52%;
-  --accent-foreground: 165 30% 6%;
+  --background: 240 6% 4%;
+  --foreground: 240 6% 90%;
+  --card: 240 6% 6%;
+  --card-foreground: 240 6% 90%;
+  --popover: 240 6% 7%;
+  --popover-foreground: 240 6% 90%;
+  --primary: 48 96% 53%;
+  --primary-foreground: 240 6% 6%;
+  --secondary: 240 5% 12%;
+  --secondary-foreground: 240 6% 88%;
+  --muted: 240 5% 12%;
+  --muted-foreground: 220 6% 58%;
+  --accent-token: 48 96% 53%;
+  --accent-foreground: 240 6% 6%;
   --destructive: 0 62% 55%;
   --destructive-foreground: 0 0% 98%;
-  --border: 160 28% 22%;
-  --input: 160 24% 16%;
-  --ring: 160 70% 55%;
+  --border: 240 6% 16%;
+  --input: 240 6% 14%;
+  --ring: 48 96% 53%;
   --radius: 0.85rem;
 }
 
@@ -74,9 +76,8 @@ body {
   margin: 0;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 72% 48% at 50% -14%, rgba(var(--accent-rgb), 0.12), transparent),
-    radial-gradient(ellipse 38% 26% at 92% 18%, rgba(var(--jade-rgb), 0.06), transparent),
-    radial-gradient(ellipse 44% 34% at 4% 86%, rgba(var(--jade-rgb), 0.05), transparent);
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(234, 179, 8, 0.07), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 100% 100%, rgba(16, 185, 129, 0.05), transparent 55%);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-cairo), var(--font-tajawal), system-ui, sans-serif;
@@ -86,90 +87,39 @@ body {
 }
 
 ::selection {
-  background: rgba(var(--accent-rgb), 0.32);
+  background: rgba(var(--accent-rgb), 0.28);
   color: #fff;
 }
 
-/* ============ LUMINOUS GRID BACKDROP ============ */
-.grid-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: -3;
-  background-image:
-    linear-gradient(rgba(var(--accent-rgb), 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(var(--accent-rgb), 0.03) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 84%);
-}
-
-/* ============ SILK OVERLAY ============ */
-.carbon-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -4;
-  pointer-events: none;
-  background-image:
-    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(var(--accent-rgb), 0.05), transparent 60%),
-    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.35) 100%);
-}
-
-/* ============ SOFT AMBIENT DRIFT ============ */
-.tactical-grid {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 18% 22%, rgba(var(--jade-rgb), 0.05), transparent 42%),
-    radial-gradient(circle at 84% 78%, rgba(var(--accent-rgb), 0.05), transparent 46%);
-}
-
-/* ============ GLOWING AMBIENT ORBS ============ */
-.cyber-orb {
-  position: fixed;
-  z-index: -1;
-  border-radius: 9999px;
-  filter: blur(100px);
-  pointer-events: none;
-  background: rgba(var(--accent-rgb), 0.1);
-}
-
-/* ============ ELEGANT EDGE VIGNETTE ============ */
-.lux-vignette {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 120% 90% at 50% 0%, transparent 58%, rgba(0, 0, 0, 0.55) 100%),
-    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(0, 0, 0, 0.45), transparent 70%);
-}
-
-/* ============ FROSTED CRYSTAL PANELS ============ */
+/* ============ GLASS SURFACES ============ */
 .glass {
-  background: rgba(var(--glass), 0.68);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--line);
+  background: rgba(var(--glass), 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .glass-strong {
-  background: rgba(var(--glass), 0.88);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid var(--line-strong);
+  background: rgba(var(--glass), 0.78);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-/* ============ SMOOTH SOFT CORNERS (luxe — no military cuts) ============ */
+/* ============ CORNERS ============ */
 .clip-notch {
-  border-radius: 1.25rem;
+  border-radius: 1.15rem;
 }
 
 .clip-notch-sm {
   border-radius: 0.7rem;
 }
 
-/* ============ JADE FRAME GLOW ============ */
+.clip-hex {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* ============ CORNER FRAME ============ */
 .hud-frame {
   position: relative;
 }
@@ -181,32 +131,32 @@ body {
   pointer-events: none;
   border-radius: inherit;
   background:
-    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 26px 1.5px,
-    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 1.5px 26px,
-    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 26px 1.5px,
-    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 1.5px 26px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 26px 1.5px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 1.5px 26px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 26px 1.5px,
-    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 1.5px 26px;
+    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 20px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) top 0 left 0 / 1.5px 20px,
+    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 20px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) top 0 right 0 / 1.5px 20px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 20px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 left 0 / 1.5px 20px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 20px 1.5px,
+    linear-gradient(var(--accent), var(--accent)) bottom 0 right 0 / 1.5px 20px;
   background-repeat: no-repeat;
-  opacity: 0.4;
+  opacity: 0.45;
   transition: opacity 0.25s ease;
 }
 .hud-frame:hover::before {
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
-/* ============ JADE VEIN STRIPES ============ */
+/* ============ HAZARD STRIPES ============ */
 .hazard-stripes {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(var(--accent-rgb), 0.1) 0 10px,
+    rgba(255, 255, 255, 0.05) 0 10px,
     transparent 10px 20px
   );
 }
 
-/* ============ JADE SHIMMER SWEEP ============ */
+/* ============ SHIMMER SWEEP ============ */
 .gold-shimmer {
   position: relative;
   overflow: hidden;
@@ -219,9 +169,9 @@ body {
   background: linear-gradient(
     105deg,
     transparent 22%,
-    rgba(var(--accent-bright-rgb), 0.08) 45%,
-    rgba(var(--accent-bright-rgb), 0.16) 50%,
-    rgba(var(--accent-bright-rgb), 0.08) 55%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 55%,
     transparent 78%
   );
   transition: transform 0.95s ease;
@@ -231,13 +181,13 @@ body {
   transform: translateX(110%);
 }
 
-/* ============ JADE GRADIENT TEXT ============ */
+/* ============ AMBER TEXT ============ */
 .gold-text {
   background: linear-gradient(
     118deg,
     var(--accent-200) 0%,
     var(--accent-bright) 38%,
-    var(--accent-400) 62%,
+    var(--accent) 62%,
     var(--accent-200) 88%
   );
   -webkit-background-clip: text;
@@ -245,65 +195,33 @@ body {
   color: transparent;
 }
 
-/* ============ SILVER-WASH TEXT ============ */
-.steel-text {
-  background: linear-gradient(
-    100deg,
-    #a5c0b8 0%,
-    #eef7f3 30%,
-    #6f9188 55%,
-    #cfe2dc 80%,
-    #a5c0b8 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* ============ BORDER GLOWS ============ */
-.gold-border-glow {
-  border: 1px solid rgba(var(--accent-rgb), 0.32);
-  box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.14);
-}
-
-.neon-border {
-  border: 1px solid rgba(var(--accent-rgb), 0.26);
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.14) inset;
-}
-
-/* ============ ACCESSORIES: LUMINOUS JADE EFFECTS ============ */
+/* ============ GLOWS ============ */
 .gold-pulse {
   animation: goldPulse 2.6s ease-in-out infinite;
 }
 @keyframes goldPulse {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.22), 0 0 22px rgba(var(--accent-rgb), 0.16);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.22), 0 0 22px rgba(var(--accent-rgb), 0.14);
   }
   50% {
-    box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.5), 0 0 40px rgba(var(--accent-rgb), 0.32);
+    box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.5), 0 0 38px rgba(var(--accent-rgb), 0.32);
   }
 }
 
 .gold-glow {
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.16), 0 12px 44px -18px rgba(var(--accent-rgb), 0.35);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.16), 0 12px 44px -18px rgba(var(--accent-rgb), 0.3);
 }
 
 .gold-glow-strong {
-  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.34), 0 0 35px -6px rgba(var(--accent-rgb), 0.5), 0 0 80px -20px rgba(var(--accent-rgb), 0.38);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.32), 0 0 35px -6px rgba(var(--accent-rgb), 0.45), 0 0 80px -20px rgba(var(--accent-rgb), 0.32);
 }
 
-.gold-inner-frame {
-  position: relative;
-}
-.gold-inner-frame::before {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  pointer-events: none;
-  border: 1px solid rgba(var(--accent-rgb), 0.12);
-  border-radius: inherit;
+.gold-border-glow {
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.13);
 }
 
+/* ============ DIVIDER FLOURISH ============ */
 .gold-flourish {
   display: flex;
   align-items: center;
@@ -314,117 +232,30 @@ body {
   content: "";
   height: 1px;
   flex: 1;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
 }
 .gold-flourish .diamond {
   width: 7px;
   height: 7px;
   transform: rotate(45deg);
   border: 1px solid rgba(var(--accent-rgb), 0.7);
-  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
-  background: rgba(var(--accent-rgb), 0.12);
+  background: rgba(var(--accent-rgb), 0.15);
 }
 
-/* ============ V200 LUXE BADGE ============ */
+/* ============ V200 BADGE ============ */
 .v100-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
   border-radius: 9999px;
-  background: linear-gradient(115deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent-rgb), 0.05));
+  background: rgba(var(--accent-rgb), 0.08);
   color: var(--accent-300);
   font-family: var(--font-display), sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
-}
-
-/* ============ LEGACY SPACE ACCESSORIES (kept for background components) ============ */
-.space-layer {
-  position: fixed;
-  inset: 0;
-  z-index: -4;
-  pointer-events: none;
-  overflow: hidden;
-}
-.space-star {
-  position: absolute;
-  border-radius: 50%;
-  background: #fff;
-  animation: twinkle 3.5s ease-in-out infinite;
-  opacity: 0.55;
-}
-.space-star.gold-star {
-  background: rgba(var(--accent-bright-rgb), 0.8);
-  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
-}
-@keyframes twinkle {
-  0%, 100% { opacity: 0.08; transform: scale(0.7); }
-  50% { opacity: 0.4; transform: scale(1.05); }
-}
-.space-shooting {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  background: rgba(var(--accent-bright-rgb), 1);
-  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.9);
-  animation: shoot 9s linear infinite;
-  opacity: 0;
-}
-@keyframes shoot {
-  0% { transform: translate(0, 0) rotate(-45deg); opacity: 0; }
-  3% { opacity: 1; }
-  12% { transform: translate(-260px, 260px) rotate(-45deg); opacity: 0; }
-  100% { transform: translate(-260px, 260px) rotate(-45deg); opacity: 0; }
-}
-.space-nebula {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(85px);
-  opacity: 0.6;
-}
-.space-planet {
-  position: absolute;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 32% 28%, #0f332b, #081712 52%, #02090a 100%);
-  box-shadow:
-    inset -18px -14px 50px rgba(0, 0, 0, 0.9),
-    0 0 70px rgba(var(--accent-rgb), 0.16);
-}
-.space-planet .planet-ring {
-  position: absolute;
-  inset: -34% -70%;
-  border: 1px solid rgba(var(--accent-rgb), 0.32);
-  border-radius: 50%;
-  transform: rotate(-16deg);
-  box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.18), inset 0 0 30px rgba(var(--accent-rgb), 0.1);
-}
-
-/* ============ LEGACY JADE DUST ============ */
-.gold-dust {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  overflow: hidden;
-  pointer-events: none;
-}
-.gold-dust span {
-  position: absolute;
-  bottom: -10px;
-  width: 3px;
-  height: 3px;
-  background: radial-gradient(circle, rgba(var(--accent-bright-rgb), 0.55), rgba(var(--accent-rgb), 0.06));
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.3);
-  animation: dust 13s linear infinite;
-}
-
-/* ============ DECORATIVE ============ */
-.clip-hex {
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
 
 /* ============ SCROLLBARS ============ */
@@ -433,7 +264,7 @@ body {
   height: 6px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(var(--accent-rgb), 0.4);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 3px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -465,18 +296,17 @@ input[type="range"].gold-range {
   accent-color: var(--accent);
 }
 
-/* ============ NATIVE SELECT DROPDOWN ============ */
+/* ============ NATIVE FORM CONTROLS ============ */
 select option,
 select optgroup {
   background-color: var(--bg-800);
   color: var(--foreground);
 }
 select option:checked {
-  background-color: rgba(52, 211, 153, 0.25);
+  background-color: rgba(234, 179, 8, 0.25);
   color: var(--accent-200);
 }
 
-/* ============ NATIVE FORM CONTROLS (DARK) ============ */
 input,
 select,
 textarea {
@@ -487,8 +317,8 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px var(--bg-800) inset;
-  -webkit-text-fill-color: #f0faf5;
-  caret-color: #f0faf5;
+  -webkit-text-fill-color: #f4f4f5;
+  caret-color: #f4f4f5;
   border-radius: 0.85rem;
 }
 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
@@ -500,18 +330,11 @@ input[type="radio"] {
   background-color: transparent;
 }
 
-/* ============ FIELD-ISSUE FORM FIELDS ============ */
-input.rounded-lg,
-select.rounded-lg,
-textarea.rounded-lg {
-  border-radius: 0.85rem;
-}
-
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
 select:focus,
 textarea:focus {
   outline: none;
   box-shadow:
-    0 0 0 1px rgba(var(--accent-rgb), 0.22),
-    0 0 24px -8px rgba(var(--accent-rgb), 0.5);
+    0 0 0 1px rgba(var(--accent-rgb), 0.3),
+    0 0 22px -8px rgba(var(--accent-rgb), 0.5);
 }

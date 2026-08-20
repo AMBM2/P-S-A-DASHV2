@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   ClipboardList,
   Send,
@@ -21,9 +24,25 @@ type DiscordRole = {
   position: number;
 };
 
+const recruitSchema = z.object({
+  nameAr: z.string().trim().min(3, "يرجى إدخال الاسم الكامل (3 أحرف على الأقل)"),
+  discordId: z
+    .string()
+    .trim()
+    .regex(/^\d{15,20}$/, "يرجى إدخال معرّف ديسكورد صحيح (15-20 رقماً)"),
+});
+type RecruitValues = z.infer<typeof recruitSchema>;
+
 export default function RecruitPage() {
-  const [nameAr, setNameAr] = useState("");
-  const [discordId, setDiscordId] = useState("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RecruitValues>({
+    resolver: zodResolver(recruitSchema),
+    defaultValues: { nameAr: "", discordId: "" },
+  });
   const [roles, setRoles] = useState<DiscordRole[]>([]);
   const [rolesError, setRolesError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -71,16 +90,8 @@ export default function RecruitPage() {
     });
   };
 
-  const submit = async () => {
+  const submit = async (values: RecruitValues) => {
     setResult(null);
-    if (!nameAr.trim()) {
-      setResult({ ok: false, error: "يرجى تعبئة الاسم" });
-      return;
-    }
-    if (!/^\d{15,20}$/.test(discordId.trim())) {
-      setResult({ ok: false, error: "يرجى إدخال معرّف ديسكورد صحيح" });
-      return;
-    }
     if (selected.size === 0) {
       setResult({ ok: false, error: "يرجى اختيار رتبة واحدة على الأقل من قائمة ديسكورد" });
       return;
@@ -91,9 +102,9 @@ export default function RecruitPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nameAr: nameAr.trim(),
-          name: nameAr.trim(),
-          discordId: discordId.trim(),
+          nameAr: values.nameAr.trim(),
+          name: values.nameAr.trim(),
+          discordId: values.discordId.trim(),
           ranks: [...selected],
           primaryRankId,
         }),
@@ -101,8 +112,7 @@ export default function RecruitPage() {
       const data = await res.json();
       setResult({ ok: data.ok, error: data.error });
       if (data.ok) {
-        setNameAr("");
-        setDiscordId("");
+        reset({ nameAr: "", discordId: "" });
         setSelected(new Set());
         setPrimaryRankId("");
       }
@@ -129,22 +139,22 @@ export default function RecruitPage() {
 
         <div className="space-y-4 p-6">
           <Field label="الاسم الكامل">
-            <Input
-              value={nameAr}
-              onChange={(e) => setNameAr(e.target.value)}
-              placeholder="الاسم الثلاثي"
-              dir="rtl"
-            />
+            <Input {...register("nameAr")} placeholder="الاسم الثلاثي" dir="rtl" />
+            {errors.nameAr && (
+              <span className="text-xs text-rose-300">{errors.nameAr.message}</span>
+            )}
           </Field>
 
           <Field label="Discord ID">
             <Input
-              value={discordId}
-              onChange={(e) => setDiscordId(e.target.value)}
+              {...register("discordId")}
               placeholder="مثال: 123456789012345678 (من الديسكورد: كليك يمين على اسمك → نسخ المعرّف)"
               dir="ltr"
               className="text-left"
             />
+            {errors.discordId && (
+              <span className="text-xs text-rose-300">{errors.discordId.message}</span>
+            )}
           </Field>
 
           <div>
@@ -208,7 +218,7 @@ export default function RecruitPage() {
             )}
           </div>
 
-          <Button onClick={submit} disabled={loading} className="mt-2 w-full py-3 text-base font-bold">
+          <Button onClick={handleSubmit(submit)} disabled={loading} className="mt-2 w-full py-3 text-base font-bold">
             {loading ? <Loader2 size={18} className="ml-2 animate-spin" /> : <Send size={18} className="ml-2" />}
             تقديم الطلب
           </Button>

@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { X, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ export function Button({
 }) {
   const styles: Record<string, string> = {
     primary:
-      "gold-shimmer relative border border-emerald-300/40 bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-600 text-white font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(var(--accent-rgb),0.7),0_4px_14px_-6px_rgba(var(--accent-rgb),0.45)] hover:from-emerald-300 hover:to-emerald-500 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_14px_38px_-10px_rgba(var(--accent-rgb),0.85)]",
+      "gold-shimmer relative border border-gold-300/50 bg-gradient-to-b from-gold-200 via-gold-400 to-gold-600 text-zinc-950 font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_10px_30px_-10px_rgba(var(--accent-rgb),0.7),0_4px_14px_-6px_rgba(var(--accent-rgb),0.45)] hover:from-gold-100 hover:to-gold-500 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_14px_38px_-10px_rgba(var(--accent-rgb),0.85)]",
     ghost: "text-zinc-300 hover:bg-white/5 hover:text-gold-200",
     outline:
       "border border-gold-400/35 text-gold-200 hover:border-gold-300/70 hover:bg-gold-400/10 hover:shadow-[0_8px_24px_-10px_rgba(var(--accent-rgb),0.5)] focus-visible:ring-2 focus-visible:ring-gold-300/40",
@@ -434,3 +435,65 @@ export function EmptyState({ message }: { message: string }) {
     </div>
   );
 }
+
+/* ============================= DROPDOWN (Radix) ============================= */
+export const DropdownMenu = DropdownMenuPrimitive.Root;
+export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+
+export const DropdownMenuContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
+>(({ className, sideOffset = 6, ...props }, ref) => (
+  <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "glass-strong clip-notch-sm z-[120] min-w-[190px] overflow-hidden border border-gold-400/25 p-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.85),0_0_40px_-18px_rgba(var(--accent-rgb),0.4)]",
+        className
+      )}
+      {...props}
+    />
+  </DropdownMenuPrimitive.Portal>
+));
+DropdownMenuContent.displayName = "DropdownMenuContent";
+
+export const DropdownMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & { danger?: boolean }
+>(({ className, danger, ...props }, ref) => (
+  <DropdownMenuPrimitive.Item
+    ref={ref}
+    className={cn(
+      "flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none transition-colors data-[highlighted]:bg-gold-400/15 data-[highlighted]:text-gold-100",
+      danger ? "text-rose-300 data-[highlighted]:bg-rose-500/15 data-[highlighted]:text-rose-200" : "text-zinc-200",
+      className
+    )}
+    {...props}
+  />
+));
+DropdownMenuItem.displayName = "DropdownMenuItem";
+
+export const DropdownMenuLabel = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Label
+    ref={ref}
+    className={cn("px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500", className)}
+    {...props}
+  />
+));
+DropdownMenuLabel.displayName = "DropdownMenuLabel";
+
+export const DropdownMenuSeparator = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-gold-400/15", className)}
+    {...props}
+  />
+));
+DropdownMenuSeparator.displayName = "DropdownMenuSeparator";

@@ -2,6 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Cell,
+} from "recharts";
+import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
+import {
   Newspaper,
   Users,
   Radio,
@@ -18,10 +29,12 @@ import {
   Tags,
   Plus,
   X,
+  UploadCloud,
+  BarChart3,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Button, Card, Stat, Badge } from "@/components/ui";
-import { formatDate } from "@/lib/format";
+import { formatDate, cn } from "@/lib/format";
 import { uploadMedia, isYoutubeUrl } from "@/lib/upload";
 import type { AuditEntry } from "@/lib/types";
 
@@ -61,6 +74,43 @@ function MediaToggle({
           {m === "url" ? "رابط YouTube" : "رفع من الجهاز"}
         </button>
       ))}
+    </div>
+  );
+}
+
+function DropzoneField({
+  accept,
+  label,
+  uploading,
+  onFile,
+}: {
+  accept: Record<string, string[]>;
+  label: string;
+  uploading: boolean;
+  onFile: (f: File) => void;
+}) {
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept,
+    multiple: false,
+    onDrop: (files) => {
+      const f = files[0];
+      if (f) onFile(f);
+    },
+  });
+  return (
+    <div
+      {...getRootProps()}
+      className={cn(
+        "flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors",
+        isDragActive
+          ? "border-gold-400 bg-gold-400/10"
+          : "border-gold-400/30 bg-obsidian-900/40 hover:border-gold-400/60 hover:bg-gold-400/5"
+      )}
+    >
+      <input {...getInputProps()} />
+      <UploadCloud size={22} className="text-gold-300" />
+      <span className="text-xs font-medium text-zinc-200">{uploading ? "جارٍ الرفع..." : label}</span>
+      <span className="text-[11px] text-zinc-500">اسحب الملف وأفلته هنا أو انقر للاختيار</span>
     </div>
   );
 }
@@ -127,8 +177,7 @@ export function AdminOverview() {
     updateSettings({ newsCategories: current.filter((c) => c.id !== id) });
   };
 
-  const handleWelcomeVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleWelcomeVideo = async (file: File) => {
     if (!file) return;
     setUploading(true);
     setWelcomeVideoMsg("");
@@ -138,13 +187,12 @@ export function AdminOverview() {
       setWelcomeVideoMsg(`خطأ: ${res.error}`);
     } else {
       setWelcomeVideoMsg("تم رفع الفيديو بنجاح ✅");
+      toast.success("تم تحديث فيديو النافذة الترحيبية");
       updateSettings({ welcome: { ...settings.welcome!, videoUrl: res.url } });
     }
-    e.target.value = "";
   };
 
-  const handleAnthemUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleAnthemUpload = async (file: File) => {
     if (!file) return;
     setAnthemUploading(true);
     setAnthemMsg("");
@@ -154,10 +202,30 @@ export function AdminOverview() {
       setAnthemMsg(`خطأ: ${res.error}`);
     } else {
       setAnthemMsg("تم رفع النشيد بنجاح ✅");
+      toast.success("تم تحديث النشيد الرسمي");
       updateSettings({ anthemUrl: res.url });
     }
-    e.target.value = "";
   };
+
+  const statusChart = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const o of officers) counts[o.status] = (counts[o.status] || 0) + 1;
+    const LABELS: Record<string, string> = {
+      "on-duty": "في الواجب",
+      "off-duty": "خارج الواجب",
+      suspended: "موقوف",
+      leave: "إجازة",
+      discharged: "مفصول",
+    };
+    const COLORS = ["#eab308", "#10b981", "#f43f5e", "#a78bfa", "#64748b"];
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v], i) => ({
+        name: LABELS[k] || k,
+        count: v,
+        fill: COLORS[i % COLORS.length],
+      }));
+  }, [officers]);
 
   return (
     <div>
@@ -231,6 +299,52 @@ export function AdminOverview() {
           </div>
         </Card>
       </div>
+
+      <Card className="mt-4">
+        <h3 className="mb-4 flex items-center gap-2 font-display text-lg font-bold gold-text">
+          <BarChart3 size={18} /> توزيع حالة القوة
+        </h3>
+        {statusChart.length === 0 ? (
+          <p className="text-sm text-zinc-500">لا توجد بيانات أفراد بعد.</p>
+        ) : (
+          <div className="h-56 w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={statusChart} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                <XAxis
+                  dataKey="name"
+                  stroke="#71717a"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  stroke="#71717a"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(234,179,8,0.06)" }}
+                  contentStyle={{
+                    background: "rgba(18,21,29,0.95)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: "0.7rem",
+                    fontSize: "12px",
+                  }}
+                  labelStyle={{ color: "#e4e4e7" }}
+                  formatter={(v) => [`${v} عضو`, "العدد"]}
+                />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={42}>
+                  {statusChart.map((s, i) => (
+                    <Cell key={i} fill={s.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </Card>
 
       <Card className="mt-4">
         <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
@@ -319,11 +433,11 @@ export function AdminOverview() {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <input
-              type="file"
-              accept="audio/*,video/*"
-              onChange={handleAnthemUpload}
-              className="block w-full text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-gold-400/20 file:px-3 file:py-2 file:text-gold-200 file:transition-colors hover:file:bg-gold-400/30"
+            <DropzoneField
+              accept={{ "audio/*": [], "video/*": [] }}
+              label="رفع النشيد من الجهاز"
+              uploading={anthemUploading}
+              onFile={handleAnthemUpload}
             />
             {anthemUploading ? (
               <p className="text-xs text-gold-200">جارٍ رفع النشيد...</p>
@@ -400,11 +514,11 @@ export function AdminOverview() {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleWelcomeVideo}
-                  className="block w-full text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-gold-400/20 file:px-3 file:py-2 file:text-gold-200 file:transition-colors hover:file:bg-gold-400/30"
+                <DropzoneField
+                  accept={{ "video/*": [] }}
+                  label="رفع فيديو الترحيب من الجهاز"
+                  uploading={uploading}
+                  onFile={handleWelcomeVideo}
                 />
                 {uploading ? (
                   <p className="text-xs text-gold-200">جارٍ رفع الفيديو...</p>
