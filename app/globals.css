@@ -3,63 +3,63 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   TACTICAL DARK — DESIGN SYSTEM
-   Obsidian slate (#09090B / #0B0F17) · glassmorphic zinc panels ·
-   Tactical Amber/Gold (#EAB308) accent · Cyber Emerald status
+   NOIR NAVY — LUXE DESIGN SYSTEM
+   Deep black (#05060C) · navy glass panels (#0C1326) ·
+   Sapphire / royal-blue accent (#6E97EE) · platinum highlights
    ========================================================================== */
 :root {
   color-scheme: dark;
 
-  /* Tactical amber / gold accent scale */
-  --accent-100: #fef3c7;
-  --accent-200: #fde68a;
-  --accent-300: #facc15;
-  --accent-400: #eab308;
-  --accent-500: #ca8a04;
-  --accent-600: #a16207;
-  --accent-700: #854d0e;
-  --accent: #eab308;
-  --accent-bright: #facc15;
-  --accent-rgb: 234, 179, 8;
-  --accent-bright-rgb: 250, 204, 21;
+  /* Sapphire / royal-blue luxe accent scale */
+  --accent-100: #e8eefc;
+  --accent-200: #c2d4f7;
+  --accent-300: #93b1f2;
+  --accent-400: #6e97ee;
+  --accent-500: #4a6fdb;
+  --accent-600: #2f4cab;
+  --accent-700: #21377e;
+  --accent: #6e97ee;
+  --accent-bright: #acc4fb;
+  --accent-rgb: 110, 151, 238;
+  --accent-bright-rgb: 172, 196, 251;
 
-  /* Cyber emerald — status/success indicators */
+  /* Emerald — status/success indicators (kept for semantic states) */
   --emerald: #10b981;
   --emerald-rgb: 16, 185, 129;
 
-  --foreground: #e4e4e7;
-  --muted: #8b919e;
+  --foreground: #e6e9f2;
+  --muted: #8b93a7;
 
-  /* Glass surface (zinc-900/60) */
-  --glass: 24, 24, 27;
-  --bg: #09090b;
-  --bg-2: #0b0f17;
-  --bg-800: #12151d;
-  --bg-700: #1a1f2c;
+  /* Glass surface (navy-tinted) */
+  --glass: 14, 20, 38;
+  --bg: #05060c;
+  --bg-2: #070b16;
+  --bg-800: #0c1326;
+  --bg-700: #121c35;
 
   --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.16);
 
   /* ============ shadcn/ui DESIGN TOKENS (HSL) ============ */
-  --background: 240 6% 4%;
-  --foreground: 240 6% 90%;
-  --card: 240 6% 6%;
-  --card-foreground: 240 6% 90%;
-  --popover: 240 6% 7%;
-  --popover-foreground: 240 6% 90%;
-  --primary: 48 96% 53%;
-  --primary-foreground: 240 6% 6%;
-  --secondary: 240 5% 12%;
-  --secondary-foreground: 240 6% 88%;
-  --muted: 240 5% 12%;
-  --muted-foreground: 220 6% 58%;
-  --accent-token: 48 96% 53%;
-  --accent-foreground: 240 6% 6%;
+  --background: 222 47% 4%;
+  --foreground: 215 25% 88%;
+  --card: 222 40% 7%;
+  --card-foreground: 215 25% 88%;
+  --popover: 222 40% 8%;
+  --popover-foreground: 215 25% 88%;
+  --primary: 219 78% 66%;
+  --primary-foreground: 222 47% 8%;
+  --secondary: 220 30% 14%;
+  --secondary-foreground: 215 22% 86%;
+  --muted: 220 30% 14%;
+  --muted-foreground: 215 16% 60%;
+  --accent-token: 219 78% 66%;
+  --accent-foreground: 222 47% 8%;
   --destructive: 0 62% 55%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 6% 16%;
-  --input: 240 6% 14%;
-  --ring: 48 96% 53%;
+  --border: 220 30% 18%;
+  --input: 220 30% 16%;
+  --ring: 219 78% 66%;
   --radius: 0.85rem;
 }
 
@@ -76,8 +76,9 @@ body {
   margin: 0;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(234, 179, 8, 0.07), transparent 60%),
-    radial-gradient(ellipse 40% 30% at 100% 100%, rgba(16, 185, 129, 0.05), transparent 55%);
+    radial-gradient(ellipse 62% 42% at 50% -12%, rgba(110, 151, 238, 0.12), transparent 60%),
+    radial-gradient(ellipse 48% 36% at 100% 105%, rgba(47, 76, 171, 0.14), transparent 58%),
+    radial-gradient(ellipse 40% 30% at 0% 0%, rgba(110, 151, 238, 0.07), transparent 55%);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-cairo), var(--font-tajawal), system-ui, sans-serif;
@@ -309,7 +310,7 @@ select optgroup {
   color: var(--foreground);
 }
 select option:checked {
-  background-color: rgba(234, 179, 8, 0.25);
+  background-color: rgba(var(--accent-rgb), 0.25);
   color: var(--accent-200);
 }
 

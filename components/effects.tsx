@@ -10,9 +10,9 @@ export function AuroraBackground({ className }: { className?: string }) {
         className="absolute -inset-[10%] animate-[aurora_16s_ease-in-out_infinite]"
         style={{
           background:
-            "radial-gradient(ellipse 55% 45% at 18% -5%, rgba(234,179,8,0.14), transparent 60%)," +
-            "radial-gradient(ellipse 45% 40% at 85% 8%, rgba(16,185,129,0.11), transparent 58%)," +
-            "radial-gradient(ellipse 60% 55% at 50% 110%, rgba(234,179,8,0.09), transparent 62%)",
+            "radial-gradient(ellipse 55% 45% at 18% -5%, rgba(110,151,238,0.16), transparent 60%)," +
+            "radial-gradient(ellipse 45% 40% at 85% 8%, rgba(47,76,171,0.14), transparent 58%)," +
+            "radial-gradient(ellipse 60% 55% at 50% 110%, rgba(110,151,238,0.10), transparent 62%)",
         }}
       />
     </div>
@@ -24,8 +24,8 @@ export function BorderBeam({
   className,
   size = 170,
   duration = 7,
-  colorFrom = "rgba(234,179,8,0.75)",
-  colorTo = "rgba(234,179,8,0)",
+  colorFrom = "rgba(110,151,238,0.85)",
+  colorTo = "rgba(110,151,238,0)",
 }: {
   className?: string;
   size?: number;
@@ -63,10 +63,10 @@ export function GlowCard({
     <div
       className={cn(
         "group/glow relative rounded-2xl p-px transition-all duration-300",
-        "bg-[radial-gradient(circle_at_30%_0%,rgba(234,179,8,0.35),transparent_45%)]",
+        "bg-[radial-gradient(circle_at_30%_0%,rgba(110,151,238,0.4),transparent_45%)]",
         className
       )}
-      style={{ boxShadow: `0 0 ${20 + intensity * 30}px -6px rgba(234,179,8,${0.2 * intensity})` }}
+      style={{ boxShadow: `0 0 ${20 + intensity * 30}px -6px rgba(110,151,238,${0.22 * intensity})` }}
     >
       <div className="clip-notch relative overflow-hidden bg-[rgba(var(--glass),0.7)] backdrop-blur-xl">
         {children}

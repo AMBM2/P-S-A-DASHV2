@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#09090b",
+  themeColor: "#05060c",
 };
 
 export default function RootLayout({
@@ -58,9 +58,9 @@ export default function RootLayout({
             richColors
             toastOptions={{
               style: {
-                background: "rgba(18,21,29,0.92)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                color: "#e4e4e7",
+                background: "rgba(12,19,38,0.94)",
+                border: "1px solid rgba(110,151,238,0.28)",
+                color: "#e6e9f2",
                 borderRadius: "0.85rem",
               },
             }}
@@ -80,7 +80,7 @@ export default function RootLayout({
               <span className="mx-2 text-zinc-600">—</span>
               <span className="text-xs text-zinc-500">P S A · بوابة الأمن العام · خادم Dash Roleplay</span>
               <div className="mt-3 flex items-center justify-center gap-2">
-                <span className="v100-badge">V300 · تكتيكي</span>
+                <span className="v100-badge">V300 · كحلي فخم</span>
               </div>
             </footer>
           </SiteGate>

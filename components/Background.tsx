@@ -9,9 +9,9 @@ export function Background() {
         className="pointer-events-none fixed inset-0 z-0"
         style={{
           background:
-            "radial-gradient(ellipse 55% 38% at 18% -5%, rgba(234,179,8,0.13), transparent 62%)," +
-            "radial-gradient(ellipse 42% 34% at 88% 8%, rgba(16,185,129,0.08), transparent 58%)," +
-            "radial-gradient(ellipse 50% 45% at 50% 112%, rgba(234,179,8,0.07), transparent 62%)",
+            "radial-gradient(ellipse 55% 38% at 18% -5%, rgba(110,151,238,0.14), transparent 62%)," +
+            "radial-gradient(ellipse 42% 34% at 88% 8%, rgba(47,76,171,0.12), transparent 58%)," +
+            "radial-gradient(ellipse 50% 45% at 50% 112%, rgba(110,151,238,0.08), transparent 62%)",
         }}
       />
       {/* Static raster grid */}
