@@ -246,4 +246,7 @@ export type Settings = {
     videoUrl: string;
   };
   newsCategories?: NewsCategory[];
+  // Role registered from the dashboard that is allowed to operate the field
+  // (الميدان) — the Public Security role. The bot reads this value.
+  fieldRoleId?: string;
 };

@@ -234,6 +234,31 @@ export function AdminOverview() {
 
       <Card className="mt-4">
         <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
+          <ShieldAlert size={18} /> رول قيادة الميدان
+        </h3>
+        <p className="mb-3 text-xs text-zinc-500">
+          الميدان يعمل فقط لأعضاء رول الأمن العام — سجّل معرّف الرول هنا من لوحة التحكم، ويقرأه البوت مباشرة.
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="text"
+            dir="ltr"
+            value={settings.fieldRoleId || ""}
+            onChange={(e) => updateSettings({ fieldRoleId: e.target.value.replace(/\D/g, "").slice(0, 20) })}
+            placeholder="1527321813325971577"
+            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+          />
+          <Button variant="outline" onClick={() => updateSettings({ fieldRoleId: "1527321813325971577" })}>
+            استعادة الافتراضي
+          </Button>
+        </div>
+        <p className="mt-2 text-[11px] text-zinc-500">
+          الرول المسجل حاليًا: <span dir="ltr" className="font-mono text-gold-300">{settings.fieldRoleId || "—"}</span>
+        </p>
+      </Card>
+
+      <Card className="mt-4">
+        <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold gold-text">
           <Tags size={18} /> أقسام الأخبار
         </h3>
         <p className="mb-3 text-xs text-zinc-500">

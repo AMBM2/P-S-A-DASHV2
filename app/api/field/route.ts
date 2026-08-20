@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     if (gateActor instanceof NextResponse) return gateActor;
     const actor = gateActor.actor;
 
-    const gate = await requireGrants(actor, ["field", "executive", "master"]);
+    const gate = await requireGrants(actor, ["field", "master"]);
     if (gate instanceof NextResponse) return gate;
 
     const location = cleanString(body?.location, 200);
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-bot-secret": secret },
         body: JSON.stringify({
+          actor,
           location,
           memberIds,
           ...(imageUrl ? { imageUrl } : {}),

@@ -35,7 +35,7 @@ import type { Grant } from "@/lib/types";
 import { RANKS } from "@/lib/seed";
 import { cn } from "@/lib/format";
 
-const FIELD_GRANTS: Grant[] = ["master", "executive", "field"];
+const FIELD_GRANTS: Grant[] = ["master", "field"];
 
 // Fixed scenario locations — the dispatch payload only accepts these.
 const LOCATIONS = [
@@ -348,7 +348,7 @@ export default function FieldPage() {
           <ShieldAlert size={36} className="text-rose-300" />
           <div className="text-lg font-bold text-white">لا تملك صلاحية قيادة الميدان</div>
           <div className="text-sm text-zinc-400">
-            إرسال التنبيهات الميدانية متاح فقط لقيادة الميدان والقيادة العليا.
+            إرسال التنبيهات الميدانية متاح فقط لأعضاء رول الأمن العام المسجلين من لوحة التحكم.
           </div>
         </div>
       </div>

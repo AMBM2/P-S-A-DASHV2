@@ -3,6 +3,8 @@ import { getGuild } from "./nickname.js";
 import { AttachmentBuilder } from "discord.js";
 import { loadRoleCategories } from "./roleCategories.js";
 import { getHighestRank, getHighestRankRole, findRankByRoleName } from "../ranks.js";
+import { getFieldRoleId } from "./settings.js";
+import { masterIds } from "./rbac.js";
 
 const ESC = "\u001b";
 
@@ -109,9 +111,29 @@ async function buildAttachment(payload) {
 
 // Field Patrol dispatch: resolve the selected members into officers/enlisted,
 // list each under their rank-role mention, post the template, attach the image.
+// Restricted to holders of the registered الأمن العام role (from the
+// dashboard) — masters are always allowed.
 export async function dispatchPatrol(client, payload) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
+
+  const actor = String(payload.actor || "").trim();
+  if (actor) {
+    const fieldRoleId = await getFieldRoleId();
+    const isMaster = masterIds().includes(actor);
+    let holdsRole = false;
+    if (fieldRoleId) {
+      try {
+        const actorMember = await guild.members.fetch(actor);
+        holdsRole = actorMember.roles.cache.has(fieldRoleId);
+      } catch {
+        // actor not in server / unreadable → denied below unless master
+      }
+    }
+    if (!isMaster && !holdsRole) {
+      return { ok: false, error: "field-role-required" };
+    }
+  }
 
   const target =
     (config.patrolChannelId && guild.channels.cache.get(config.patrolChannelId)) ||

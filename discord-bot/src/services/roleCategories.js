@@ -2,6 +2,7 @@ import { config } from "../config.js";
 import { supabase } from "../supabase.js";
 import { getGuild } from "./nickname.js";
 import { findRankByRoleName, getHighestRank } from "../ranks.js";
+import { getFieldRoleId } from "./settings.js";
 
 // Maps Discord role IDs to the two patrol groups:
 //   "officer"  — قسم الضباط (command + officer division ranks)
@@ -53,12 +54,11 @@ export async function loadRoleCategories(client) {
 let fieldCache = { at: 0, data: null };
 const FIELD_CACHE_TTL_MS = 25_000;
 
-// Full Public Security member list for the field dispatch UI: every guild
-// member holding an officer/enlisted category role, with rank + presence
-// (connected = online/idle/dnd, plus whether they are in a voice channel).
-// Besides الأمن العام role holders, command ranks (القادة مثل نائب المدير +
-// الرئاسة / القيادة العليا) are listed so they can be mentioned in the
-// field dispatch even when they don't hold the الأمن العام role.
+// Full Public Security member list for the field dispatch UI: ONLY guild
+// members holding the registered الأمن العام role (fieldRoleId, configured
+// from the Web dashboard), with rank + presence (connected = online/idle/dnd,
+// plus whether they are in a voice channel). The field only operates on
+// الأمن العام members.
 export async function getFieldMembers(client) {
   const guild = getGuild(client);
   if (!guild) return { ok: false, error: "no-guild" };
@@ -67,6 +67,7 @@ export async function getFieldMembers(client) {
     return fieldCache.data;
   }
 
+  const fieldRoleId = await getFieldRoleId();
   const categoryMap = await loadRoleCategories(client);
 
   let members;
@@ -84,13 +85,10 @@ export async function getFieldMembers(client) {
 
   const list = [];
   for (const member of members.values()) {
-    const rank = getHighestRank(member);
-    // الأمن العام role holders are always listed; command ranks (القادة مثل
-    // نائب المدير + الرئاسة / القيادة العليا) are included as well.
-    const isPublicSecurity =
-      !config.fieldMemberRoleId || member.roles.cache.has(config.fieldMemberRoleId);
-    if (!isPublicSecurity && rank?.division !== "command") continue;
+    // Only الأمن العام role holders appear in the field dispatch list.
+    if (!fieldRoleId || !member.roles.cache.has(fieldRoleId)) continue;
 
+    const rank = getHighestRank(member);
     let cat = null;
     if (rank && (rank.division === "command" || rank.division === "officer")) cat = "officer";
     else if (rank && rank.division === "troop") cat = "enlisted";

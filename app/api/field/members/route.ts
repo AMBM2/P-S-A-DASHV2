@@ -3,7 +3,7 @@ import { requireGrants } from "@/lib/admin-gate";
 import { requireActor } from "@/lib/auth";
 
 // Public Security member list (connected / offline + ranks) for the field
-// dispatch UI. Gated to field command + executive + master.
+// dispatch UI. Gated to field command (الأمن العام role) + master.
 export async function GET(req: Request) {
   try {
     // SECURITY: the actor is the server-verified cookie identity — never trust
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
     if (gateActor instanceof NextResponse) return gateActor;
     const actor = gateActor.actor;
 
-    const gate = await requireGrants(actor, ["field", "executive", "master"]);
+    const gate = await requireGrants(actor, ["field", "master"]);
     if (gate instanceof NextResponse) return gate;
 
     const botUrl = (process.env.PATROL_BOT_URL || "http://localhost:4000").replace(/\/+$/, "");

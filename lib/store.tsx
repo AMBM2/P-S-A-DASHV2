@@ -61,6 +61,7 @@ const DEFAULT_SETTINGS: Settings = {
     { id: "tamshit", labelAr: "تمشيط", label: "Sweeps" },
     { id: "internal", labelAr: "داخلي", label: "Internal" },
   ],
+  fieldRoleId: "1527321813325971577",
 };
 
 const TABLE: Record<keyof Collections, string> = {

@@ -1,6 +1,7 @@
 import { supabase } from "../supabase.js";
 import { config } from "../config.js";
 import { getGuild } from "./nickname.js";
+import { getFieldRoleId } from "./settings.js";
 
 const LEVEL_ORDER = { none: 0, recruitment: 1, admin: 2, master: 3 };
 
@@ -50,7 +51,10 @@ export async function resolveAccessLevel(client, discordId) {
       const member = await guild.members.fetch(discordId);
       const has = (id) => id && member.roles.cache.has(id);
       if (has(config.hrRoleId) || has(config.recruitmentRoleId)) grants.add("hr");
-      if (has(config.fieldRoleId)) grants.add("field");
+      // Field grant = holding the الأمن العام role registered from the
+      // dashboard (fieldRoleId), or the env-configured field role.
+      const fieldRoleId = await getFieldRoleId();
+      if (has(config.fieldRoleId) || (fieldRoleId && has(fieldRoleId))) grants.add("field");
       if (has(config.personnelRoleId)) grants.add("personnel");
       if (has(config.executiveRoleId) || has(config.commandRoleId)) grants.add("executive");
     } catch {
