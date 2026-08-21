@@ -121,7 +121,7 @@ export function Sidebar() {
   return (
     <>
       {/* ===================== DESKTOP SIDEBAR ===================== */}
-      <aside className="fixed inset-y-0 right-0 z-40 hidden w-72 flex-col border-l border-gold-400/15 bg-[rgba(var(--glass),0.55)] px-4 py-5 backdrop-blur-2xl lg:flex">
+      <aside className="fixed inset-y-0 right-0 z-40 hidden w-80 flex-col border-l border-gold-400/15 bg-[rgba(var(--glass),0.5)] px-5 py-6 backdrop-blur-2xl lg:flex">
         <div className="mb-6 px-1">
           <Brand />
         </div>
@@ -205,7 +205,7 @@ export function Sidebar() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <aside className="absolute inset-y-0 right-0 flex w-72 flex-col border-l border-gold-400/15 bg-[rgba(var(--glass),0.95)] px-4 py-5 backdrop-blur-2xl">
+            <aside className="absolute inset-y-0 right-0 flex w-80 flex-col border-l border-gold-400/15 bg-[rgba(var(--glass),0.95)] px-5 py-6 backdrop-blur-2xl">
               <div className="mb-6 flex items-center justify-between px-1">
                 <Brand />
                 <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-gold-200" aria-label="إغلاق">

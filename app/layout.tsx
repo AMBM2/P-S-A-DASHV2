@@ -68,7 +68,7 @@ export default function RootLayout({
           <SiteGate>
             <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[3px] bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 shadow-[0_0_18px_rgba(var(--accent-rgb),0.6)]" />
             <Sidebar />
-            <main className="mx-auto max-w-[1500px] px-4 py-6 md:px-6 lg:mr-72 lg:pr-2">
+            <main className="mx-auto max-w-[1600px] px-4 py-8 md:px-8 lg:mr-80 lg:pr-2">
               <Ticker />
               {children}
             </main>

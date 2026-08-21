@@ -96,11 +96,11 @@ export default function HomePage() {
             shadow={false}
             highlight={false}
           >
-            <div data-atropos-offset="-6">
-              <div className="clip-hex absolute -inset-3 border border-gold-400/25" />
-            </div>
-            <div data-atropos-offset="-3">
-              <div className="clip-hex absolute -inset-3 border border-dashed border-gold-400/20 animate-[spin_40s_linear_infinite]" />
+            <div data-atropos-offset="-2" className="absolute inset-0 -m-7">
+              <div className="absolute inset-0 rounded-full border border-gold-400/20 animate-[spin_26s_linear_infinite]" />
+              <div className="absolute inset-4 rounded-full border border-dashed border-gold-400/15 animate-[spin_40s_linear_infinite_reverse]" />
+              <span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-gold-300 shadow-[0_0_10px_rgba(var(--accent-rgb),0.9)]" />
+              <span className="absolute bottom-3 right-4 h-1.5 w-1.5 rounded-full bg-sky-300 shadow-[0_0_8px_rgba(14,165,233,0.9)]" />
             </div>
             <div
               data-atropos-offset="5"
@@ -118,7 +118,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-8 lg:grid-cols-3">
         {/* Module 1: News Feed */}
         <div className="lg:col-span-2">
           <div className="mb-4">

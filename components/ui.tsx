@@ -64,7 +64,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "clip-notch hud-frame gold-shimmer group/card relative overflow-hidden border border-gold-400/20 bg-[rgba(var(--glass),0.66)] p-5 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.8),0_0_0_1px_rgba(var(--accent-rgb),0.05)]",
+        "clip-notch hud-frame gold-shimmer group/card relative overflow-hidden border border-gold-400/20 bg-[rgba(var(--glass),0.6)] p-6 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.85),0_0_0_1px_rgba(var(--accent-rgb),0.06)]",
         hover &&
           "transition-all duration-300 hover:-translate-y-1 hover:border-gold-300/50 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25),0_22px_60px_-20px_rgba(var(--accent-rgb),0.55),0_0_45px_-10px_rgba(var(--accent-rgb),0.35)]",
         className

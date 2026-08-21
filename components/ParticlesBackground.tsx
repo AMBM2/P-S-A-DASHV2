@@ -13,12 +13,12 @@ function CyberParticles() {
       background: { color: { value: "transparent" } },
       particles: {
         number: { value: 60, density: { enable: true, area: 1000 } },
-        color: { value: ["#D9B45B", "#F3D489", "#E6C97D"] },
-        opacity: { value: { min: 0.1, max: 0.55 } },
+        color: { value: ["#c7d2fe", "#a5b4fc", "#e0e7ff", "#67e8f9"] },
+        opacity: { value: { min: 0.1, max: 0.6 } },
         size: { value: { min: 1, max: 2.6 } },
         move: {
           enable: true,
-          speed: 0.5,
+          speed: 0.35,
           direction: "top",
           random: true,
           straight: false,
@@ -27,8 +27,8 @@ function CyberParticles() {
         links: {
           enable: true,
           distance: 130,
-          color: "#D9B45B",
-          opacity: 0.15,
+          color: "#6366f1",
+          opacity: 0.1,
           width: 1,
         },
       },
