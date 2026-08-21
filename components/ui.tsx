@@ -28,14 +28,14 @@ export function Button({
 }) {
   const styles: Record<string, string> = {
     primary:
-      "gold-shimmer relative border border-gold-300/50 bg-gradient-to-b from-gold-200 via-gold-400 to-gold-600 text-white font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_30px_-10px_rgba(var(--accent-rgb),0.7),0_4px_14px_-6px_rgba(var(--accent-rgb),0.45)] hover:from-gold-100 hover:to-gold-500 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_14px_38px_-10px_rgba(var(--accent-rgb),0.85)]",
+      "relative border border-gold-400/40 bg-gold-500 text-white font-semibold shadow-[0_4px_14px_-6px_rgba(var(--accent-rgb),0.5)] hover:bg-gold-400",
     ghost: "text-zinc-300 hover:bg-white/5 hover:text-gold-200",
     outline:
-      "border border-gold-400/35 text-gold-200 hover:border-gold-300/70 hover:bg-gold-400/10 hover:shadow-[0_8px_24px_-10px_rgba(var(--accent-rgb),0.5)] focus-visible:ring-2 focus-visible:ring-gold-300/40",
+      "border border-gold-400/35 text-gold-200 hover:border-gold-300/70 hover:bg-gold-400/10 focus-visible:ring-2 focus-visible:ring-gold-300/40",
     danger:
-      "gold-shimmer relative border border-rose-500/40 bg-gradient-to-b from-rose-500 to-red-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_26px_-12px_rgba(244,63,94,0.6)] hover:from-rose-400 hover:to-red-600",
+      "relative border border-rose-500/40 bg-rose-600 text-white hover:bg-rose-500",
     success:
-      "gold-shimmer relative border border-emerald-500/40 bg-gradient-to-b from-emerald-500 to-emerald-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_26px_-12px_rgba(16,185,129,0.6)] hover:from-emerald-400 hover:to-emerald-600",
+      "relative border border-emerald-500/40 bg-emerald-600 text-white hover:bg-emerald-500",
   };
   return (
     <button
@@ -64,9 +64,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "clip-notch hud-frame gold-shimmer group/card relative overflow-hidden border border-gold-400/20 bg-[rgba(var(--glass),0.6)] p-6 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.85),0_0_0_1px_rgba(var(--accent-rgb),0.06)]",
+        "clip-notch relative overflow-hidden border border-gold-400/15 bg-[rgba(var(--glass),0.5)] p-6",
         hover &&
-          "transition-all duration-300 hover:-translate-y-1 hover:border-gold-300/50 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.25),0_22px_60px_-20px_rgba(var(--accent-rgb),0.55),0_0_45px_-10px_rgba(var(--accent-rgb),0.35)]",
+          "transition-all duration-200 hover:border-gold-300/40",
         className
       )}
     >

@@ -3,12 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Atropos from "atropos/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft, Play } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, ProgressBar, EmptyState, SectionTitle } from "@/components/ui";
-import { AuroraBackground, GlowCard, BorderBeam } from "@/components/effects";
 import { timeAgo, number } from "@/lib/format";
 import { AR } from "@/lib/ar";
 import { RANKS } from "@/lib/seed";
@@ -52,17 +50,7 @@ export default function HomePage() {
   return (
     <div>
       {/* Command Hero */}
-      <div className="clip-notch relative mb-10 overflow-hidden border border-gold-400/20 bg-[rgba(var(--glass),0.6)] p-8 backdrop-blur-xl md:p-12">
-        <AuroraBackground />
-        <BorderBeam size={280} duration={9} />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: "radial-gradient(circle at 1px 1px, var(--accent) 1px, transparent 0)",
-            backgroundSize: "26px 26px",
-          }}
-        />
-
+      <div className="clip-notch relative mb-10 overflow-hidden border border-gold-400/15 bg-[rgba(var(--glass),0.5)] p-8 backdrop-blur-xl md:p-12">
         <div className="relative flex flex-col items-center gap-8 text-center md:flex-row md:justify-between md:text-right">
           <div className="max-w-xl">
             <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-200">
@@ -88,33 +76,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Official emblem — Atropos 3D parallax */}
-          <Atropos
-            className="relative shrink-0"
-            rotateXMax={16}
-            rotateYMax={16}
-            shadow={false}
-            highlight={false}
-          >
-            <div data-atropos-offset="-2" className="absolute inset-0 -m-7">
-              <div className="absolute inset-0 rounded-full border border-gold-400/20 animate-[spin_26s_linear_infinite]" />
-              <div className="absolute inset-4 rounded-full border border-dashed border-gold-400/15 animate-[spin_40s_linear_infinite_reverse]" />
-              <span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-gold-300 shadow-[0_0_10px_rgba(var(--accent-rgb),0.9)]" />
-              <span className="absolute bottom-3 right-4 h-1.5 w-1.5 rounded-full bg-gold-300 shadow-[0_0_8px_rgba(var(--accent-rgb),0.9)]" />
-            </div>
-            <div
-              data-atropos-offset="5"
-              className="clip-hex relative flex h-36 w-36 items-center justify-center border border-gold-400/30 bg-gold-400/5 backdrop-blur-md gold-glow-strong animate-[goldPulse_4s_ease-in-out_infinite]"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/psa-logo.png"
-                alt="PSA"
-                className="h-28 w-28 rounded-full object-contain"
-                style={{ filter: "drop-shadow(0 0 12px rgba(var(--accent-rgb),0.4))" }}
-              />
-            </div>
-          </Atropos>
+          {/* Official emblem */}
+          <div className="clip-notch relative flex h-36 w-36 shrink-0 items-center justify-center border border-gold-400/30 bg-gold-400/5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/psa-logo.png"
+              alt="PSA"
+              className="h-28 w-28 rounded-full object-contain"
+            />
+          </div>
         </div>
       </div>
 
@@ -260,8 +230,8 @@ export default function HomePage() {
 
         {/* Module 2 + 3: On-Duty Counter & Rank Distribution */}
         <div className="space-y-6">
-          <GlowCard intensity={0.6} className="text-center">
-            <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-gold-400/30 bg-gold-400/10 gold-pulse">
+          <Card className="text-center">
+            <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-gold-400/30 bg-gold-400/10">
               <ShieldCheck className="h-7 w-7 text-gold-300" />
             </div>
             <div className="font-display text-5xl font-bold gold-text">{onDuty}</div>
@@ -275,7 +245,7 @@ export default function HomePage() {
               </span>
               {lang === "ar" ? "الخدمة الآن" : "On shift"}
             </span>
-          </GlowCard>
+          </Card>
 
           <Card>
             <SectionTitle icon={Crown}>
