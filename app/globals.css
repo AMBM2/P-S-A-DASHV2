@@ -11,18 +11,18 @@
 :root {
   color-scheme: dark;
 
-  /* Primary brand scale (indigo/violet) */
-  --accent-100: #e0e7ff;
-  --accent-200: #c7d2fe;
-  --accent-300: #a5b4fc;
-  --accent-400: #818cf8;
-  --accent-500: #6366f1;
-  --accent-600: #4f46e5;
-  --accent-700: #4338ca;
-  --accent: #6366f1;
-  --accent-bright: #a5b4fc;
-  --accent-rgb: 99, 102, 241;
-  --accent-bright-rgb: 165, 180, 252;
+  /* Primary brand scale (gold on black) */
+  --accent-100: #fef3c7;
+  --accent-200: #fde68a;
+  --accent-300: #facc15;
+  --accent-400: #eab308;
+  --accent-500: #ca8a04;
+  --accent-600: #a16207;
+  --accent-700: #854d0e;
+  --accent: #eab308;
+  --accent-bright: #facc15;
+  --accent-rgb: 234, 179, 8;
+  --accent-bright-rgb: 250, 204, 21;
 
   --emerald: #10b981;
   --emerald-rgb: 16, 185, 129;
@@ -49,13 +49,13 @@
   --card-foreground: 220 20% 90%;
   --popover: 222 40% 9%;
   --popover-foreground: 220 20% 90%;
-  --primary: 243 75% 59%;
+  --primary: 48 96% 53%;
   --primary-foreground: 0 0% 100%;
   --secondary: 220 25% 14%;
   --secondary-foreground: 220 18% 86%;
   --muted: 220 25% 14%;
   --muted-foreground: 220 12% 60%;
-  --accent-token: 243 75% 59%;
+  --accent-token: 48 96% 53%;
   --accent-foreground: 0 0% 100%;
   --destructive: 350 75% 55%;
   --destructive-foreground: 0 0% 98%;
@@ -74,9 +74,9 @@ body {
   min-height: 100vh;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 60% 45% at 50% -12%, rgba(99, 102, 241, 0.18), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 100% 105%, rgba(139, 92, 246, 0.14), transparent 58%),
-    linear-gradient(180deg, #05060f 0%, #080b18 50%, #05060f 100%);
+    radial-gradient(ellipse 60% 45% at 50% -12%, rgba(234, 179, 8, 0.10), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 105%, rgba(202, 138, 4, 0.08), transparent 58%),
+    linear-gradient(180deg, #050505 0%, #0a0907 50%, #050505 100%);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-cairo), var(--font-tajawal), system-ui, sans-serif;

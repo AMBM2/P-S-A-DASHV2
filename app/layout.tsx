@@ -82,7 +82,7 @@ export default function RootLayout({
               <span className="mx-2 text-zinc-600">—</span>
               <span className="text-xs text-zinc-500">P S A · بوابة الأمن العام · خادم Dash Roleplay</span>
               <div className="mt-3 flex items-center justify-center gap-2">
-                <span className="v100-badge">V300 · عصري</span>
+                <span className="v100-badge">V300 · ذهبي</span>
               </div>
             </footer>
           </SiteGate>
