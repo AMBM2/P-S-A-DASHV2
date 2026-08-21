@@ -1,70 +1,40 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { requireGrants } from "@/lib/admin-gate";
-import { requirePermission, PERMS } from "@/lib/permissions";
-import { requireActor } from "@/lib/auth";
-import { rateLimit, tooMany } from "@/lib/rate-limit";
-import { checkOrigin } from "@/lib/csrf";
-import { cleanString } from "@/lib/sanitize";
 import { auditLog } from "@/lib/audit";
-import type { PermissionKey } from "@/lib/types";
 
-const ALLOWED: Record<string, string[]> = {
-  news: ["executive"],
-  officers: ["executive"],
-  leaders: ["executive"],
-  codes: ["hr", "executive"],
-};
-const ALLOWED_PERM: Record<string, string> = {
-  news: PERMS.NEWS_ADMIN,
-  officers: PERMS.SITE_ADMIN,
-  leaders: PERMS.SITE_ADMIN,
-  codes: PERMS.SITE_ADMIN,
-};
+const ALLOWED = ["news", "officers", "leaders", "codes"] as const;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    if (checkOrigin(req)) {
-      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
-    }
-    if (!rateLimit(req, { limit: 60, windowMs: 60_000 })) return tooMany();
-
     const body = await req.json();
-    const table = cleanString(body?.table, 32);
-    const id = cleanString(body?.id, 128);
-    const claimed = cleanString(body?.actor, 40);
+    const { table, id, actor } = body;
 
-    // SECURITY: the actor is the server-verified cookie identity.
-    const gateActor = await requireActor(req, claimed || undefined);
-    if (gateActor instanceof NextResponse) return gateActor;
-    const actor = gateActor.actor;
-
-    const needed = ALLOWED[table as string];
-    if (!needed || !id) {
-      return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
+    if (!ALLOWED.includes(table)) {
+      return NextResponse.json({ error: "invalid table" }, { status: 400 });
+    }
+    if (!id) {
+      return NextResponse.json({ error: "id required" }, { status: 400 });
     }
 
-    const legacy = await requireGrants(actor || "", needed);
-    const delegated = legacy instanceof NextResponse
-      ? await requirePermission(actor || "", (ALLOWED_PERM[table as string] || PERMS.SITE_ADMIN) as PermissionKey)
-      : legacy;
-    if (delegated instanceof NextResponse) return delegated;
+    const admin = getSupabaseAdmin();
+    const { error } = await admin.from(table).delete().eq("id", id);
 
-    const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from(table).delete().eq("id", id);
     if (error) {
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     await auditLog({
-      action: "store.remove",
-      actionAr: table === "news" ? "حذف خبر" : "حذف سجل",
-      executor: actor || "",
-      target: id,
+      action: "remove",
+      actionAr: "حذف بيانات",
+      executor: actor?.discordId || "system",
+      executorName: actor?.nameAr || actor?.name || "النظام",
+      target: table,
+      targetName: id,
       metadata: { table },
-    });
+    }).catch(() => {});
+
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message || "server error" }, { status: 500 });
+    return NextResponse.json({ error: e?.message || "remove failed" }, { status: 500 });
   }
 }

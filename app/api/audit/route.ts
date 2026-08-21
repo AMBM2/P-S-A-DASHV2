@@ -1,57 +1,31 @@
-import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { requireGrants } from "@/lib/admin-gate";
-import { rateLimit, tooMany } from "@/lib/rate-limit";
-import { checkOrigin } from "@/lib/csrf";
-import { cleanObject } from "@/lib/sanitize";
+import { NextRequest, NextResponse } from "next/server";
+import { auditLog } from "@/lib/audit";
 
-// Server-side audit log read (executive / master only).
-export async function GET(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const actor = new URL(req.url).searchParams.get("actor") || "";
-    const gate = await requireGrants(actor, ["executive"]);
-    if (gate instanceof NextResponse) return gate;
-
-    const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
-      .from("audit")
-      .select("*")
-      .order("timestamp", { ascending: false })
-      .limit(200);
-    if (error) {
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ ok: true, entries: data || [] });
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message || "server error" }, { status: 500 });
-  }
-}
-
-// Server-side audit log insert (executive / master only).
-export async function POST(req: Request) {
-  try {
-    if (checkOrigin(req)) {
-      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
-    }
-    if (!rateLimit(req, { limit: 120, windowMs: 60_000 })) return tooMany();
-
     const body = await req.json();
-    const entry = cleanObject(body?.entry, { maxLen: 2000, maxKeys: 50 });
-    const actor = cleanObject(body?.actor, { maxLen: 40 }) as string;
-    if (!entry || !entry.id || !entry.action) {
-      return NextResponse.json({ ok: false, error: "معاملات غير صالحة" }, { status: 400 });
+    const { action, actionAr, executor, executorName, target, targetName, metadata } = body;
+
+    if (!action || !executor) {
+      return NextResponse.json({ error: "action and executor required" }, { status: 400 });
     }
 
-    const gate = await requireGrants(actor || "", ["executive"]);
-    if (gate instanceof NextResponse) return gate;
+    const result = await auditLog({
+      action,
+      actionAr,
+      executor,
+      executorName,
+      target,
+      targetName,
+      metadata,
+    });
 
-    const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("audit").insert(entry);
-    if (error) {
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
+
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message || "server error" }, { status: 500 });
+    return NextResponse.json({ error: e?.message || "audit failed" }, { status: 500 });
   }
 }

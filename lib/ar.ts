@@ -18,6 +18,13 @@ export const AR = {
     leave: "إجازة",
     discharged: "مُسرّح",
   } as Record<string, string>,
+  status: {
+    "on-duty": "في الخدمة",
+    "off-duty": "خارج الخدمة",
+    suspended: "موقوف",
+    leave: "إجازة",
+    discharged: "مُسرّح",
+  } as Record<string, string>,
   codeType: {
     "10-code": "كود 10",
     signal: "إشارة",

@@ -15,12 +15,14 @@ export type Department = {
 
 export type Officer = {
   id: string;
+  order?: number;
   badge: string;
   callsign: string;
   name: string;
   nameAr: string;
   cid?: string;
   discordId?: string;
+  discordTag?: string;
   discordName?: string;
   discordAvatar?: string;
   rankId: string;
@@ -46,13 +48,14 @@ export type Leader = {
   id: string;
   name: string;
   nameAr: string;
-  title: string;
-  titleAr: string;
-  badge: string;
-  mandate: string;
-  mandateAr: string;
-  rank: string;
-  photo?: string;
+  rankId: string;
+  departmentId: string;
+  bio: string;
+  bioAr: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  tags?: string[];
+  order?: number;
 };
 
 export type News = {
@@ -82,9 +85,13 @@ export type NewsCategory = {
 export type MilitaryCode = {
   id: string;
   code: string;
-  meaning: string;
-  meaningAr: string;
-  type: "10-code" | "signal" | "channel" | "protocol" | "callsign";
+  type: "general" | "tactical" | "emergency";
+  titleAr: string;
+  title: string;
+  bodyAr: string;
+  body: string;
+  order?: number;
+  createdAt: string;
 };
 
 export type AdminRole = "master" | "executive" | "field" | "hr" | "personnel" | "admin" | "recruitment";
@@ -246,7 +253,7 @@ export type Settings = {
     videoUrl: string;
   };
   newsCategories?: NewsCategory[];
-  // Role registered from the dashboard that is allowed to operate the field
-  // (الميدان) — the Public Security role. The bot reads this value.
+  ranks?: Rank[];
+  departments?: Department[];
   fieldRoleId?: string;
 };

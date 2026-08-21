@@ -1,23 +1,53 @@
 import type { Config } from "tailwindcss";
 
+const accent = {
+  50: "#eff6ff",
+  100: "#dbeafe",
+  200: "#bfdbfe",
+  300: "#93c5fd",
+  400: "#60a5fa",
+  500: "#3b82f6",
+  600: "#2563eb",
+  700: "#1d4ed8",
+  800: "#1e40af",
+  900: "#1e3a8a",
+  950: "#172554",
+};
+
 const config: Config = {
+  darkMode: ["class", '[data-theme="dark"]'],
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./lib/**/*.{ts,tsx}",
   ],
   theme: {
+    screens: {
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
+    },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-cairo)", "var(--font-inter)", "system-ui", "sans-serif"],
+        inter: ["var(--font-inter)", "system-ui", "sans-serif"],
+        cairo: ["var(--font-cairo)", "sans-serif"],
+        tajawal: ["var(--font-tajawal)", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-inter)", "sans-serif"],
+      },
       colors: {
-        // shadcn/ui design tokens (mapped to the obsidian & gold theme)
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: accent[600],
+          hover: accent[500],
+          active: accent[700],
+          foreground: "#ffffff",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -27,13 +57,20 @@ const config: Config = {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent-token))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
+        accent: accent,
+        accentForeground: "#0f172a",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
+          hover: "hsl(var(--destructive-hover))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",
@@ -43,41 +80,21 @@ const config: Config = {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
-        obsidian: {
-          950: "var(--bg)",
-          900: "var(--bg-2)",
-          800: "var(--bg-800)",
-          700: "var(--bg-700)",
-        },
-        gold: {
-          100: "var(--accent-100)",
-          200: "var(--accent-200)",
-          300: "var(--accent-300)",
-          400: "var(--accent-400)",
-          500: "var(--accent-500)",
-          600: "var(--accent-600)",
-          700: "var(--accent-700)",
-        },
-        },
-      fontFamily: {
-        sans: ["var(--font-inter)", "var(--font-cairo)", "var(--font-tajawal)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "var(--font-inter)", "var(--font-cairo)", "sans-serif"],
-        inter: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "var(--radius-lg)",
+        md: "var(--radius-md)",
+        sm: "var(--radius-sm)",
+        xl: "var(--radius-xl)",
+        "2xl": "var(--radius-2xl)",
+        full: "var(--radius-full)",
       },
       boxShadow: {
         sm: "var(--shadow-sm)",
         md: "var(--shadow-md)",
         lg: "var(--shadow-lg)",
         xl: "var(--shadow-xl)",
-        gold: "0 0 25px rgba(var(--accent-rgb), 0.15)",
-        "gold-lg": "0 0 45px rgba(var(--accent-rgb), 0.25)",
-        "gold-glow": "0 4px 30px -4px rgba(var(--accent-rgb), 0.4)",
-        brass: "0 18px 50px -22px rgba(var(--accent-rgb), 0.6)",
+        "2xl": "var(--shadow-2xl)",
       },
       transitionDuration: {
         fast: "var(--duration-fast)",
@@ -89,33 +106,24 @@ const config: Config = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
-        shimmer: {
-          "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(100%)" },
-        },
-        float: {
-          "0%,100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-8px)" },
-        },
-        dust: {
-          "0%": { transform: "translateY(0) translateX(0)", opacity: "0" },
-          "20%": { opacity: "1" },
-          "100%": { transform: "translateY(-100vh) translateX(40px)", opacity: "0" },
-        },
-        scan: {
-          "0%": { transform: "translateX(-110%)" },
-          "100%": { transform: "translateX(110%)" },
+        "gold-pulse": {
+          "0%,100%": { opacity: "1" },
+          "50%": { opacity: "0.6" },
         },
       },
       animation: {
-        ticker: "ticker 40s linear infinite",
-        shimmer: "shimmer 2.5s infinite",
-        float: "float 6s ease-in-out infinite",
-        dust: "dust 12s linear infinite",
-        scan: "scan 7s ease-in-out infinite",
+        ticker: "ticker 30s linear infinite",
+      },
+      zIndex: {
+        dropdown: "1000",
+        sticky: "1100",
+        modal: "1200",
+        popover: "1300",
+        tooltip: "1400",
       },
     },
   },
   plugins: [],
 };
+
 export default config;

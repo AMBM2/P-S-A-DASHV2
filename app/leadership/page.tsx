@@ -1,62 +1,57 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Crown } from "lucide-react";
+import { Crown, Mail, Phone } from "lucide-react";
+import { Card, Badge, SectionTitle, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
-import { PageHeader } from "@/components/PageHeader";
-import { Card, Badge } from "@/components/ui";
 
 export default function LeadershipPage() {
-  const { leaders, settings } = useStore();
-  const lang = settings.language;
+  const { leaders, getRankTitle, getDepartmentTitle } = useStore();
+  const ordered = [...leaders].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   return (
     <div>
-      <PageHeader
-        title={lang === "ar" ? "صفحة القادة" : "Leadership"}
-        subtitle={
-          lang === "ar"
-            ? "كبار مسؤولي قوات الأمن العام — الأسماء والرتب والصور الرسمية"
-            : "Senior command staff of Public Security — names, ranks and official portraits"
-        }
-      />
-
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {leaders.map((l, i) => (
-          <motion.div
-            key={l.id}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-          >
-            <Card hover className="group flex flex-col items-center text-center">
-              <div className="relative mb-4">
-                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 opacity-60 blur-sm transition-opacity group-hover:opacity-100" />
-                <div className="relative h-32 w-32 overflow-hidden rounded-full border-2 border-gold-400/50 bg-obsidian-800">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={l.photo || "/psa-logo.png"}
-                    alt={l.name}
-                    className="h-full w-full object-cover"
-                  />
+      <SectionTitle icon={Crown}>هيكل القيادة</SectionTitle>
+      {ordered.length === 0 ? (
+        <EmptyState message="لا يوجد قادة مضافون" />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {ordered.map((l) => (
+            <Card key={l.id} hover className="relative">
+              <span className="pointer-events-none absolute inset-0 clip-notch opacity-0 [background:radial-gradient(120%_120%_at_100%_0%,rgba(var(--accent-rgb),0.08),transparent_40%)] group-hover:opacity-100" />
+              <div className="flex items-center gap-4">
+                <div className="clip-hex relative flex h-16 w-16 items-center justify-center border border-accent-400/40 bg-accent-50">
+                  <Crown className="h-7 w-7 text-accent-600" />
                 </div>
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full border border-gold-400/40 bg-black/80 px-2 py-0.5">
-                  <Crown className="h-3 w-3 text-gold-300" />
+                <div>
+                  <div className="font-display text-lg font-bold text-gray-900">{l.nameAr}</div>
+                  <div className="text-xs text-accent-600">{getRankTitle(l.rankId)}</div>
+                  <div className="text-xs text-gray-500">{getDepartmentTitle(l.departmentId)}</div>
                 </div>
               </div>
-
-              <Badge tone="gold" className="mb-2">{l.badge}</Badge>
-              <h3 className="font-display text-lg font-bold text-white">
-                {lang === "ar" ? l.nameAr : l.name}
-              </h3>
-              <div className="mt-1 font-display text-sm font-semibold gold-text">
-                {lang === "ar" ? l.titleAr : l.title}
+              <p className="mt-3 line-clamp-2 text-sm text-gray-600">{l.bioAr}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {l.contactEmail && (
+                  <span className="flex items-center gap-1 rounded-full border border-gray-200 px-2 py-1 text-[11px] text-gray-500">
+                    <Mail size={11} /> {l.contactEmail}
+                  </span>
+                )}
+                {l.contactPhone && (
+                  <span className="flex items-center gap-1 rounded-full border border-gray-200 px-2 py-1 text-[11px] text-gray-500">
+                    <Phone size={11} /> {l.contactPhone}
+                  </span>
+                )}
               </div>
-              <div className="mt-0.5 text-xs text-zinc-400">{l.rank}</div>
+              {l.tags && l.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {l.tags.map((t) => (
+                    <Badge key={t} tone="gold">{t}</Badge>
+                  ))}
+                </div>
+              )}
             </Card>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

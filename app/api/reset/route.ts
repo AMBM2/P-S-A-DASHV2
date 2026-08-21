@@ -1,44 +1,32 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { requireGrants } from "@/lib/admin-gate";
-import { requireActor } from "@/lib/auth";
-import { MASTER_ADMIN_ID } from "@/lib/permissions";
-import { rateLimit, tooMany } from "@/lib/rate-limit";
-import { checkOrigin } from "@/lib/csrf";
-import { cleanString } from "@/lib/sanitize";
+import { auditLog } from "@/lib/audit";
 
-// Master-only: wipe the site collections (previously a client-side direct
-// delete that ran with the public anon key — anyone could erase the DB).
-export async function POST(req: Request) {
+const TABLES = ["news", "officers", "leaders", "codes"] as const;
+
+export async function POST(req: NextRequest) {
   try {
-    if (checkOrigin(req)) {
-      return NextResponse.json({ ok: false, error: "invalid origin" }, { status: 403 });
-    }
-    if (!rateLimit(req, { limit: 10, windowMs: 60_000 })) return tooMany();
+    const body = await req.json().catch(() => ({}));
+    const actor = body?.actor;
 
-    const body = await req.json();
-    const claimed = cleanString(body?.actor || "", 40);
-
-    // SECURITY: the actor is the server-verified cookie identity + must be master.
-    const gateActor = await requireActor(req, claimed || undefined);
-    if (gateActor instanceof NextResponse) return gateActor;
-    const actor = gateActor.actor;
-    if (actor !== MASTER_ADMIN_ID) {
-      return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    const admin = getSupabaseAdmin();
+    for (const t of TABLES) {
+      const { error } = await admin.from(t).delete().neq("id", "__never__");
+      if (error) {
+        return NextResponse.json({ error: `failed on ${t}: ${error.message}` }, { status: 500 });
+      }
     }
 
-    const gate = await requireGrants(actor, ["master"]);
-    if (gate instanceof NextResponse) return gate;
+    await auditLog({
+      action: "reset",
+      actionAr: "إعادة تعيين البيانات",
+      executor: actor?.discordId || "system",
+      executorName: actor?.nameAr || actor?.name || "النظام",
+      target: "all",
+    }).catch(() => {});
 
-    const supabase = getSupabaseAdmin();
-    const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
-    await supabase.from("news").delete().neq("id", ZERO_UUID);
-    await supabase.from("officers").delete().neq("id", ZERO_UUID);
-    await supabase.from("leaders").delete().neq("id", ZERO_UUID);
-    await supabase.from("codes").delete().neq("id", ZERO_UUID);
-    await supabase.from("audit").delete().neq("id", ZERO_UUID);
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message || "server error" }, { status: 500 });
+    return NextResponse.json({ error: e?.message || "reset failed" }, { status: 500 });
   }
 }

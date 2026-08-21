@@ -1,139 +1,91 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowRight, Calendar, Eye, Pin, User } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { useEffect } from "react";
+import { ArrowRight, Eye, Calendar, User, Pin, Play } from "lucide-react";
 import { Card, Badge, EmptyState } from "@/components/ui";
-import { formatDate } from "@/lib/format";
+import { useStore } from "@/lib/store";
+import { timeAgo, number } from "@/lib/format";
 import { AR } from "@/lib/ar";
 
-const PRIORITY_TONE: Record<string, any> = {
-  critical: "rose",
-  high: "amber",
-  normal: "gold",
-  low: "slate",
-};
-
-export default function NewsDetailPage() {
-  const { id } = useParams<{ id: string }>();
+export default function NewsDetail() {
+  const params = useParams();
+  const router = useRouter();
+  const id = String(params.id);
   const { news, settings } = useStore();
-  const lang = settings.language;
-  const [activeImg, setActiveImg] = useState(0);
-
   const item = news.find((n) => n.id === id);
-  const cats = settings.newsCategories || [];
-  const catLabel = (cid: string) => {
-    const c = cats.find((x) => x.id === cid);
-    return lang === "ar" ? c?.labelAr || AR.category[cid] || cid : c?.label || cid;
-  };
 
-  const images = item?.images?.length ? item.images : item?.image ? [item.image] : [];
+  const catLabel = (cid: string) =>
+    (settings.newsCategories || []).find((c) => c.id === cid)?.labelAr || cid;
 
   useEffect(() => {
-    if (!id || !item) return;
-    fetch("/api/news/views", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-      cache: "no-store",
-    }).catch(() => {});
-  }, [id, item?.views]);
-
-  useEffect(() => {
-    setActiveImg(0);
-  }, [id]);
+    if (item) {
+      fetch("/api/news/views", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      }).catch(() => {});
+    }
+  }, [item]);
 
   if (!item) {
     return (
-      <div className="mx-auto max-w-3xl">
-        <EmptyState message={lang === "ar" ? "الخبر غير موجود" : "Article not found"} />
-        <div className="mt-4 text-center">
-          <Link href="/" className="text-sm text-gold-300 hover:underline">
-            {lang === "ar" ? "العودة للرئيسية" : "Back to home"}
-          </Link>
-        </div>
+      <div>
+        <button onClick={() => router.back()} className="mb-4 text-sm text-accent-600 hover:underline">
+          ← رجوع
+        </button>
+        <EmptyState message="الخبر غير موجود" />
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link href="/" className="mb-4 inline-flex items-center gap-1 text-sm text-gold-300 hover:underline">
-        <ArrowRight size={14} className="rtl:rotate-180" />
-        {lang === "ar" ? "العودة إلى الأخبار" : "Back to news"}
+      <Link href="/" className="mb-4 inline-flex items-center gap-1 text-sm text-accent-600 hover:underline">
+        <ArrowRight size={14} className="rtl:rotate-180" /> العودة للرئيسية
       </Link>
 
-      <Card className="overflow-hidden">
-        {item.video && (
-          <div className="bg-black">
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-            <video src={item.video} controls className="max-h-[30rem] w-full" />
-          </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Badge tone="gold">{catLabel(item.category)}</Badge>
+        <Badge tone={item.priority === "critical" ? "rose" : item.priority === "high" ? "amber" : "slate"}>
+          {AR.priority[item.priority]}
+        </Badge>
+        {item.pinned && (
+          <Badge tone="gold">
+            <Pin size={11} /> مثبت
+          </Badge>
         )}
-        {images.length > 0 && (
-          <div>
-            <div className="relative bg-black">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={images[activeImg]}
-                alt=""
-                className="max-h-96 w-full object-contain"
-              />
-            </div>
-            {images.length > 1 && (
-              <div className="flex flex-wrap gap-2 border-t border-gold-400/10 bg-obsidian-900/60 p-3">
-                {images.map((src, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImg(i)}
-                    className={`overflow-hidden rounded-lg border transition-all ${
-                      i === activeImg
-                        ? "border-gold-400/80 ring-2 ring-gold-400/30"
-                        : "border-gold-400/15 opacity-60 hover:opacity-100"
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="h-14 w-20 object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+      </div>
 
-        <div className="p-6 md:p-8">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <Badge tone={PRIORITY_TONE[item.priority]}>{AR.priority[item.priority] || item.priority}</Badge>
-            <Badge tone="slate">{catLabel(item.category)}</Badge>
-            {item.pinned && (
-              <span className="flex items-center gap-1 text-xs text-gold-300">
-                <Pin size={12} /> {lang === "ar" ? "مثبت" : "Pinned"}
-              </span>
-            )}
-          </div>
+      <h1 className="mb-3 font-display text-3xl font-extrabold leading-tight text-gray-900 md:text-4xl">
+        {item.titleAr}
+      </h1>
 
-          <h1 className="font-display text-2xl font-bold leading-snug text-white md:text-3xl">
-            {lang === "ar" ? item.titleAr : item.title}
-          </h1>
+      <div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+        <span className="flex items-center gap-1.5">
+          <User size={13} /> {item.author}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Calendar size={13} /> {timeAgo(item.publishedAt)}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Eye size={13} /> {number(item.views)} مشاهدة
+        </span>
+      </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-4 border-y border-gold-400/10 py-3 text-xs text-zinc-500">
-            <span className="flex items-center gap-1">
-              <User size={13} /> {item.author}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar size={13} /> {formatDate(item.publishedAt, lang)}
-            </span>
-            <span className="flex items-center gap-1">
-              <Eye size={13} /> {item.views + 1} {lang === "ar" ? "مشاهدة" : "views"}
-            </span>
-          </div>
-
-          <div className="mt-6 whitespace-pre-wrap text-[15px] leading-loose text-gray-600">
-            {lang === "ar" ? item.bodyAr : item.body}
-          </div>
+      {(item.images?.[0] || item.image) && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={item.images?.[0] || item.image} alt="" className="mb-6 max-h-[420px] w-full rounded-2xl object-cover" />
+      )}
+      {item.video && !item.images?.[0] && !item.image && (
+        <div className="mb-6 flex aspect-video items-center justify-center rounded-2xl bg-gray-900">
+          <Play size={40} className="text-white" />
         </div>
+      )}
+
+      <Card>
+        <p className="whitespace-pre-line text-base leading-loose text-gray-700">{item.bodyAr}</p>
       </Card>
     </div>
   );

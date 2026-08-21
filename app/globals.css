@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -100,8 +100,8 @@
 
   /* ---------- LIGHT SURFACES ---------- */
   --glass: 255, 255, 255;
-  --bg: #f8fafc;        /* slate-50 */
-  --bg-2: #f1f5f9;      /* slate-100 */
+  --bg: #f8fafc;
+  --bg-2: #f1f5f9;
   --bg-800: #ffffff;
   --bg-700: #f8fafc;
   --line: rgba(15, 23, 42, 0.08);

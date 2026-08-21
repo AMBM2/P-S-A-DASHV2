@@ -14,14 +14,10 @@ import {
   ShieldCheck,
   Radio,
   UserPlus,
-  Search,
   type LucideIcon,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { AudioPlayer } from "@/components/AudioPlayer";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui";
 import { cn } from "@/lib/format";
-import { Transition } from "@headlessui/react";
 
 const NAV: { href: string; label: string; icon: LucideIcon; hint: string }[] = [
   { href: "/", label: "الرئيسية", icon: Home, hint: "الملخص والتحديثات" },
@@ -118,7 +114,6 @@ export function Sidebar() {
 
   return (
     <>
-      {/* ===================== DESKTOP SIDEBAR ===================== */}
       <aside className="fixed inset-y-0 right-0 z-40 hidden w-80 flex-col border-l border-gray-200 bg-white/80 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div className="mb-6 px-1">
           <Brand />
@@ -126,17 +121,7 @@ export function Sidebar() {
         <div className="flex-1 overflow-y-auto scrollbar-thin px-1">
           <NavList />
         </div>
-
         <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
-          <button
-            onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-            className="clip-notch-sm flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 transition-colors hover:border-accent-400/40 hover:text-accent-600"
-          >
-            <Search size={16} />
-            <span className="flex-1 text-right">بحث سريع</span>
-            <kbd className="rounded border border-accent-400/25 bg-accent-50 px-1.5 py-0.5 text-[10px] text-accent-600">⌘K</kbd>
-          </button>
-
           <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
             <div className="flex flex-col leading-tight">
               <span className="font-display text-base font-bold tabular-nums text-gray-900">{timeStr}</span>
@@ -150,20 +135,11 @@ export function Sidebar() {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-500" />
               </span>
               <span className="text-xs font-bold text-accent-600">{onDuty}</span>
-              <TooltipProvider delayDuration={150}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <AudioPlayer />
-                  </TooltipTrigger>
-                  <TooltipContent side="top">النشيد الرسمي</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* ===================== MOBILE TOPBAR + DRAWER ===================== */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-2xl lg:hidden">
         <button
           onClick={() => setOpen(true)}
@@ -173,50 +149,25 @@ export function Sidebar() {
           <Menu size={20} />
         </button>
         <Brand />
-        <TooltipProvider delayDuration={150}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <AudioPlayer />
-            </TooltipTrigger>
-            <TooltipContent side="top">النشيد الرسمي</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="w-9" />
       </div>
 
-      <Transition show={open}>
+      {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <Transition.Child
-            enter="transition-opacity duration-200"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity duration-150"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          </Transition.Child>
-          <Transition.Child
-            enter="transition-transform duration-250 ease-out"
-            enterFrom="translate-x-full"
-            enterTo="translate-x-0"
-            leave="transition-transform duration-200 ease-in"
-            leaveFrom="translate-x-0"
-            leaveTo="translate-x-full"
-          >
-            <aside className="absolute inset-y-0 right-0 flex w-80 flex-col border-l border-gray-200 bg-white px-5 py-6 backdrop-blur-2xl">
-              <div className="mb-6 flex items-center justify-between px-1">
-                <Brand />
-                <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-accent-600" aria-label="إغلاق">
-                  <X size={22} />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto scrollbar-thin px-1">
-                <NavList onNavigate={() => setOpen(false)} />
-              </div>
-            </aside>
-          </Transition.Child>
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <aside className="absolute inset-y-0 right-0 flex w-80 flex-col border-l border-gray-200 bg-white px-5 py-6 backdrop-blur-2xl">
+            <div className="mb-6 flex items-center justify-between px-1">
+              <Brand />
+              <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-accent-600" aria-label="إغلاق">
+                <X size={22} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto scrollbar-thin px-1">
+              <NavList onNavigate={() => setOpen(false)} />
+            </div>
+          </aside>
         </div>
-      </Transition>
+      )}
     </>
   );
 }

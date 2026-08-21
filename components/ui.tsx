@@ -1,21 +1,15 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { createPortal } from "react-dom";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import * as SelectPrimitive from "@radix-ui/react-select";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
 import * as LabelPrimitive from "@radix-ui/react-label";
-import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import * as ProgressPrimitive from "@radix-ui/react-progress";
-import { X, ChevronDown, ChevronUp, Check, type LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { X, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/format";
 
 /* ============================= BUTTON ============================= */
 export function Button({
@@ -127,7 +121,7 @@ export function Badge({
   );
 }
 
-/* ============================= FIELD / LABEL (Radix) ============================= */
+/* ============================= FIELD / LABEL ============================= */
 export function Field({
   label,
   children,
@@ -157,7 +151,7 @@ export const Label = React.forwardRef<
 ));
 Label.displayName = "Label";
 
-/* ============================= INPUT / TEXTAREA ============================= */
+/* ============================= INPUT ============================= */
 export const inputClass =
   "w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition duration-150 focus:border-primary focus:ring-4 focus:ring-primary/10";
 
@@ -169,90 +163,110 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return <textarea {...props} className={cn(inputClass, "min-h-[90px]", props.className)} />;
 }
 
-/* ============================= SELECT (Radix) ============================= */
-/* Drop-in replacement for native <select> backed by Radix primitives. Keeps the
-   same API (<option> children + value/onChange) so every existing caller works
-   unchanged. Options with an empty value render as the "placeholder" state. */
-type SelectOption = { value: string; label: React.ReactNode; disabled?: boolean };
-
-export function Select({
-  children,
-  value,
-  onChange,
-  className,
-  disabled,
-  placeholder = "— اختر —",
-  title,
-}: React.SelectHTMLAttributes<HTMLSelectElement> & { placeholder?: string }) {
-  const options = useMemo<SelectOption[]>(
-    () =>
-      React.Children.toArray(children)
-        .filter((c): c is React.ReactElement<React.HTMLProps<HTMLOptionElement>> => React.isValidElement(c))
-        .map((c) => ({
-          value: String(c.props.value ?? ""),
-          label: c.props.children,
-          disabled: c.props.disabled,
-        })),
-    [children]
-  );
-  const empty = options.find((o) => o.value === "");
-  const current = options.find((o) => o.value === value && o.value !== "");
-  const items = options.filter((o) => o.value !== "");
-
+/* ============================= PROGRESS ============================= */
+export function ProgressBar({ value, className }: { value: number; className?: string }) {
   return (
-    <SelectPrimitive.Root value={String(value ?? "")} onValueChange={(v) => onChange?.({ target: { value: v } } as React.ChangeEvent<HTMLSelectElement>)} disabled={disabled}>
-      <SelectPrimitive.Trigger
-        title={title}
-        className={cn(
-          inputClass,
-          "flex items-center justify-between gap-2 text-left rtl:text-right disabled:cursor-not-allowed disabled:opacity-60"
-        )}
-      >
-        <SelectPrimitive.Value>
-          <span className={cn("truncate", !current && !empty && "text-zinc-500")}>
-            {current?.label ?? (value === "" && empty ? empty.label : placeholder)}
-          </span>
-        </SelectPrimitive.Value>
-        <SelectPrimitive.Icon>
-          <ChevronDown size={15} className="shrink-0 text-gold-300/80" />
-        </SelectPrimitive.Icon>
-      </SelectPrimitive.Trigger>
-      <SelectPrimitive.Portal>
-        <SelectPrimitive.Content
-          position="popper"
-          sideOffset={6}
-          className="z-[100] max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-xl border border-gold-400/25 bg-[#14161b]/95 p-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.85),0_0_0_1px_rgba(var(--accent-rgb),0.08),0_0_40px_-18px_rgba(var(--accent-rgb),0.4)] backdrop-blur-xl"
-        >
-          <SelectPrimitive.ScrollUpButton className="flex items-center justify-center py-1 text-gold-300/70">
-            <ChevronUp size={13} />
-          </SelectPrimitive.ScrollUpButton>
-          <SelectPrimitive.Viewport className="p-0.5">
-            {items.map((opt) => (
-              <SelectPrimitive.Item
-                key={opt.value}
-                value={opt.value}
-                disabled={opt.disabled}
-                className="flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-right text-sm outline-none data-[highlighted]:bg-gold-400/15 data-[highlighted]:text-gold-100 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40"
-              >
-                <SelectPrimitive.ItemText>
-                  <span className="truncate">{opt.label}</span>
-                </SelectPrimitive.ItemText>
-                <SelectPrimitive.ItemIndicator>
-                  <Check size={14} className="shrink-0 text-gold-300" />
-                </SelectPrimitive.ItemIndicator>
-              </SelectPrimitive.Item>
-            ))}
-          </SelectPrimitive.Viewport>
-          <SelectPrimitive.ScrollDownButton className="flex items-center justify-center py-1 text-gold-300/70">
-            <ChevronDown size={13} />
-          </SelectPrimitive.ScrollDownButton>
-        </SelectPrimitive.Content>
-      </SelectPrimitive.Portal>
-    </SelectPrimitive.Root>
+    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-gray-200", className)}>
+      <div
+        className="h-full rounded-full bg-primary transition-all duration-500"
+        style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+      />
+    </div>
   );
 }
 
-/* ============================= MODAL (Radix Dialog + Framer) ============================= */
+/* ============================= EMPTY STATE ============================= */
+export function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center text-sm text-gray-400">
+      {message}
+    </div>
+  );
+}
+
+/* ============================= TOOLTIP ============================= */
+export const TooltipProvider = TooltipPrimitive.Provider;
+export const Tooltip = TooltipPrimitive.Root;
+export const TooltipTrigger = TooltipPrimitive.Trigger;
+export const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 6, ...props }, ref) => (
+  <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-lg",
+        className
+      )}
+      {...props}
+    />
+  </TooltipPrimitive.Portal>
+));
+TooltipContent.displayName = "TooltipContent";
+
+/* ============================= TABS ============================= */
+export const Tabs = TabsPrimitive.Root;
+export const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn("flex gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1", className)}
+    {...props}
+  />
+));
+TabsList.displayName = "TabsList";
+export const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex-1 rounded-lg px-3 py-2 text-sm font-semibold text-gray-500 transition-colors data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm",
+      className
+    )}
+    {...props}
+  />
+));
+TabsTrigger.displayName = "TabsTrigger";
+export const TabsContent = TabsPrimitive.Content;
+
+/* ============================= SEPARATOR ============================= */
+export const Separator = React.forwardRef<
+  React.ElementRef<typeof SeparatorPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SeparatorPrimitive.Root
+    ref={ref}
+    className={cn("bg-gray-200", className)}
+    {...props}
+  />
+));
+Separator.displayName = "Separator";
+
+/* ============================= SWITCH ============================= */
+export const Switch = React.forwardRef<
+  React.ElementRef<typeof SwitchPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SwitchPrimitive.Root
+    ref={ref}
+    className={cn(
+      "peer inline-flex h-6 w-11 items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-gray-300",
+      className
+    )}
+    {...props}
+  >
+    <SwitchPrimitive.Thumb className="pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" />
+  </SwitchPrimitive.Root>
+));
+Switch.displayName = "Switch";
+
+/* ============================= MODAL ============================= */
 export function Modal({
   open,
   onClose,
@@ -276,7 +290,7 @@ export function Modal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
+                className="fixed inset-0 z-50 bg-gray-900/40 backdrop-blur-sm"
                 onClick={onClose}
               />
             </DialogPrimitive.Overlay>
@@ -288,24 +302,20 @@ export function Modal({
                   exit={{ opacity: 0, scale: 0.96, y: 10 }}
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className={cn(
-                    "glass-strong clip-notch hud-frame relative w-full overflow-hidden border border-gold-400/20 p-6 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95),0_0_0_1px_rgba(var(--accent-rgb),0.1),0_0_70px_-25px_rgba(var(--accent-rgb),0.35)] max-h-[90vh] overflow-y-auto scrollbar-thin",
+                    "clip-notch relative max-h-[88vh] w-full overflow-y-auto border border-gray-200 bg-white p-6 shadow-2xl",
                     wide ? "max-w-3xl" : "max-w-lg"
                   )}
                 >
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/55 to-transparent" />
                   <div className="mb-4 flex items-center justify-between">
-                    <DialogPrimitive.Title className="font-display text-lg font-bold gold-text">
+                    <DialogPrimitive.Title className="font-display text-lg font-bold text-gray-900">
                       {title}
                     </DialogPrimitive.Title>
-                    <DialogPrimitive.Close asChild>
-                      <button
-                        onClick={onClose}
-                        className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
-                        aria-label="إغلاق"
-                      >
-                        <X size={20} />
-                      </button>
-                    </DialogPrimitive.Close>
+                    <button
+                      onClick={onClose}
+                      className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                    >
+                      <X size={18} />
+                    </button>
                   </div>
                   {children}
                 </motion.div>
@@ -315,292 +325,5 @@ export function Modal({
         )}
       </AnimatePresence>
     </DialogPrimitive.Root>
-  );
-}
-
-/* ============================= TABS (Radix) ============================= */
-export const Tabs = TabsPrimitive.Root;
-
-export const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn("flex flex-wrap gap-1 rounded-xl border border-gold-400/15 bg-obsidian-900/50 p-1", className)}
-    {...props}
-  />
-));
-TabsList.displayName = "TabsList";
-
-export const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm transition-all outline-none data-[state=active]:bg-gold-400/15 data-[state=active]:text-gold-200 text-zinc-400 hover:bg-white/5 hover:text-gray-700",
-      className
-    )}
-    {...props}
-  />
-));
-TabsTrigger.displayName = "TabsTrigger";
-
-export const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content ref={ref} className={cn("mt-2 outline-none", className)} {...props} />
-));
-TabsContent.displayName = "TabsContent";
-
-/* ============================= TOOLTIP (Radix) ============================= */
-export const TooltipProvider = TooltipPrimitive.Provider;
-export const Tooltip = TooltipPrimitive.Root;
-export const TooltipTrigger = TooltipPrimitive.Trigger;
-
-export const TooltipContent = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 8, ...props }, ref) => (
-  <TooltipPrimitive.Portal>
-    <TooltipPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "glass-strong clip-notch-sm z-[130] border border-gold-400/25 px-3 py-1.5 text-xs text-gray-700 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)]",
-        className
-      )}
-      {...props}
-    />
-  </TooltipPrimitive.Portal>
-));
-TooltipContent.displayName = "TooltipContent";
-
-/* ============================= SWITCH (Radix) ============================= */
-export const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <SwitchPrimitive.Root
-    ref={ref}
-    className={cn(
-      "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-gold-400/30 bg-obsidian-800 transition-colors data-[state=checked]:bg-gold-400 data-[state=checked]:border-gold-400 outline-none disabled:cursor-not-allowed disabled:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    <SwitchPrimitive.Thumb className="pointer-events-none block h-4 w-4 rounded-full bg-zinc-200 shadow-lg transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0 rtl:data-[state=checked]:-translate-x-4" />
-  </SwitchPrimitive.Root>
-));
-Switch.displayName = "Switch";
-
-/* ============================= CHECKBOX (Radix) ============================= */
-export const Checkbox = React.forwardRef<
-  React.ElementRef<typeof CheckboxPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <CheckboxPrimitive.Root
-    ref={ref}
-    className={cn(
-      "flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border border-gold-400/40 bg-obsidian-800 outline-none transition-colors data-[state=checked]:bg-gold-400 data-[state=checked]:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    <CheckboxPrimitive.Indicator>
-      <Check size={12} strokeWidth={3} />
-    </CheckboxPrimitive.Indicator>
-  </CheckboxPrimitive.Root>
-));
-Checkbox.displayName = "Checkbox";
-
-/* ============================= SEPARATOR (Radix) ============================= */
-export const Separator = React.forwardRef<
-  React.ElementRef<typeof SeparatorPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
->(({ className, orientation = "horizontal", ...props }, ref) => (
-  <SeparatorPrimitive.Root
-    ref={ref}
-    orientation={orientation}
-    className={cn("shrink-0 bg-gold-400/15", orientation === "horizontal" ? "h-px w-full" : "h-full w-px", className)}
-    {...props}
-  />
-));
-Separator.displayName = "Separator";
-
-/* ============================= ACCORDION (Radix) ============================= */
-export const Accordion = AccordionPrimitive.Root;
-
-export const AccordionItem = React.forwardRef<
-  React.ElementRef<typeof AccordionPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
->(({ className, ...props }, ref) => (
-  <AccordionPrimitive.Item
-    ref={ref}
-    className={cn("rounded-xl border border-gold-400/15 bg-obsidian-900/40", className)}
-    {...props}
-  />
-));
-AccordionItem.displayName = "AccordionItem";
-
-export const AccordionTrigger = React.forwardRef<
-  React.ElementRef<typeof AccordionPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
-    <AccordionPrimitive.Trigger
-      ref={ref}
-      className={cn(
-        "flex flex-1 items-center justify-between gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 transition-colors outline-none hover:text-gold-200 [&[data-state=open]>svg]:rotate-180",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <ChevronDown size={15} className="shrink-0 text-gold-300/80 transition-transform duration-200" />
-    </AccordionPrimitive.Trigger>
-  </AccordionPrimitive.Header>
-));
-AccordionTrigger.displayName = "AccordionTrigger";
-
-export const AccordionContent = React.forwardRef<
-  React.ElementRef<typeof AccordionPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Content
-    ref={ref}
-    className="overflow-hidden text-sm data-[state=closed]:animate-none"
-    {...props}
-  >
-    <div className={cn("px-4 pb-4 pt-0 text-zinc-400", className)}>{children}</div>
-  </AccordionPrimitive.Content>
-));
-AccordionContent.displayName = "AccordionContent";
-
-/* ============================= PROGRESS (Radix) ============================= */
-export function ProgressBar({
-  value,
-  color = "var(--accent)",
-  className,
-}: {
-  value: number;
-  color?: string;
-  className?: string;
-}) {
-  return (
-    <ProgressPrimitive.Root
-      value={value}
-      className={cn("h-2 w-full overflow-hidden rounded-full bg-white/8", className)}
-      style={{ boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)" }}
-    >
-      <ProgressPrimitive.Indicator
-        className="h-full rounded-full transition-all duration-500"
-        style={{ width: `${Math.min(100, Math.max(0, value))}%`, background: color, boxShadow: `0 0 10px ${color}` }}
-      />
-    </ProgressPrimitive.Root>
-  );
-}
-
-/* ============================= DROPDOWN (Radix) ============================= */
-export const DropdownMenu = DropdownMenuPrimitive.Root;
-export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
-
-export const DropdownMenuContent = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 6, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "glass-strong clip-notch-sm z-[120] min-w-[190px] overflow-hidden border border-gold-400/25 p-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.85),0_0_40px_-18px_rgba(var(--accent-rgb),0.4)]",
-        className
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-));
-DropdownMenuContent.displayName = "DropdownMenuContent";
-
-export const DropdownMenuItem = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & { danger?: boolean }
->(({ className, danger, ...props }, ref) => (
-  <DropdownMenuPrimitive.Item
-    ref={ref}
-    className={cn(
-      "flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none transition-colors data-[highlighted]:bg-gold-400/15 data-[highlighted]:text-gold-100",
-      danger ? "text-rose-300 data-[highlighted]:bg-rose-500/15 data-[highlighted]:text-rose-200" : "text-gray-700",
-      className
-    )}
-    {...props}
-  />
-));
-DropdownMenuItem.displayName = "DropdownMenuItem";
-
-export const DropdownMenuLabel = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label>
->(({ className, ...props }, ref) => (
-  <DropdownMenuPrimitive.Label
-    ref={ref}
-    className={cn("px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500", className)}
-    {...props}
-  />
-));
-DropdownMenuLabel.displayName = "DropdownMenuLabel";
-
-export const DropdownMenuSeparator = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
->(({ className, ...props }, ref) => (
-  <DropdownMenuPrimitive.Separator
-    ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-gold-400/15", className)}
-    {...props}
-  />
-));
-DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
-
-/* ============================= STAT ============================= */
-export function Stat({
-  label,
-  value,
-  icon,
-  tone = "gold",
-}: {
-  label: string;
-  value: React.ReactNode;
-  icon?: React.ReactNode;
-  tone?: string;
-}) {
-  const colors: Record<string, string> = {
-    gold: "text-gold-300",
-    green: "text-emerald-300",
-    rose: "text-rose-300",
-    indigo: "text-indigo-300",
-  };
-  return (
-    <Card className="flex items-center gap-4">
-      {icon && <div className={cn("text-2xl", colors[tone])}>{icon}</div>}
-      <div>
-        <div className="text-xs uppercase tracking-wider text-zinc-400">{label}</div>
-        <div className={cn("font-display text-2xl font-bold", colors[tone])}>{value}</div>
-      </div>
-    </Card>
-  );
-}
-
-/* ============================= EMPTY STATE ============================= */
-export function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-3 h-12 w-12 rounded-full border border-dashed border-gold-400/40" />
-      <p className="text-zinc-400">{message}</p>
-    </div>
   );
 }

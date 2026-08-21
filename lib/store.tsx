@@ -38,6 +38,8 @@ type Store = Collections & {
   nextCallsign: () => string;
   resetData: () => void;
   exportJSON: () => void;
+  getRankTitle: (id: string) => string;
+  getDepartmentTitle: (id: string) => string;
 };
 
 const DEFAULT_SETTINGS: Settings = {
@@ -144,7 +146,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (o.data) setOfficers(o.data as Officer[]);
       if (l.data) setLeaders(l.data as Leader[]);
       if (c.data) setCodes(c.data as MilitaryCode[]);
-      if (st.data?.value) setSettings(safeSettings(st.data));
+      if (st.data?.value) setSettings(safeSettings(st));
       setLoading(false);
     })();
     return () => {
@@ -174,9 +176,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             }
             const query = supabase.from(t).select("*");
             const ordered =
-              t === "news"
-                ? query.order("publishedAt", { ascending: false })
-                : query;
+              t === "news" ? query.order("publishedAt", { ascending: false }) : query;
             const { data } = await ordered;
             if (!data) return;
             if (t === "news") setNews(data as News[]);
@@ -204,7 +204,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ip: "127.0.0.1",
     };
     setAudit((prev) => [entry, ...prev].slice(0, 200));
-    // Server-side only (service role key) — never via the public anon key.
     fetch("/api/audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -280,7 +279,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetData = async () => {
-    // Master-only, server-side (service role key). No more client-side deletes.
     await fetch("/api/reset", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -299,6 +297,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const getRankTitle = (id: string) =>
+    settings.ranks?.find((r) => r.id === id)?.titleAr ||
+    settings.ranks?.find((r) => r.id === id)?.title ||
+    id;
+
+  const getDepartmentTitle = (id: string) =>
+    settings.departments?.find((d) => d.id === id)?.nameAr ||
+    settings.departments?.find((d) => d.id === id)?.name ||
+    id;
 
   const store: Store = {
     news,
@@ -319,6 +327,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     nextCallsign,
     resetData,
     exportJSON,
+    getRankTitle,
+    getDepartmentTitle,
   };
 
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;

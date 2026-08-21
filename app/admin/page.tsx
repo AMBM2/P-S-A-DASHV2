@@ -1,287 +1,260 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
-  LayoutDashboard,
+  ShieldCheck,
+  LogOut,
+  Plus,
+  Pencil,
+  Trash2,
   Newspaper,
   Users,
-  Radio,
   Crown,
-  Shield,
-  LogOut,
-  UserPlus,
-  GraduationCap,
-  UserX,
-  ShieldCheck,
-  Loader2,
-  Settings2,
-  FileBadge,
-  ScrollText,
-  KeyRound,
-  ChevronDown,
+  Radio,
+  BarChart3,
+  Save,
 } from "lucide-react";
-import { AdminOverview } from "@/components/admin/AdminOverview";
-import { NewsManager } from "@/components/admin/NewsManager";
-import { RosterManager } from "@/components/admin/RosterManager";
-import { CodesManager } from "@/components/admin/CodesManager";
-import { BadgeCodesManager } from "@/components/admin/BadgeCodesManager";
-import { LeadershipManager } from "@/components/admin/LeadershipManager";
-import { RolesManager } from "@/components/admin/RolesManager";
-import { RecruitmentManager } from "@/components/admin/RecruitmentManager";
-import { CollegeManager } from "@/components/admin/CollegeManager";
-import { DischargeManager } from "@/components/admin/DischargeManager";
-import { PermissionsManager } from "@/components/admin/PermissionsManager";
-import { ExamBuilder } from "@/components/admin/ExamBuilder";
-import { AuditLogs } from "@/components/admin/AuditLogs";
-import { RoleCategoriesManager } from "@/components/admin/RoleCategoriesManager";
-import { AdminLogin } from "@/components/admin/AdminLogin";
-import { PageHeader } from "@/components/PageHeader";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui";
+import { Card, Button, Badge, Modal, Field, Input, Textarea, SectionTitle, EmptyState } from "@/components/ui";
 import { useStore } from "@/lib/store";
-import { cn } from "@/lib/format";
-import { PERMISSION_DEFS } from "@/lib/permissions";
-import type { AccessLevel, Grant, PermissionKey } from "@/lib/types";
+import { AR } from "@/lib/ar";
+import { number } from "@/lib/format";
 
-type TabDef = {
+type NewsDraft = {
   id: string;
-  label: string;
-  icon: any;
-  cats: Grant[];
-  perms: PermissionKey[];
+  titleAr: string;
+  title: string;
+  bodyAr: string;
+  body: string;
+  category: string;
+  priority: "low" | "normal" | "high" | "critical";
+  author: string;
+  image: string;
+  video: string;
+  pinned: boolean;
+  status: "draft" | "published";
+  publishedAt: string;
 };
 
-const TABS: TabDef[] = [
-  { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
-  { id: "news", label: "الأخبار", icon: Newspaper, cats: ["master", "executive"], perms: ["NEWS_ADMIN"] },
-  { id: "recruit", label: "التوظيف", icon: UserPlus, cats: ["master", "executive", "hr"], perms: ["RECRUITMENT_ADMIN"] },
-  { id: "roster", label: "الأفراد", icon: Users, cats: ["master", "executive", "personnel"], perms: ["SITE_ADMIN"] },
-  { id: "roles", label: "الرتب العسكرية", icon: Shield, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
-  { id: "leadership", label: "القيادة", icon: Crown, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
-  { id: "codes", label: "الأكواد", icon: Radio, cats: ["master", "executive", "hr"], perms: ["SITE_ADMIN"] },
-  { id: "college", label: "الكلية العسكرية", icon: GraduationCap, cats: ["master", "executive", "hr"], perms: ["RECRUITMENT_ADMIN"] },
-  { id: "exams", label: "بناء الاختبارات", icon: FileBadge, cats: ["master", "executive"], perms: ["EXAMS_ADMIN"] },
-  { id: "discharge", label: "الفصل", icon: UserX, cats: ["master", "executive"], perms: ["DISCHARGE_ADMIN"] },
-  { id: "delegates", label: "الصلاحيات", icon: KeyRound, cats: ["master"], perms: ["PERMISSIONS_ADMIN"] },
-  { id: "audit", label: "لوق العمليات", icon: ScrollText, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
-  { id: "settings", label: "الإعدادات", icon: Settings2, cats: ["master", "executive"], perms: ["SITE_ADMIN"] },
-];
+const emptyDraft = (): NewsDraft => ({
+  id: "n_" + Math.random().toString(36).slice(2, 9),
+  titleAr: "",
+  title: "",
+  bodyAr: "",
+  body: "",
+  category: "general",
+  priority: "normal",
+  author: "",
+  image: "",
+  video: "",
+  pinned: false,
+  status: "published",
+  publishedAt: new Date().toISOString(),
+});
 
 export default function AdminPage() {
-  const { settings, session, logout } = useStore();
-  const lang = settings.language;
-  const [tab, setTab] = useState("overview");
-  const [level, setLevel] = useState<AccessLevel | null>(null);
-  const [grants, setGrants] = useState<Grant[]>([]);
-  const [perms, setPerms] = useState<PermissionKey[]>([]);
-  const [resolving, setResolving] = useState(false);
-  const [levelError, setLevelError] = useState<string | null>(null);
+  const router = useRouter();
+  const { session, login, logout, news, officers, leaders, codes, upsert, remove } =
+    useStore();
 
-  // If the httpOnly session cookie is missing/invalid (e.g. it was signed with
-  // an older secret), the localStorage session alone is useless — every admin
-  // write would fail with 401. Detect it up-front and force a fresh login.
-  useEffect(() => {
-    if (!session) return;
-    let active = true;
-    (async () => {
-      try {
-        const r = await fetch("/api/session", { cache: "no-store" });
-        if (active && r.status === 401) logout();
-      } catch {
-        if (active) logout();
-      }
-    })();
-    return () => {
-      active = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.discordId]);
+  const [authId, setAuthId] = useState("");
+  const [editor, setEditor] = useState<NewsDraft | null>(null);
 
-  useEffect(() => {
-    if (!session) return;
-    let active = true;
-    setResolving(true);
-    setLevelError(null);
-    (async () => {
-      try {
-        const r = await fetch("/api/me", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ discordId: session.discordId }),
-          cache: "no-store",
-        });
-        const d = await r.json();
-        if (!active) return;
-        setLevel(d.level || "none");
-        setGrants(d.grants || []);
-        setPerms(d.permissions || []);
-      } catch {
-        if (!active) return;
-        setLevel("none");
-        setLevelError("تعذر تحديد الصلاحية");
-      } finally {
-        if (active) setResolving(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [session?.discordId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const me = session?.officer; // officer record currently stored as session
 
-  const canSee = (t: TabDef) =>
-    t.cats.some((c) => grants.includes(c)) || t.perms.some((p) => perms.includes(p));
+  async function handleLogin() {
+    if (!authId.trim()) return toast.error("Ø£Ø¯Ø®Ù„ Ù…Ø¹Ø±Ù‘Ù Discord");
+    const officer = officers.find((o) => o.discordId === authId.trim());
+    if (!officer) return toast.error("Ù…Ø¹Ø±Ù‘Ù ØºÙŠØ± Ù…Ø³Ø¬Ù‘Ù„ ÙƒØ¶Ø§Ø¨Ø·");
+    login(authId.trim(), officer);
+  }
 
-  const isAdmin = level !== null && (level !== "none" || perms.length > 0);
-
-  // Jump to the first tab the user may see once grants/permissions resolve.
-  useEffect(() => {
-    if (!grants.length && !perms.length) return;
-    const allowed = TABS.filter(canSee);
-    if (allowed.length === 0) return;
-    if (!allowed.some((t) => t.id === tab)) setTab(allowed[0].id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grants, perms]);
-
-  if (!session) {
+  if (!me) {
     return (
-      <div>
-        <PageHeader
-          title={lang === "ar" ? "لوحة التحكم" : "Admin Control Panel"}
-          subtitle={
-            lang === "ar"
-              ? "منطقة محمية — الدخول بمعرّف ديسكورد ورمز خاص"
-              : "Protected area — Discord ID + private code required"
-          }
-        />
-        <AdminLogin />
+      <div className="mx-auto mt-16 max-w-md">
+        <Card className="text-center">
+          <div className="clip-hex mx-auto mb-4 flex h-16 w-16 items-center justify-center border border-accent-400/40 bg-accent-50">
+            <ShieldCheck className="h-8 w-8 text-accent-600" />
+          </div>
+          <h1 className="font-display text-2xl font-bold text-gray-900">Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</h1>
+          <p className="mt-1 text-sm text-gray-500">Ø³Ø¬Ù‘Ù„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… Ù…Ø¹Ø±Ù‘Ù Discord Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ</p>
+          <div className="mt-6 text-right">
+            <Field label="Ù…Ø¹Ø±Ù‘Ù Discord">
+              <Input value={authId} onChange={(e) => setAuthId(e.target.value)} placeholder="Ù…Ø«Ø§Ù„: 123456789012345678" />
+            </Field>
+          </div>
+          <Button className="mt-4 w-full" onClick={handleLogin}>
+            <ShieldCheck size={16} /> Ø¯Ø®ÙˆÙ„
+          </Button>
+        </Card>
       </div>
     );
   }
 
-  const allowed = TABS.filter(canSee);
-  const myPerms = perms
-    .map((p) => PERMISSION_DEFS.find((x) => x.key === p)?.label || p)
-    .filter((l) => l !== "صلاحية السوبر أدمن");
+  const stats = [
+    { icon: Newspaper, label: "Ø§Ù„Ø£Ø®Ø¨Ø§Ø±", value: news.length },
+    { icon: Users, label: "Ø§Ù„Ø£ÙØ±Ø§Ø¯", value: officers.length },
+    { icon: Crown, label: "Ø§Ù„Ù‚Ø§Ø¯Ø©", value: leaders.length },
+    { icon: Radio, label: "Ø§Ù„Ø£ÙƒÙˆØ§Ø¯", value: codes.length },
+  ];
+
+  async function saveDraft() {
+    if (!editor) return;
+    if (!editor.titleAr.trim()) return toast.error("Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ø¹Ø±Ø¨ÙŠ Ù…Ø·Ù„ÙˆØ¨");
+    await upsert("news", editor as any);
+    toast.success("ØªÙ… Ø­ÙØ¸ Ø§Ù„Ø®Ø¨Ø±");
+    setEditor(null);
+  }
+
+  async function deleteNews(n: any) {
+    if (!confirm(`Ø­Ø°Ù Ø§Ù„Ø®Ø¨Ø±: ${n.titleAr}ØŸ`)) return;
+    await remove("news", n.id);
+    toast.success("ØªÙ… Ø§Ù„Ø­Ø°Ù");
+  }
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-end gap-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="clip-notch-sm flex items-center gap-2 rounded-lg border border-gold-400/25 bg-obsidian-900/60 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gold-400/50">
-              <ShieldCheck size={14} className="text-gold-300" />
-              <span className="font-bold text-gold-200">{session.officer?.nameAr || session.discordId}</span>
-              <ChevronDown size={13} className="text-zinc-500" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-              {level === "master" ? "سوبر أدمن" : level === "admin" ? "أدمن" : "توظيف"}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setTab("overview")}>
-              <LayoutDashboard size={14} /> نظرة عامة
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTab("settings")}>
-              <Settings2 size={14} /> الإعدادات
-            </DropdownMenuItem>
-            {myPerms.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-3 py-1.5 text-[11px] leading-relaxed text-zinc-500">
-                  {myPerms.join(" • ")}
-                </div>
-              </>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem danger onClick={logout}>
-              <LogOut size={14} /> تسجيل الخروج
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {level && level !== "none" && (
-          <span
-            className={cn(
-              "rounded-full border px-2.5 py-0.5 text-[11px] font-bold",
-              level === "master"
-                ? "border-rose-400/40 bg-rose-500/10 text-rose-300"
-                : level === "admin"
-                  ? "border-gold-400/40 bg-gold-400/10 text-gold-200"
-                  : "border-indigo-400/40 bg-indigo-500/10 text-indigo-300"
-            )}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="clip-hex flex h-12 w-12 items-center justify-center border border-accent-400/40 bg-accent-50">
+            <BarChart3 className="h-6 w-6 text-accent-600" />
+          </div>
+          <div>
+            <h1 className="font-display text-2xl font-bold text-gray-900">Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</h1>
+            <p className="text-xs text-gray-500">Ù…Ø±Ø­Ø¨Ø§Ù‹ {me?.nameAr} Â· {session?.discordId}</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setEditor(emptyDraft())}>
+            <Plus size={16} /> Ø®Ø¨Ø± Ø¬Ø¯ÙŠØ¯
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              logout();
+              router.refresh();
+            }}
           >
-            {level === "master" ? "سوبر أدمن" : level === "admin" ? "أدمن" : "توظيف"}
-          </span>
-        )}
+            <LogOut size={16} /> Ø®Ø±ÙˆØ¬
+          </Button>
+        </div>
       </div>
 
-      <PageHeader
-        title={lang === "ar" ? "لوحة التحكم" : "Admin Control Panel"}
-        subtitle={lang === "ar" ? "إدارة الأخبار والأفراد والاختبارات والصلاحيات" : "Manage news, personnel, exams and permissions"}
-      />
+      <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map((s) => (
+          <Card key={s.label}>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-display text-3xl font-bold text-gray-900">{number(s.value)}</div>
+                <div className="text-xs text-gray-500">{s.label}</div>
+              </div>
+              <span className="clip-notch-sm flex h-9 w-9 items-center justify-center bg-accent-50 text-accent-600">
+                <s.icon size={16} />
+              </span>
+            </div>
+          </Card>
+        ))}
+      </div>
 
-      {resolving ? (
-        <div className="glass flex items-center justify-center gap-2 rounded-2xl p-14 text-zinc-400">
-          <Loader2 size={20} className="animate-spin" /> جارٍ التحقق من الصلاحيات...
+      <SectionTitle icon={Newspaper}>Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø£Ø®Ø¨Ø§Ø±</SectionTitle>
+      {news.length === 0 ? (
+        <EmptyState message="Ù„Ø§ ØªÙˆØ¬Ø¯ Ø£Ø®Ø¨Ø§Ø±" />
+      ) : (
+        <div className="space-y-2">
+          {[...news]
+            .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
+            .map((n) => (
+              <div key={n.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3">
+                {n.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={n.image} alt="" className="h-12 w-16 rounded-lg object-cover" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold text-gray-900">{n.titleAr}</div>
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <Badge tone="gold">{n.category}</Badge>
+                    <Badge tone={n.priority === "critical" ? "rose" : n.priority === "high" ? "amber" : "slate"}>
+                      {AR.priority[n.priority]}
+                    </Badge>
+                    <span>{n.author}</span>
+                  </div>
+                </div>
+                <Button variant="outline" onClick={() => setEditor(n as any)}>
+                  <Pencil size={14} /> ØªØ¹Ø¯ÙŠÙ„
+                </Button>
+                <Button variant="danger" onClick={() => deleteNews(n)}>
+                  <Trash2 size={14} />
+                </Button>
+              </div>
+            ))}
         </div>
-      ) : !isAdmin ? (
-        <div className="glass flex flex-col items-center gap-4 rounded-2xl p-14 text-center">
-          <ShieldCheck size={36} className="text-rose-300" />
-          <div>
-            <div className="text-lg font-bold text-white">لا تملك صلاحية الوصول</div>
-            <div className="mt-1 text-sm text-zinc-400">
-              {levelError || "حسابك لا يملك صلاحية دخول لوحة التحكم. تواصل مع السوبر أدمن."}
+      )}
+
+      <Modal open={!!editor} onClose={() => setEditor(null)} title={editor?.titleAr ? "ØªØ¹Ø¯ÙŠÙ„ Ø®Ø¨Ø±" : "Ø®Ø¨Ø± Ø¬Ø¯ÙŠØ¯"} wide>
+        {editor && (
+          <div className="grid gap-4">
+            <Field label="Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ø¹Ø±Ø¨ÙŠ">
+              <Input value={editor.titleAr} onChange={(e) => setEditor({ ...editor, titleAr: e.target.value })} />
+            </Field>
+            <Field label="Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠ">
+              <Input value={editor.title} onChange={(e) => setEditor({ ...editor, title: e.target.value })} />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Ø§Ù„Ù‚Ø³Ù…">
+                <Input value={editor.category} onChange={(e) => setEditor({ ...editor, category: e.target.value })} />
+              </Field>
+              <Field label="Ø§Ù„Ø£ÙˆÙ„ÙˆÙŠØ©">
+                <select
+                  className="w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none focus:border-accent-500"
+                  value={editor.priority}
+                  onChange={(e) => setEditor({ ...editor, priority: e.target.value as any })}
+                >
+                  <option value="low">Ù…Ù†Ø®ÙØ¶</option>
+                  <option value="normal">Ø¹Ø§Ø¯ÙŠ</option>
+                  <option value="high">Ø¹Ø§Ù„ÙŠ</option>
+                  <option value="critical">Ø­Ø±Ø¬</option>
+                </select>
+              </Field>
+            </div>
+            <Field label="Ø§Ù„ÙƒØ§ØªØ¨">
+              <Input value={editor.author} onChange={(e) => setEditor({ ...editor, author: e.target.value })} />
+            </Field>
+            <Field label="Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø¹Ø±Ø¨ÙŠ">
+              <Textarea value={editor.bodyAr} onChange={(e) => setEditor({ ...editor, bodyAr: e.target.value })} />
+            </Field>
+            <Field label="Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠ">
+              <Textarea value={editor.body} onChange={(e) => setEditor({ ...editor, body: e.target.value })} />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Ø±Ø§Ø¨Ø· Ø§Ù„ØµÙˆØ±Ø©">
+                <Input value={editor.image} onChange={(e) => setEditor({ ...editor, image: e.target.value })} />
+              </Field>
+              <Field label="Ø±Ø§Ø¨Ø· Ø§Ù„ÙÙŠØ¯ÙŠÙˆ">
+                <Input value={editor.video} onChange={(e) => setEditor({ ...editor, video: e.target.value })} />
+              </Field>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" checked={editor.pinned} onChange={(e) => setEditor({ ...editor, pinned: e.target.checked })} />
+                Ù…Ø«Ø¨Øª
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" checked={editor.status === "published"} onChange={(e) => setEditor({ ...editor, status: e.target.checked ? "published" : "draft" })} />
+                Ù…Ù†Ø´ÙˆØ±
+              </label>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="ghost" onClick={() => setEditor(null)}>Ø¥Ù„ØºØ§Ø¡</Button>
+              <Button onClick={saveDraft}>
+                <Save size={16} /> Ø­ÙØ¸
+              </Button>
             </div>
           </div>
-        </div>
-      ) : (
-        <>
-          <div className="mb-6 flex flex-wrap gap-1 rounded-xl border border-gold-400/15 bg-obsidian-900/50 p-1">
-            {allowed.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={cn(
-                  "flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm transition-all",
-                  tab === t.id
-                    ? "bg-gold-400/15 text-gold-200"
-                    : "text-zinc-400 hover:bg-white/5 hover:text-gray-700"
-                )}
-              >
-                <t.icon size={15} />
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="glass rounded-2xl p-5 md:p-6">
-            {tab === "overview" && <AdminOverview />}
-            {tab === "news" && <NewsManager />}
-            {tab === "roster" && <RosterManager />}
-            {tab === "roles" && <RolesManager />}
-            {tab === "leadership" && <LeadershipManager />}
-            {tab === "codes" && (
-              <>
-                <BadgeCodesManager />
-                <CodesManager />
-              </>
-            )}
-            {tab === "recruit" && <RecruitmentManager />}
-            {tab === "college" && <CollegeManager />}
-            {tab === "exams" && <ExamBuilder />}
-            {tab === "discharge" && <DischargeManager />}
-            {tab === "delegates" && <PermissionsManager />}
-            {tab === "audit" && <AuditLogs />}
-            {tab === "settings" && <RoleCategoriesManager />}
-          </div>
-        </>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }
+
+
