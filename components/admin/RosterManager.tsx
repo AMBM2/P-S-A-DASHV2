@@ -124,7 +124,7 @@ export function RosterManager() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={lang === "ar" ? "بحث..." : "Search..."}
-              className="w-44 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+              className="w-44 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-gray-900 outline-none focus:border-gold-400/70"
             />
           </div>
           <Button variant="outline" onClick={syncDiscord} disabled={syncing} title="سحب الأفراد من سيرفر ديسكورد">
@@ -174,7 +174,7 @@ export function RosterManager() {
                       <div className="font-semibold text-white">{lang === "ar" ? o.nameAr : o.name}</div>
                       <div className="font-mono text-xs text-zinc-400">{o.callsign}</div>
                     </td>
-                    <td className="px-4 py-3 text-zinc-300">{rank ? (lang === "ar" ? rank.titleAr : rank.title) : "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{rank ? (lang === "ar" ? rank.titleAr : rank.title) : "—"}</td>
                     <td className="px-4 py-3 text-zinc-400">{o.joinedAt}</td>
                     <td className="px-4 py-3"><Badge tone={STATUS_TONE[o.status]}>{AR.officerStatus[o.status] || o.status}</Badge></td>
                     <td className="px-4 py-3">

@@ -57,7 +57,7 @@ export function CommandPalette() {
           <Command.Input
             autoFocus
             placeholder="ابحث عن قسم… (الرئيسية، الأفراد، لوحة التحكم)"
-            className="w-full bg-transparent py-3.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none"
+            className="w-full bg-transparent py-3.5 text-sm text-gray-900 placeholder-zinc-500 outline-none"
           />
         </div>
         <Command.List className="scrollbar-thin max-h-80 overflow-y-auto p-2">
@@ -73,7 +73,7 @@ export function CommandPalette() {
                   router.push(item.href);
                   setOpen(false);
                 }}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-300 data-[selected=true]:bg-gold-400/15 data-[selected=true]:text-gold-100"
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-600 data-[selected=true]:bg-gold-400/15 data-[selected=true]:text-gold-100"
               >
                 <item.icon size={16} className="text-gold-300/80" />
                 <span className="font-medium">{item.label}</span>

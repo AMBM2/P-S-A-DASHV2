@@ -87,7 +87,7 @@ export function AudioPlayer() {
           "rounded-lg border p-2 transition-colors",
           open
             ? "border-gold-300/60 bg-gold-400/15 text-gold-100"
-            : "border-gold-400/20 text-zinc-300 hover:text-gold-100"
+            : "border-gold-400/20 text-gray-600 hover:text-gold-100"
         )}
         title={soundPref ? "مشغل الصوت" : "مشغل الصوت"}
       >

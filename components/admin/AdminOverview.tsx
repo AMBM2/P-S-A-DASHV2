@@ -68,7 +68,7 @@ function MediaToggle({
           className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
             value === m
               ? "border-gold-400 bg-gold-400/15 text-gold-200"
-              : "border-gold-400/25 text-zinc-400 hover:text-zinc-200"
+              : "border-gold-400/25 text-zinc-400 hover:text-gray-700"
           }`}
         >
           {m === "url" ? "رابط YouTube" : "رفع من الجهاز"}
@@ -109,7 +109,7 @@ function DropzoneField({
     >
       <input {...getInputProps()} />
       <UploadCloud size={22} className="text-gold-300" />
-      <span className="text-xs font-medium text-zinc-200">{uploading ? "جارٍ الرفع..." : label}</span>
+      <span className="text-xs font-medium text-gray-700">{uploading ? "جارٍ الرفع..." : label}</span>
       <span className="text-[11px] text-zinc-500">اسحب الملف وأفلته هنا أو انقر للاختيار</span>
     </div>
   );
@@ -276,7 +276,7 @@ export function AdminOverview() {
             <div className="max-h-80 space-y-2 overflow-y-auto scrollbar-thin">
               {displayedAudit.map((a) => (
                 <div key={a.id} className="flex items-center justify-between rounded-lg border border-gold-400/15 bg-obsidian-900/50 px-4 py-2 text-sm">
-                  <span className="text-zinc-300">
+                  <span className="text-gray-600">
                     <span className="font-semibold text-gold-200">{ACTION_AR[a.action] || a.action}</span> → {ENTITY_AR[a.entity] || a.entity}
                   </span>
                   <span className="text-xs text-zinc-500">
@@ -360,7 +360,7 @@ export function AdminOverview() {
             value={settings.fieldRoleId || ""}
             onChange={(e) => updateSettings({ fieldRoleId: e.target.value.replace(/\D/g, "").slice(0, 20) })}
             placeholder="1527321813325971577"
-            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-gray-900 outline-none focus:border-gold-400/70"
           />
           <Button variant="outline" onClick={() => updateSettings({ fieldRoleId: "1527321813325971577" })}>
             استعادة الافتراضي
@@ -401,7 +401,7 @@ export function AdminOverview() {
             value={newCatAr}
             onChange={(e) => setNewCatAr(e.target.value)}
             placeholder="اسم القسم — مثال: زيارات القطاعات"
-            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+            className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-gray-900 outline-none focus:border-gold-400/70"
           />
           <Button onClick={addCategory}>
             <Plus size={15} /> إضافة
@@ -425,7 +425,7 @@ export function AdminOverview() {
               onChange={(e) => updateSettings({ anthemUrl: e.target.value })}
               placeholder="https://www.youtube.com/watch?v=..."
               dir="ltr"
-              className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+              className="flex-1 rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-gray-900 outline-none focus:border-gold-400/70"
             />
             <Button variant="outline" onClick={() => updateSettings({ anthemUrl: "https://www.youtube.com/watch?v=ecdPScS0MKo" })}>
               استعادة الافتراضي
@@ -464,7 +464,7 @@ export function AdminOverview() {
           نافذة تظهر للزائر عند دخول الموقع، تعرض فيديو ونصاً ترحيبياً.
         </p>
 
-        <label className="mb-3 flex cursor-pointer items-center gap-2 text-sm text-zinc-200">
+        <label className="mb-3 flex cursor-pointer items-center gap-2 text-sm text-gray-700">
           <Switch
             checked={!!settings.welcome?.enabled}
             onCheckedChange={(checked) => updateSettings({ welcome: { ...settings.welcome!, enabled: checked } })}
@@ -480,7 +480,7 @@ export function AdminOverview() {
               type="text"
               value={settings.welcome?.title || ""}
               onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, title: e.target.value } })}
-              className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+              className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-gray-900 outline-none focus:border-gold-400/70"
             />
           </div>
           <div>
@@ -489,7 +489,7 @@ export function AdminOverview() {
               value={settings.welcome?.text || ""}
               onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, text: e.target.value } })}
               rows={3}
-              className="w-full resize-none rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+              className="w-full resize-none rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 text-sm text-gray-900 outline-none focus:border-gold-400/70"
             />
           </div>
           <div>
@@ -503,7 +503,7 @@ export function AdminOverview() {
                   onChange={(e) => updateSettings({ welcome: { ...settings.welcome!, videoUrl: e.target.value } })}
                   placeholder="https://www.youtube.com/watch?v=..."
                   dir="ltr"
-                  className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+                  className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2 font-mono text-sm text-gray-900 outline-none focus:border-gold-400/70"
                 />
                 {isYoutubeUrl(settings.welcome?.videoUrl) && (
                   <Button variant="outline" onClick={() => updateSettings({ welcome: { ...settings.welcome!, videoUrl: "" } })}>
@@ -549,7 +549,7 @@ export function AdminOverview() {
 function StatusRow({ label, on, danger = false }: { label: string; on: boolean; danger?: boolean }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-zinc-300">{label}</span>
+      <span className="text-sm text-gray-600">{label}</span>
       <Badge tone={danger ? (on ? "rose" : "green") : on ? "green" : "slate"}>
         {on ? "مفعل" : "معطل"}
       </Badge>

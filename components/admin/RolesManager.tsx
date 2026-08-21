@@ -130,7 +130,7 @@ export function RolesManager() {
                   <span
                     className={cn(
                       "rounded-md px-2 py-0.5 text-sm font-semibold",
-                      isRank ? "text-gold-100" : "text-zinc-200"
+                      isRank ? "text-gold-100" : "text-gray-700"
                     )}
                   >
                     {r.name}

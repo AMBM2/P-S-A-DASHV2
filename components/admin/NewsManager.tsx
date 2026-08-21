@@ -313,7 +313,7 @@ export function NewsManager() {
           </Field>
         </div>
         <div className="mt-4 flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <label className="flex items-center gap-2 text-sm text-gray-600">
             <input type="checkbox" checked={form.pinned} onChange={(e) => setForm({ ...form, pinned: e.target.checked })} className="accent-gold-400" />
             تثبيت في الأعلى
           </label>

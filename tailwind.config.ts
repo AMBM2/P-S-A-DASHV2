@@ -60,8 +60,9 @@ const config: Config = {
         },
         },
       fontFamily: {
-        sans: ["var(--font-cairo)", "var(--font-tajawal)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "var(--font-cairo)", "sans-serif"],
+        sans: ["var(--font-inter)", "var(--font-cairo)", "var(--font-tajawal)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-inter)", "var(--font-cairo)", "sans-serif"],
+        inter: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

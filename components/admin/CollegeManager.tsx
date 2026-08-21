@@ -124,7 +124,7 @@ export function CollegeManager() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="بحث..."
-              className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+              className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-gray-900 outline-none focus:border-gold-400/70"
             />
           </div>
           <Button variant="outline" onClick={load} disabled={loading}>
@@ -169,7 +169,7 @@ export function CollegeManager() {
                       <div className="font-semibold text-white">{c.nameAr || c.name}</div>
                       <div className="font-mono text-xs text-zinc-400">{c.discordId}</div>
                     </td>
-                    <td className="px-4 py-3 text-zinc-300">{rank?.titleAr || "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{rank?.titleAr || "—"}</td>
                     <td className="px-4 py-3 font-bold text-gold-200">{c.examScore || 0}</td>
                     <td className="px-4 py-3">
                       <Badge tone={STATUS_TONE[c.status]}>

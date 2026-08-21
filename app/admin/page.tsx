@@ -174,7 +174,7 @@ export default function AdminPage() {
       <div className="mb-4 flex items-center justify-end gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="clip-notch-sm flex items-center gap-2 rounded-lg border border-gold-400/25 bg-obsidian-900/60 px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:border-gold-400/50">
+            <button className="clip-notch-sm flex items-center gap-2 rounded-lg border border-gold-400/25 bg-obsidian-900/60 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-gold-400/50">
               <ShieldCheck size={14} className="text-gold-300" />
               <span className="font-bold text-gold-200">{session.officer?.nameAr || session.discordId}</span>
               <ChevronDown size={13} className="text-zinc-500" />
@@ -251,7 +251,7 @@ export default function AdminPage() {
                   "flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm transition-all",
                   tab === t.id
                     ? "bg-gold-400/15 text-gold-200"
-                    : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+                    : "text-zinc-400 hover:bg-white/5 hover:text-gray-700"
                 )}
               >
                 <t.icon size={15} />

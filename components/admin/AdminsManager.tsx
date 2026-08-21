@@ -199,7 +199,7 @@ export function AdminsManager() {
       ) : (
         <div className="space-y-6">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-sm font-bold text-zinc-200">
+            <div className="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700">
               <KeyRound size={15} className="text-rose-300" />
               السوبر أدمن (تحكم كامل)
             </div>
@@ -236,7 +236,7 @@ export function AdminsManager() {
                   )}
                 >
                   <div className="mb-2 flex items-center gap-2">
-                    <Icon size={18} className={cn("shrink-0", cat.tone === "rose" ? "text-rose-300" : cat.tone === "amber" ? "text-amber-300" : cat.tone === "indigo" ? "text-indigo-300" : "text-zinc-300")} />
+                    <Icon size={18} className={cn("shrink-0", cat.tone === "rose" ? "text-rose-300" : cat.tone === "amber" ? "text-amber-300" : cat.tone === "indigo" ? "text-indigo-300" : "text-gray-600")} />
                     <span className="font-bold text-white">{cat.title}</span>
                     <Badge tone={cat.tone as any}>{members.length}</Badge>
                   </div>
@@ -254,7 +254,7 @@ export function AdminsManager() {
                     <div className="space-y-1.5">
                       {members.map((a) => (
                         <div key={a.id} className="flex items-center justify-between gap-2 rounded-lg border border-gold-400/10 bg-obsidian-900/40 px-2.5 py-1.5">
-                          <span className="truncate font-mono text-xs text-zinc-200">{a.userId}</span>
+                          <span className="truncate font-mono text-xs text-gray-700">{a.userId}</span>
                           <div className="flex shrink-0 items-center gap-1.5">
                             <button onClick={() => toggleActive(a)} className="text-[11px] text-zinc-400 hover:text-white" disabled={busy}>
                               {a.active ? "إيقاف" : "تفعيل"}

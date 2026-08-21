@@ -78,7 +78,7 @@ export function AdminLogin() {
 
           {step === "id" ? (
             <>
-              <p className="mb-3 flex items-center gap-2 text-sm text-zinc-300">
+              <p className="mb-3 flex items-center gap-2 text-sm text-gray-600">
                 <Fingerprint size={15} className="text-gold-300" />
                 أدخل معرّف ديسكورد الخاص بك وسيصلك رمز في الخاص.
               </p>
@@ -89,7 +89,7 @@ export function AdminLogin() {
                 placeholder="USER ID"
                 dir="ltr"
                 inputMode="numeric"
-                className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+                className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2.5 font-mono text-sm text-gray-900 outline-none focus:border-gold-400/70"
               />
               {error && <p className="mt-2 text-xs text-rose-300">{error}</p>}
               <Button className="mt-4 w-full" onClick={requestCode} disabled={busy || !userId.trim()}>
@@ -99,7 +99,7 @@ export function AdminLogin() {
             </>
           ) : (
             <>
-              <p className="mb-3 flex items-center gap-2 text-sm text-zinc-300">
+              <p className="mb-3 flex items-center gap-2 text-sm text-gray-600">
                 <MessageSquareText size={15} className="text-gold-300" />
                 {sentVia === "channel"
                   ? "أُرسل الرمز في قناة السيرفر (منشن لك) — أدخل الرمز."
@@ -113,7 +113,7 @@ export function AdminLogin() {
                 dir="ltr"
                 inputMode="numeric"
                 maxLength={6}
-                className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2.5 text-center font-mono text-xl tracking-[0.4em] text-zinc-100 outline-none focus:border-gold-400/70"
+                className="w-full rounded-lg border border-gold-400/25 bg-obsidian-900/70 px-3 py-2.5 text-center font-mono text-xl tracking-[0.4em] text-gray-900 outline-none focus:border-gold-400/70"
               />
               {error && <p className="mt-2 text-xs text-rose-300">{error}</p>}
               <div className="mt-4 flex gap-2">

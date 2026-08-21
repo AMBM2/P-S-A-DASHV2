@@ -189,7 +189,7 @@ export function ExamBuilder() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2">
                     <FileBadge size={16} className="text-gold-300" />
-                    <span className="font-display font-bold text-zinc-100">{exam.title}</span>
+                    <span className="font-display font-bold text-gray-900">{exam.title}</span>
                     <Badge tone={exam.status === "active" ? "green" : exam.status === "draft" ? "slate" : "amber"}>
                       {exam.status === "active" ? "منشور" : exam.status === "draft" ? "مسودة" : "مؤرشف"}
                     </Badge>
@@ -227,7 +227,7 @@ export function ExamBuilder() {
           </Field>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold text-zinc-300">الأسئلة ({questions.length})</span>
+            <span className="text-sm font-bold text-gray-600">الأسئلة ({questions.length})</span>
             <Button variant="outline" className="!px-2 !py-1 !text-xs" onClick={() => setQuestions((p) => [...p, { ...EMPTY_Q }])}>
               <Plus size={13} /> سؤال
             </Button>

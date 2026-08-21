@@ -322,7 +322,7 @@ export default function ExamEnginePage() {
                             "flex items-center gap-2 rounded-lg border p-2.5 text-right text-sm transition-all",
                             active
                               ? "border-gold-300/70 bg-gold-400/15 text-gold-100"
-                              : "border-gold-400/15 bg-obsidian-800/60 text-zinc-300 hover:border-gold-400/40"
+                              : "border-gold-400/15 bg-obsidian-800/60 text-gray-600 hover:border-gold-400/40"
                           )}
                         >
                           <span

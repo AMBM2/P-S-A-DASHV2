@@ -55,7 +55,7 @@ export function BadgeCodesManager() {
         </Badge>
       </div>
       <p className="mb-3 text-xs text-zinc-400">{desc}</p>
-      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
         <span className="rounded-lg border border-gold-400/20 bg-obsidian-900/50 px-2 py-1 font-mono">
           {p.prefix}-{p.start} ← {p.prefix}-{p.end}
         </span>
@@ -70,7 +70,7 @@ export function BadgeCodesManager() {
   return (
     <div className="mb-6 rounded-2xl border border-gold-400/15 bg-obsidian-900/30 p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h4 className="flex items-center gap-2 text-sm font-bold text-zinc-200">
+        <h4 className="flex items-center gap-2 text-sm font-bold text-gray-700">
           <Hash size={15} className="text-gold-300" />
           الأكواد العسكرية (الشارات) — توليد تلقائي وإعادة تدوير
         </h4>

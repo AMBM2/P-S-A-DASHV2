@@ -56,7 +56,7 @@ export function CodesManager() {
               <div className="flex items-center gap-3">
                 <Badge tone={TYPE_TONE[c.type]}>{AR.codeType[c.type] || c.type}</Badge>
                 <span className="font-display font-bold text-gold-200">{c.code}</span>
-                <span className="hidden text-sm text-zinc-300 sm:inline">
+                <span className="hidden text-sm text-gray-600 sm:inline">
                   {lang === "ar" ? c.meaningAr : c.meaning}
                 </span>
               </div>

@@ -3,12 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Atropos from "atropos/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft, Play } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, ProgressBar, EmptyState, SectionTitle } from "@/components/ui";
-import { AuroraBackground, GlowCard, BorderBeam } from "@/components/effects";
 import { timeAgo, number } from "@/lib/format";
 import { AR } from "@/lib/ar";
 import { RANKS } from "@/lib/seed";
@@ -52,20 +50,20 @@ export default function HomePage() {
   return (
     <div>
       {/* Command Hero */}
-      <div className="clip-notch relative mb-10 overflow-hidden border border-border bg-card/55 p-8 backdrop-blur-xl md:p-12">
-        <AuroraBackground />
-        <BorderBeam size={300} duration={10} />
+      <div className="clip-notch relative mb-10 overflow-hidden border border-gray-200 bg-gradient-to-bl from-accent-50 via-white to-white p-8 md:p-12">
+        <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -right-10 h-56 w-56 rounded-full bg-accent-300/20 blur-3xl" />
         <div className="relative flex flex-col items-center gap-8 text-center md:flex-row md:justify-between md:text-right">
           <div className="max-w-xl">
-            <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-200">
+            <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-accent-400/30 bg-accent-50 px-4 py-1.5 text-xs font-semibold tracking-widest text-accent-700">
               <ShieldCheck size={14} />
               {lang === "ar" ? "المنصة الرسمية لقوات الأمن العام" : "Official Public Security Command"}
             </div>
 
-            <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight gold-text md:text-6xl">
+            <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-6xl">
               {lang === "ar" ? "بوابة الأمن العام" : "Public Security Portal"}
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="mt-4 text-sm leading-relaxed text-gray-500 md:text-base">
               {lang === "ar"
                 ? "المنصة الإدارية الموحدة لأخبار القيادة، الأفراد في الخدمة، والتوزيع حسب الرتب."
                 : "The unified administrative platform for command news, on-duty personnel and rank distribution."}
@@ -73,36 +71,25 @@ export default function HomePage() {
 
             <div className="mt-6 flex items-center justify-center gap-3 md:justify-start">
               <span className="v100-badge">V300</span>
-              <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-gold-300/80">
-                <span className="h-1.5 w-1.5 rotate-45 bg-gold-400/80" />
+              <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-accent-600">
+                <span className="h-1.5 w-1.5 rotate-45 bg-accent-500" />
                 Command Operations
               </span>
             </div>
           </div>
 
-          {/* Official emblem — orbital rings */}
+          {/* Official emblem */}
           <div className="relative flex h-44 w-44 shrink-0 items-center justify-center">
-            <div className="absolute inset-0 rounded-full border border-gold-400/15 animate-[spin_30s_linear_infinite]" />
-            <div className="absolute inset-5 rounded-full border border-dashed border-gold-400/10 animate-[spin_44s_linear_infinite_reverse]" />
-            <Atropos
-              className="relative"
-              rotateXMax={14}
-              rotateYMax={14}
-              shadow={false}
-              highlight={false}
-            >
-              <div
-                data-atropos-offset="5"
-                className="clip-hex relative flex h-32 w-32 items-center justify-center border border-gold-400/30 bg-gold-400/5 gold-glow-strong animate-[goldPulse_4.5s_ease-in-out_infinite]"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/psa-logo.png"
-                  alt="PSA"
-                  className="h-24 w-24 rounded-full object-contain"
-                />
-              </div>
-            </Atropos>
+            <div className="absolute inset-0 rounded-full border border-accent-200" />
+            <div className="absolute inset-5 rounded-full border border-dashed border-accent-300" />
+            <div className="clip-hex relative flex h-32 w-32 items-center justify-center border border-accent-400/40 bg-white shadow-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/psa-logo.png"
+                alt="PSA"
+                className="h-24 w-24 rounded-full object-contain"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -121,7 +108,7 @@ export default function HomePage() {
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder={lang === "ar" ? "بحث..." : "Search..."}
-                  className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-1.5 pl-8 pr-3 text-xs text-zinc-100 outline-none focus:border-gold-400/70"
+                  className="w-40 rounded-lg border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-xs text-gray-900 outline-none focus:border-accent-500"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -131,8 +118,8 @@ export default function HomePage() {
                     onClick={() => setCat(c.id)}
                     className={`rounded-full border px-3 py-1 text-xs transition-all ${
                       cat === c.id
-                        ? "border-gold-400/60 bg-gold-400/15 text-gold-200"
-                        : "border-gold-400/15 text-zinc-400 hover:border-gold-400/40 hover:text-zinc-200"
+                        ? "border-accent-400/60 bg-accent-50 text-accent-700"
+                        : "border-gray-200 text-gray-500 hover:border-accent-400/40 hover:text-accent-600"
                     }`}
                   >
                     {lang === "ar" ? c.labelAr : c.label}
@@ -179,7 +166,7 @@ export default function HomePage() {
                               <Play size={11} /> {lang === "ar" ? "فيديو" : "Video"}
                             </span>
                           )}
-                          <div className="absolute bottom-3 right-3 flex items-center gap-2 text-[11px] text-zinc-300">
+                          <div className="absolute bottom-3 right-3 flex items-center gap-2 text-[11px] text-gray-600">
                             <span className="flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur">
                               <Eye size={11} /> {number(n.views)}
                             </span>
@@ -213,28 +200,28 @@ export default function HomePage() {
                           </div>
                         )}
 
-                        <div className="mb-1.5 flex items-center gap-2 text-[11px] text-zinc-500">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 text-[9px] font-bold text-gold-300">
+                        <div className="mb-1.5 flex items-center gap-2 text-[11px] text-gray-400">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full border border-accent-400/30 bg-accent-50 text-[9px] font-bold text-accent-600">
                             {n.author.slice(0, 1)}
                           </span>
-                          <span className="font-semibold text-zinc-400">{n.author}</span>
+                          <span className="font-semibold text-gray-600">{n.author}</span>
                           <span>·</span>
                           <span>{timeAgo(n.publishedAt)}</span>
                         </div>
 
-                        <h3 className="mb-2 font-display text-lg font-bold leading-snug text-white transition-colors group-hover:text-gold-200">
+                        <h3 className="mb-2 font-display text-lg font-bold leading-snug text-gray-900 transition-colors group-hover:text-accent-600">
                           {lang === "ar" ? n.titleAr : n.title}
                         </h3>
-                        <p className="line-clamp-2 text-sm leading-relaxed text-zinc-400">
+                        <p className="line-clamp-2 text-sm leading-relaxed text-gray-500">
                           {lang === "ar" ? n.bodyAr : n.body}
                         </p>
 
-                        <div className="mt-4 flex items-center justify-between border-t border-gold-400/10 pt-3">
-                          <span className="flex items-center gap-1 rounded-full border border-gold-400/25 bg-gold-400/5 px-3 py-1 text-xs font-semibold text-gold-200 transition-all group-hover:border-gold-400/60 group-hover:bg-gold-400/15">
+                        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+                          <span className="flex items-center gap-1 rounded-full border border-accent-400/25 bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-600 transition-all group-hover:border-accent-400/60 group-hover:bg-accent-100">
                             {lang === "ar" ? "اقرأ الخبر" : "Read"}
                             <ChevronLeft size={13} className="rtl:rotate-180 transition-transform group-hover:translate-x-[-2px] group-hover:rtl:translate-x-[2px]" />
                           </span>
-                          <span className="text-xs text-zinc-500">
+                          <span className="text-xs text-gray-400">
                             {lang === "ar" ? "مشاهدة" : "views"}: {number(n.views)}
                           </span>
                         </div>
@@ -249,22 +236,22 @@ export default function HomePage() {
 
         {/* Module 2 + 3: On-Duty Counter & Rank Distribution */}
         <div className="space-y-6">
-          <GlowCard intensity={0.5} className="text-center">
-            <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-gold-400/30 bg-gold-400/10">
-              <ShieldCheck className="h-7 w-7 text-gold-300" />
+          <Card className="text-center">
+            <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-accent-400/30 bg-accent-50">
+              <ShieldCheck className="h-7 w-7 text-accent-600" />
             </div>
-            <div className="font-display text-5xl font-bold gold-text">{onDuty}</div>
-            <div className="mt-1 text-xs uppercase tracking-widest text-zinc-400">
+            <div className="font-display text-5xl font-bold text-gray-900">{onDuty}</div>
+            <div className="mt-1 text-xs uppercase tracking-widest text-gray-500">
               {lang === "ar" ? "الأفراد في الخدمة" : "Officers On Duty"}
             </div>
-            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-gold-400/30 bg-gold-400/10 px-3 py-1 text-[11px] text-gold-200">
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent-400/30 bg-accent-50 px-3 py-1 text-[11px] text-accent-700">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-300 opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold-300" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-500" />
               </span>
               {lang === "ar" ? "الخدمة الآن" : "On shift"}
             </span>
-          </GlowCard>
+          </Card>
 
           <Card>
             <SectionTitle icon={Crown}>

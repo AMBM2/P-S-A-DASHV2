@@ -130,7 +130,7 @@ export default function NewsDetailPage() {
             </span>
           </div>
 
-          <div className="mt-6 whitespace-pre-wrap text-[15px] leading-loose text-zinc-300">
+          <div className="mt-6 whitespace-pre-wrap text-[15px] leading-loose text-gray-600">
             {lang === "ar" ? item.bodyAr : item.body}
           </div>
         </div>

@@ -28,19 +28,19 @@ export function Button({
 }) {
   const styles: Record<string, string> = {
     primary:
-      "relative border border-primary/45 bg-primary text-primary-foreground font-semibold shadow-[0_4px_14px_-6px_hsl(var(--primary)/0.6)] hover:bg-primary/90 hover:border-primary/60 active:bg-primary/80",
-    ghost: "text-muted-foreground hover:bg-white/5 hover:text-primary-foreground",
+      "relative border border-transparent bg-primary text-primary-foreground font-semibold shadow-md hover:bg-primary-hover hover:shadow-lg active:bg-primary-active",
+    ghost: "text-muted-foreground hover:bg-black/5 hover:text-gray-900",
     outline:
-      "border border-primary/35 text-primary hover:border-primary/70 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring/40",
+      "border border-primary/40 text-primary hover:border-primary/70 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring/40",
     danger:
-      "relative border border-destructive/40 bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
+      "relative border border-transparent bg-destructive text-destructive-foreground shadow-md hover:bg-destructive-hover hover:shadow-lg active:bg-destructive-hover",
     success:
-      "relative border border-success/40 bg-success text-success-foreground hover:bg-success/90 active:bg-success/80",
+      "relative border border-transparent bg-success text-success-foreground shadow-md hover:opacity-90 hover:shadow-lg active:opacity-80",
   };
   return (
     <button
       className={cn(
-        "clip-notch-sm inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:ring-4 focus-visible:ring-ring/40",
+        "clip-notch-sm inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:ring-4 focus-visible:ring-primary/15",
         styles[variant],
         className
       )}
@@ -64,9 +64,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "clip-notch relative overflow-hidden border border-border bg-card/55 p-6",
+        "clip-notch relative overflow-hidden border border-gray-200 bg-white p-6 shadow-md",
         hover &&
-          "transition-all duration-200 hover:border-primary/40 hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.18),0_18px_50px_-22px_hsl(var(--primary)/0.28)]",
+          "transition-all duration-200 hover:border-primary/40 hover:shadow-lg",
         className
       )}
     >
@@ -90,7 +90,7 @@ export function SectionTitle({
       <span className="clip-notch-sm flex h-8 w-8 shrink-0 items-center justify-center border border-primary/30 bg-primary/10 text-primary">
         {Icon ? <Icon size={15} /> : <span className="h-2 w-2 rotate-45 bg-primary" />}
       </span>
-      <h2 className="font-display text-xl font-bold text-foreground">{children}</h2>
+      <h2 className="font-display text-xl font-bold text-gray-900">{children}</h2>
       <span className="gold-flourish flex-1" />
     </div>
   );
@@ -111,7 +111,7 @@ export function Badge({
     amber: "bg-warning/15 text-warning border-warning/30",
     rose: "bg-destructive/15 text-destructive border-destructive/30",
     green: "bg-success/15 text-success border-success/30",
-    slate: "bg-muted text-muted-foreground border-border",
+    slate: "bg-gray-100 text-gray-600 border-gray-200",
     indigo: "bg-primary/15 text-primary border-primary/30",
   };
   return (
@@ -139,7 +139,7 @@ export function Field({
 }) {
   return (
     <LabelPrimitive.Root className={cn("flex flex-col gap-1.5", className)}>
-      <span className="text-xs font-semibold uppercase tracking-wider text-zinc-300">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</span>
       {children}
     </LabelPrimitive.Root>
   );
@@ -151,7 +151,7 @@ export const Label = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn("text-xs font-semibold uppercase tracking-wider text-muted-foreground", className)}
+    className={cn("text-xs font-semibold uppercase tracking-wider text-gray-600", className)}
     {...props}
   />
 ));
@@ -159,7 +159,7 @@ Label.displayName = "Label";
 
 /* ============================= INPUT / TEXTAREA ============================= */
 export const inputClass =
-  "w-full rounded-[6px] border border-input bg-obsidian-800/80 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)] outline-none transition duration-150 focus:border-primary focus:bg-obsidian-800 focus:ring-2 focus:ring-ring/40 focus:shadow-[0_0_0_1px_hsl(var(--primary)/0.18),0_0_22px_-8px_hsl(var(--primary)/0.5)]";
+  "w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition duration-150 focus:border-primary focus:ring-4 focus:ring-primary/10";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClass, props.className)} />;
@@ -340,7 +340,7 @@ export const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm transition-all outline-none data-[state=active]:bg-gold-400/15 data-[state=active]:text-gold-200 text-zinc-400 hover:bg-white/5 hover:text-zinc-200",
+      "flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm transition-all outline-none data-[state=active]:bg-gold-400/15 data-[state=active]:text-gold-200 text-zinc-400 hover:bg-white/5 hover:text-gray-700",
       className
     )}
     {...props}
@@ -370,7 +370,7 @@ export const TooltipContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "glass-strong clip-notch-sm z-[130] border border-gold-400/25 px-3 py-1.5 text-xs text-zinc-200 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)]",
+        "glass-strong clip-notch-sm z-[130] border border-gold-400/25 px-3 py-1.5 text-xs text-gray-700 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.8)]",
         className
       )}
       {...props}
@@ -454,7 +454,7 @@ export const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-zinc-200 transition-colors outline-none hover:text-gold-200 [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center justify-between gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 transition-colors outline-none hover:text-gold-200 [&[data-state=open]>svg]:rotate-180",
         className
       )}
       {...props}
@@ -534,7 +534,7 @@ export const DropdownMenuItem = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none transition-colors data-[highlighted]:bg-gold-400/15 data-[highlighted]:text-gold-100",
-      danger ? "text-rose-300 data-[highlighted]:bg-rose-500/15 data-[highlighted]:text-rose-200" : "text-zinc-200",
+      danger ? "text-rose-300 data-[highlighted]:bg-rose-500/15 data-[highlighted]:text-rose-200" : "text-gray-700",
       className
     )}
     {...props}

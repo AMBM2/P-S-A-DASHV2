@@ -57,7 +57,7 @@ export function WelcomeModal() {
 
             <button
               onClick={close}
-              className="absolute right-3 top-3 z-10 rounded-full border border-gold-400/30 bg-black/40 p-1.5 text-zinc-300 transition-colors hover:text-gold-200"
+              className="absolute right-3 top-3 z-10 rounded-full border border-gold-400/30 bg-black/40 p-1.5 text-gray-600 transition-colors hover:text-gold-200"
               aria-label="إغلاق"
             >
               <X size={16} />
@@ -95,7 +95,7 @@ export function WelcomeModal() {
                 <Info size={17} className="text-gold-300" />
                 <h2 className="font-display text-lg font-bold gold-text">{welcome.title}</h2>
               </div>
-              <p className="text-sm leading-relaxed text-zinc-300">{welcome.text}</p>
+              <p className="text-sm leading-relaxed text-gray-600">{welcome.text}</p>
               <div className="mt-5 flex justify-end">
                 <Button onClick={close}>حسناً، فهمت</Button>
               </div>

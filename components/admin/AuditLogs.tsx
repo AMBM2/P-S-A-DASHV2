@@ -40,7 +40,7 @@ const columns = [
     header: "المنفّذ ← الهدف",
     cell: ({ row }: { row: { original: AuditLogEntry } }) => (
       <div className="min-w-0">
-        <div className="truncate text-xs text-zinc-200">
+        <div className="truncate text-xs text-gray-700">
           <span className="font-bold text-gold-200">{row.original.executorName || row.original.executor}</span>
           {row.original.targetName && (
             <>

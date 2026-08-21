@@ -107,7 +107,7 @@ export function PermissionsManager() {
         </Button>
       </div>
 
-      <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-400/20 bg-rose-500/5 p-3 text-xs text-zinc-300">
+      <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-400/20 bg-rose-500/5 p-3 text-xs text-gray-600">
         <KeyRound size={14} className="shrink-0 text-rose-300" />
         <span>
           السوبر أدمن الوحيد هو <span className="font-mono text-rose-100">{MASTER_ADMIN_ID}</span> — يملك تحكماً مطلقاً
@@ -142,7 +142,7 @@ export function PermissionsManager() {
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={16} className="text-gold-300" />
-                  <span className="font-mono text-sm text-zinc-100">{d.discordId}</span>
+                  <span className="font-mono text-sm text-gray-900">{d.discordId}</span>
                   {d.note && <Badge tone="slate">{d.note}</Badge>}
                 </div>
                 <button onClick={() => revoke(d)} className="flex items-center gap-1 text-xs text-rose-300 hover:text-rose-200" disabled={busy}>
@@ -194,7 +194,7 @@ export function PermissionsManager() {
                       {active && <ShieldCheck size={11} />}
                     </span>
                     <span>
-                      <span className={cn("block text-xs font-bold", active ? "text-gold-100" : "text-zinc-200")}>
+                      <span className={cn("block text-xs font-bold", active ? "text-gold-100" : "text-gray-700")}>
                         {p.label}
                       </span>
                       <span className="block text-[11px] text-zinc-400">{p.desc}</span>

@@ -3,51 +3,28 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   DESIGN SYSTEM — three-layer tokens (primitive → semantic → component)
-   Methodology adapted from nextlevelbuilder/ui-ux-pro-max-skill
-   Theme: GOLD on OBSIDIAN (dark, cosmic)
+   DESIGN SYSTEM — LibreUIUX "Modern Web App"
+   Light theme · blue-600 primary · Inter + Cairo · white cards · soft shadows
+   (legacy `gold-*` utilities are repointed to the blue scale so existing
+    markup reskins automatically)
    ========================================================================== */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* ---------- PRIMITIVE TOKENS ---------- */
-  /* Gold primary scale (HSL) */
-  --color-gold-50: 48 100% 94%;
-  --color-gold-100: 48 100% 88%;
-  --color-gold-200: 47 96% 78%;
-  --color-gold-300: 46 95% 68%;
-  --color-gold-400: 45 93% 58%;
-  --color-gold-500: 45 92% 50%;
-  --color-gold-600: 42 90% 42%;
-  --color-gold-700: 40 88% 34%;
-  --color-gold-800: 38 85% 26%;
-  --color-gold-900: 36 82% 18%;
+  /* ---------- LEGACY ALIASES → BLUE SCALE (LibreUIUX primary) ---------- */
+  --accent-100: #dbeafe;
+  --accent-200: #bfdbfe;
+  --accent-300: #93c5fd;
+  --accent-400: #60a5fa;
+  --accent-500: #3b82f6;
+  --accent-600: #2563eb;
+  --accent-700: #1d4ed8;
+  --accent: #3b82f6;
+  --accent-bright: #60a5fa;
+  --accent-rgb: 59, 130, 246;
+  --accent-bright-rgb: 96, 165, 250;
 
-  /* Neutral / obsidian scale (HSL) */
-  --color-obsidian-50: 240 6% 92%;
-  --color-obsidian-100: 240 6% 82%;
-  --color-obsidian-200: 240 5% 70%;
-  --color-obsidian-300: 240 5% 58%;
-  --color-obsidian-400: 240 5% 46%;
-  --color-obsidian-500: 240 5% 36%;
-  --color-obsidian-600: 240 5% 26%;
-  --color-obsidian-700: 240 6% 18%;
-  --color-obsidian-800: 240 6% 12%;
-  --color-obsidian-900: 240 6% 7%;
-  --color-obsidian-950: 240 8% 4%;
-
-  /* Status scale (HSL) */
-  --color-green-500: 160 84% 39%;
-  --color-green-600: 160 84% 31%;
-  --color-yellow-500: 45 93% 47%;
-  --color-yellow-600: 42 90% 40%;
-  --color-red-500: 350 89% 60%;
-  --color-red-600: 350 84% 51%;
-  --color-blue-500: 217 91% 60%;
-  --color-blue-600: 221 83% 53%;
-
-  /* Spacing scale (4px base) */
-  --space-0: 0;
+  /* ---------- PRIMITIVE SCALES (4px spacing / radius / shadow / duration) ---------- */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -59,8 +36,6 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* Radius scale */
-  --radius-none: 0;
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -68,101 +43,87 @@
   --radius-2xl: 1.25rem;
   --radius-full: 9999px;
 
-  /* Shadow scale */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 10px -2px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 14px 30px -8px rgb(0 0 0 / 0.55);
-  --shadow-xl: 0 26px 55px -14px rgb(0 0 0 / 0.65);
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.1), 0 4px 6px -4px rgb(15 23 42 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.1), 0 8px 10px -6px rgb(15 23 42 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(15 23 42 / 0.22);
 
-  /* Duration scale */
   --duration-fast: 150ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;
 
-  /* Z-index scale */
   --z-dropdown: 1000;
   --z-sticky: 1100;
   --z-modal: 1200;
   --z-popover: 1300;
   --z-tooltip: 1400;
 
-  /* ---------- SEMANTIC TOKENS (gold-on-obsidian) ---------- */
-  --background: 240 8% 4%;
-  --foreground: 220 16% 86%;
+  /* ---------- SEMANTIC TOKENS (light, Modern Web App) ---------- */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
 
-  --card: 240 6% 7%;
-  --card-foreground: 220 16% 86%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
 
-  --popover: 240 6% 8%;
-  --popover-foreground: 220 16% 86%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
 
-  --primary: 45 93% 55%;
-  --primary-hover: 45 93% 47%;
-  --primary-active: 38 92% 40%;
-  --primary-foreground: 38 50% 8%;
+  --primary: 217 91% 60%;
+  --primary-hover: 221 83% 53%;
+  --primary-active: 224 76% 48%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 240 5% 13%;
-  --secondary-foreground: 220 14% 84%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 222 47% 11%;
 
-  --muted: 240 5% 13%;
-  --muted-foreground: 220 10% 58%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
 
-  --accent: 240 5% 16%;
-  --accent-foreground: 220 14% 84%;
+  --accent-token: 217 91% 60%;
+  --accent-foreground: 222 47% 11%;
 
-  --destructive: 350 75% 55%;
-  --destructive-hover: 350 70% 47%;
-  --destructive-foreground: 0 0% 98%;
+  --destructive: 0 72% 51%;
+  --destructive-hover: 0 70% 45%;
+  --destructive-foreground: 0 0% 100%;
 
   --success: 160 84% 39%;
-  --success-foreground: 0 0% 98%;
-  --warning: 45 93% 47%;
-  --warning-foreground: 38 50% 8%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 222 47% 11%;
 
-  --border: 240 5% 16%;
-  --input: 240 5% 15%;
-  --ring: 45 93% 55%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 217 91% 60%;
 
   --radius: 0.75rem;
 
-  /* ---------- LEGACY ALIASES (kept for existing `gold-*` / `obsidian-*` utilities) ---------- */
-  --accent-100: hsl(48 100% 88%);
-  --accent-200: hsl(47 96% 78%);
-  --accent-300: hsl(46 95% 68%);
-  --accent-400: hsl(45 93% 58%);
-  --accent-500: hsl(45 92% 50%);
-  --accent-600: hsl(42 90% 42%);
-  --accent-700: hsl(40 88% 34%);
-  --accent: hsl(45 93% 55%);
-  --accent-bright: hsl(46 95% 68%);
-  --accent-rgb: 234, 179, 8;
-  --accent-bright-rgb: 250, 204, 21;
-
-  --glass: 20, 20, 24;
-  --bg: #0a0a0c;
-  --bg-2: #0d0d10;
-  --bg-800: #16161b;
-  --bg-700: #1f1f26;
-  --line: rgba(255, 255, 255, 0.1);
-  --line-strong: rgba(255, 255, 255, 0.16);
+  /* ---------- LIGHT SURFACES ---------- */
+  --glass: 255, 255, 255;
+  --bg: #f8fafc;        /* slate-50 */
+  --bg-2: #f1f5f9;      /* slate-100 */
+  --bg-800: #ffffff;
+  --bg-700: #f8fafc;
+  --line: rgba(15, 23, 42, 0.08);
+  --line-strong: rgba(15, 23, 42, 0.14);
 }
 
-/* ---------- DARK MODE OVERRIDE (design-system theme switching) ---------- */
+/* ---------- DARK MODE OVERRIDE (theme switching) ---------- */
 .dark {
-  --background: 240 8% 4%;
-  --foreground: 220 16% 86%;
-  --card: 240 6% 7%;
-  --card-foreground: 220 16% 86%;
-  --popover: 240 6% 8%;
-  --popover-foreground: 220 16% 86%;
-  --secondary: 240 5% 13%;
-  --secondary-foreground: 220 14% 84%;
-  --muted: 240 5% 13%;
-  --muted-foreground: 220 10% 58%;
-  --accent: 240 5% 16%;
-  --accent-foreground: 220 14% 84%;
-  --border: 240 5% 16%;
-  --input: 240 5% 15%;
+  --background: 222 47% 4%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 7%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 8%;
+  --popover-foreground: 210 40% 98%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent-token: 217 91% 60%;
+  --accent-foreground: 210 40% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
 }
 
 * { box-sizing: border-box; }
@@ -174,38 +135,40 @@ body {
   min-height: 100vh;
   background-color: var(--bg);
   color: var(--foreground);
-  font-family: var(--font-cairo), var(--font-tajawal), system-ui, sans-serif;
+  font-family: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-::selection { background: rgba(var(--accent-rgb), 0.28); color: #fff; }
+::selection { background: rgba(var(--accent-rgb), 0.22); color: #0b1220; }
 
-/* ============ GEOMETRY ============ */
-.clip-notch { border-radius: 1.1rem; }
+/* ---------- GEOMETRY ---------- */
+.clip-notch { border-radius: 1rem; }
 .clip-notch-sm { border-radius: 0.7rem; }
 .clip-hex { border-radius: 1rem; clip-path: none; }
 
-/* ============ SURFACES (flat, subtle) ============ */
+/* ---------- SURFACES (light glassmorphism per LibreUIUX) ---------- */
 .glass {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
 }
 .glass-strong {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
 }
 
-/* ============ BRAND TEXT GRADIENT (gold) ============ */
+/* ---------- BRAND TEXT (blue gradient) ---------- */
 .gold-text {
-  background: linear-gradient(118deg, var(--accent-200) 0%, var(--accent-bright) 42%, var(--accent-400) 100%);
+  background: linear-gradient(118deg, var(--accent-300) 0%, var(--accent-500) 50%, var(--accent-700) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* ============ GENTLE GLOWS ============ */
+/* ---------- GENTLE BLUE GLOWS (kept for legacy usage) ---------- */
 .gold-pulse { animation: goldPulse 4.5s ease-in-out infinite; }
 @keyframes goldPulse {
   0%, 100% { box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.18), 0 0 22px rgba(var(--accent-rgb), 0.12); }
@@ -213,42 +176,28 @@ body {
 }
 .gold-glow-strong { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.25), 0 0 30px -8px rgba(var(--accent-rgb), 0.32), 0 0 64px -24px rgba(var(--accent-rgb), 0.24); }
 
-@keyframes aurora {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
-  33% { transform: translate(3%, -2%) scale(1.06); opacity: 0.85; }
-  66% { transform: translate(-3%, 2%) scale(0.97); opacity: 1.05); }
-}
-@keyframes nebulaDrift {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
-  50% { transform: translate(1.5%, -1.5%) scale(1.05); opacity: 0.95; }
-}
-@keyframes twinkle {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.8; }
-}
-
-/* ============ DIVIDER (line + diamond) ============ */
+/* ---------- DIVIDER (line + diamond) ---------- */
 .gold-flourish { display: flex; align-items: center; gap: 12px; }
 .gold-flourish::before, .gold-flourish::after {
-  content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(15,23,42,0.12), transparent);
 }
 .gold-flourish .diamond {
   width: 7px; height: 7px; transform: rotate(45deg);
   border: 1px solid rgba(var(--accent-rgb), 0.7); background: rgba(var(--accent-rgb), 0.15);
 }
 
-/* ============ VERSION BADGE ============ */
+/* ---------- VERSION BADGE ---------- */
 .v100-badge {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 12px; border: 1px solid rgba(var(--accent-rgb), 0.35);
   border-radius: 9999px; background: rgba(var(--accent-rgb), 0.08);
-  color: var(--accent-300);
+  color: var(--accent-700);
   font-family: var(--font-display), sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
 }
 
-/* ============ SCROLLBARS ============ */
-.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 3px; }
+/* ---------- SCROLLBARS (light) ---------- */
+.scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.18); border-radius: 4px; }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -259,7 +208,7 @@ body {
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
 
-/* ============ FOCUS (uses --ring token) ============ */
+/* ---------- FOCUS (uses --ring token) ---------- */
 :focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px hsl(var(--ring) / 0.55), 0 0 0 6px hsl(var(--ring) / 0.18);
@@ -268,13 +217,13 @@ body {
 
 input[type="range"].gold-range { accent-color: var(--accent); }
 
-/* ============ NATIVE FORM CONTROLS ============ */
-select option, select optgroup { background-color: var(--bg-800); color: var(--foreground); }
-select option:checked { background-color: rgba(var(--accent-rgb), 0.25); color: var(--accent-200); }
-input, select, textarea { color-scheme: dark; }
+/* ---------- NATIVE FORM CONTROLS (light) ---------- */
+select option, select optgroup { background-color: #ffffff; color: #0f172a; }
+select option:checked { background-color: rgba(var(--accent-rgb), 0.18); color: var(--accent-700); }
+input, select, textarea { color-scheme: light; }
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px var(--bg-800) inset;
-  -webkit-text-fill-color: #f4f4f5; caret-color: #f4f4f5; border-radius: 0.85rem;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  -webkit-text-fill-color: #0f172a; caret-color: #0f172a; border-radius: 0.75rem;
 }
 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):focus,
 select:focus, textarea:focus {
@@ -282,7 +231,7 @@ select:focus, textarea:focus {
 }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); background-color: transparent; }
 
-/* ============ EYE COMFORT: reduce motion ============ */
+/* ---------- EYE COMFORT: reduce motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

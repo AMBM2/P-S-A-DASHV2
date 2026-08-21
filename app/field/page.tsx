@@ -460,7 +460,7 @@ export default function FieldPage() {
                           "group relative flex items-center gap-2 overflow-hidden rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200",
                           active
                             ? "border-gold-300/80 bg-gold-400/20 text-gold-100 shadow-[0_0_18px_-4px_rgba(var(--accent-rgb),0.6)]"
-                            : "border-gold-400/15 bg-obsidian-900/50 text-zinc-300 hover:border-gold-400/50 hover:bg-gold-400/5"
+                            : "border-gold-400/15 bg-obsidian-900/50 text-gray-600 hover:border-gold-400/50 hover:bg-gold-400/5"
                         )}
                       >
                         <Target
@@ -485,7 +485,7 @@ export default function FieldPage() {
           {/* Image attach */}
         <div className="mt-6 border-t border-gold-400/15 pt-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-sm font-bold text-zinc-200">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-700">
               <ImagePlus size={16} className="text-gold-300" /> ارفاق صورة الميدان (اختياري)
             </h3>
             {(imageUrl || imageData) && (
@@ -582,7 +582,7 @@ export default function FieldPage() {
                   <CheckCircle2 size={20} className="mt-0.5 shrink-0" />
                   <div>
                     <div className="font-bold">تم إرسال التنبيه بنجاح</div>
-                    <div className="mt-0.5 text-xs text-zinc-300">
+                    <div className="mt-0.5 text-xs text-gray-600">
                       نُشر أمر التحرك لموقع <span className="font-bold text-gold-200">{location}</span> في قناة الميدان مع منشن
                       الأعضاء المحددين ورتبهم.
                     </div>
@@ -629,7 +629,7 @@ export default function FieldPage() {
               className="w-full bg-transparent text-sm text-white placeholder-zinc-500 outline-none"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="text-zinc-500 hover:text-zinc-200">
+              <button onClick={() => setSearch("")} className="text-zinc-500 hover:text-gray-700">
                 <X size={14} />
               </button>
             )}

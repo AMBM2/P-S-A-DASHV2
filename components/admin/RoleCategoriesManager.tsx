@@ -129,8 +129,8 @@ export function RoleCategoriesManager() {
             ? "bg-rose-500/25 text-rose-200"
             : tone === "indigo"
               ? "bg-indigo-500/25 text-indigo-200"
-              : "bg-zinc-600/40 text-zinc-300"
-          : "bg-white/5 text-zinc-500 hover:text-zinc-300"
+              : "bg-zinc-600/40 text-gray-600"
+          : "bg-white/5 text-zinc-500 hover:text-gray-600"
       )}
     >
       {children}
@@ -140,7 +140,7 @@ export function RoleCategoriesManager() {
   const RoleRow = ({ r }: { r: RoleEntry }) => (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gold-400/10 bg-obsidian-900/40 px-3 py-2">
       <div className="flex min-w-0 items-center gap-2">
-        <span className="truncate text-xs text-zinc-200">{r.name}</span>
+        <span className="truncate text-xs text-gray-700">{r.name}</span>
         {r.rankAr && (
           <Badge tone="gold">
             {r.rankAr} {r.rankId}
@@ -227,17 +227,17 @@ export function RoleCategoriesManager() {
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-2.5">
               <Users size={15} className="text-rose-300" />
-              <span className="text-xs text-zinc-300">الضباط:</span>
+              <span className="text-xs text-gray-600">الضباط:</span>
               <span className="font-mono text-sm font-bold text-rose-200">{explicitOfficer.length}</span>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-indigo-400/25 bg-indigo-500/10 px-4 py-2.5">
               <Users size={15} className="text-indigo-300" />
-              <span className="text-xs text-zinc-300">الأفراد:</span>
+              <span className="text-xs text-gray-600">الأفراد:</span>
               <span className="font-mono text-sm font-bold text-indigo-200">{explicitEnlisted.length}</span>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-zinc-500/25 bg-obsidian-900/40 px-4 py-2.5">
               <span className="text-xs text-zinc-400">غير مصنّف:</span>
-              <span className="font-mono text-sm font-bold text-zinc-300">{uncategorized.length}</span>
+              <span className="font-mono text-sm font-bold text-gray-600">{uncategorized.length}</span>
             </div>
           </div>
 
@@ -271,7 +271,7 @@ export function RoleCategoriesManager() {
 
           {uncategorized.length > 0 && (
             <div>
-              <div className="mb-2 text-sm font-bold text-zinc-300">رتب غير مصنّفة (يُتجاهلها الفحص)</div>
+              <div className="mb-2 text-sm font-bold text-gray-600">رتب غير مصنّفة (يُتجاهلها الفحص)</div>
               <div className="grid gap-2 md:grid-cols-2">
                 {uncategorized.map((r) => (
                   <RoleRow key={r.id} r={r} />

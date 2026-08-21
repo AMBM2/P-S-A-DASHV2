@@ -125,7 +125,7 @@ export default function LookupPage() {
 
       {/* Search Bar */}
       <Card className="mb-8 p-5 md:p-6">
-        <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-300">
+        <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-600">
           <Fingerprint size={16} className="text-gold-300" />
           {lang === "ar" ? "معرّف مستخدم ديسكورد (USER ID)" : "Discord User ID"}
         </label>
@@ -136,7 +136,7 @@ export default function LookupPage() {
             onKeyDown={(e) => e.key === "Enter" && submit()}
             placeholder="123456789012345678"
             dir="ltr"
-            className="flex-1 rounded-xl border border-gold-400/25 bg-obsidian-900/70 px-4 py-3 text-left font-mono text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-gold-400/70"
+            className="flex-1 rounded-xl border border-gold-400/25 bg-obsidian-900/70 px-4 py-3 text-left font-mono text-sm text-gray-900 outline-none placeholder:text-zinc-600 focus:border-gold-400/70"
           />
           <button
             onClick={submit}
@@ -264,7 +264,7 @@ export default function LookupPage() {
               <div className="mt-5 border-t border-gold-400/15 pt-4">
                 <div className="mb-3 flex items-center gap-2">
                   <Layers size={16} className="text-gold-300" />
-                  <h3 className="text-sm font-bold text-zinc-200">
+                  <h3 className="text-sm font-bold text-gray-700">
                     {lang === "ar" ? "الرتب التي يحملها هذا العضو" : "Ranks held by this member"}
                   </h3>
                 </div>
@@ -316,7 +316,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="flex items-center justify-between gap-4 border-b border-gold-400/10 pb-2.5 last:border-0 last:pb-0">
       <span className="text-zinc-400">{label}</span>
-      <span className="font-semibold text-zinc-100">{children}</span>
+      <span className="font-semibold text-gray-900">{children}</span>
     </div>
   );
 }

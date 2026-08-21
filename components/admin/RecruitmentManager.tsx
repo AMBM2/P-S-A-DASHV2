@@ -140,7 +140,7 @@ export function RecruitmentManager() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="بحث..."
-              className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+              className="w-40 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-gray-900 outline-none focus:border-gold-400/70"
             />
           </div>
           <Button variant="outline" onClick={load} disabled={loading}>

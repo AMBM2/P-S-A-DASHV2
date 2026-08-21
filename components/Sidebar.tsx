@@ -15,7 +15,6 @@ import {
   Radio,
   UserPlus,
   Search,
-  Volume2,
   type LucideIcon,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -38,22 +37,21 @@ function Brand() {
   return (
     <Link href="/" className="group flex items-center gap-3">
       <div className="relative flex h-12 w-12 items-center justify-center">
-        <div className="clip-hex absolute inset-0 border border-gold-400/40 bg-gradient-to-b from-gold-400/40 to-gold-600/10 shadow-[0_0_22px_rgba(var(--accent-rgb),0.35)]" />
-        <div className="clip-hex absolute inset-[3px] bg-obsidian-900/90" />
+        <div className="clip-hex absolute inset-0 border border-accent-400/50 bg-gradient-to-b from-accent-400/40 to-accent-600/10 shadow-[0_0_22px_rgba(var(--accent-rgb),0.3)]" />
+        <div className="clip-hex absolute inset-[3px] bg-white/90" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/psa-logo.png"
           alt="PSA"
           className="relative h-8 w-8 rounded-full object-contain"
-          style={{ filter: "drop-shadow(0 0 10px rgba(var(--accent-rgb),0.4))" }}
         />
       </div>
       <div className="leading-tight">
         <div className="flex items-center gap-2">
-          <span className="font-display text-lg font-bold tracking-widest gold-text">الأمن العام</span>
+          <span className="font-display text-lg font-bold tracking-widest text-gray-900">الأمن العام</span>
           <span className="v100-badge">V300</span>
         </div>
-        <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-gold-300/70">
+        <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-accent-600">
           <ShieldCheck size={11} />
           P S A
         </div>
@@ -76,25 +74,25 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
             className={cn(
               "group relative flex items-center gap-3 rounded-2xl border px-4 py-3 transition-all duration-200",
               active
-                ? "border-gold-400/40 bg-gradient-to-l from-gold-400/20 to-transparent text-gold-100 shadow-[0_0_26px_-10px_rgba(var(--accent-rgb),0.7)]"
-                : "border-transparent text-zinc-400 hover:border-white/5 hover:bg-white/[0.04] hover:text-gold-200"
+                ? "border-accent-400/40 bg-accent-50 text-accent-700 shadow-[0_0_26px_-12px_rgba(var(--accent-rgb),0.7)]"
+                : "border-transparent text-gray-500 hover:border-gray-200 hover:bg-gray-100 hover:text-gray-900"
             )}
           >
             <span
               className={cn(
                 "clip-notch-sm flex h-9 w-9 shrink-0 items-center justify-center transition-all",
-                active ? "bg-gold-400/15 text-gold-200" : "bg-white/[0.03] text-zinc-400 group-hover:text-gold-200"
+                active ? "bg-accent-100 text-accent-600" : "bg-gray-100 text-gray-500 group-hover:text-accent-600"
               )}
             >
               <item.icon size={17} />
             </span>
             <span className="flex flex-col">
               <span className="text-sm font-semibold">{item.label}</span>
-              <span className="text-[11px] text-zinc-500">{item.hint}</span>
+              <span className="text-[11px] text-gray-400">{item.hint}</span>
             </span>
             <span
               className={cn(
-                "absolute inset-y-3 right-0 w-1 rounded-full bg-gold-300 transition-all",
+                "absolute inset-y-3 right-0 w-1 rounded-full bg-accent-500 transition-all",
                 active ? "opacity-100" : "opacity-0"
               )}
             />
@@ -121,7 +119,7 @@ export function Sidebar() {
   return (
     <>
       {/* ===================== DESKTOP SIDEBAR ===================== */}
-      <aside className="fixed inset-y-0 right-0 z-40 hidden w-80 flex-col border-l border-gold-400/15 bg-[rgba(var(--glass),0.5)] px-5 py-6 backdrop-blur-2xl lg:flex">
+      <aside className="fixed inset-y-0 right-0 z-40 hidden w-80 flex-col border-l border-gray-200 bg-white/80 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div className="mb-6 px-1">
           <Brand />
         </div>
@@ -129,29 +127,29 @@ export function Sidebar() {
           <NavList />
         </div>
 
-        <div className="mt-4 space-y-3 border-t border-gold-400/10 pt-4">
+        <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
           <button
             onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-            className="clip-notch-sm flex w-full items-center gap-3 rounded-xl border border-gold-400/15 bg-white/[0.03] px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-gold-400/40 hover:text-gold-200"
+            className="clip-notch-sm flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 transition-colors hover:border-accent-400/40 hover:text-accent-600"
           >
             <Search size={16} />
             <span className="flex-1 text-right">بحث سريع</span>
-            <kbd className="rounded border border-gold-400/25 bg-gold-400/10 px-1.5 py-0.5 text-[10px] text-gold-200">⌘K</kbd>
+            <kbd className="rounded border border-accent-400/25 bg-accent-50 px-1.5 py-0.5 text-[10px] text-accent-600">⌘K</kbd>
           </button>
 
-          <div className="flex items-center justify-between rounded-xl border border-gold-400/15 bg-white/[0.03] px-4 py-3">
+          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
             <div className="flex flex-col leading-tight">
-              <span className="font-display text-base font-bold tabular-nums gold-text">{timeStr}</span>
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500">
+              <span className="font-display text-base font-bold tabular-nums text-gray-900">{timeStr}</span>
+              <span className="text-[10px] uppercase tracking-widest text-gray-400">
                 {now.toLocaleDateString("ar-SA", { weekday: "long" })}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-300 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gold-300" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-500" />
               </span>
-              <span className="text-xs font-bold text-gold-200">{onDuty}</span>
+              <span className="text-xs font-bold text-accent-600">{onDuty}</span>
               <TooltipProvider delayDuration={150}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -166,10 +164,10 @@ export function Sidebar() {
       </aside>
 
       {/* ===================== MOBILE TOPBAR + DRAWER ===================== */}
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-gold-400/15 bg-[rgba(var(--glass),0.7)] px-4 py-3 backdrop-blur-2xl lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-2xl lg:hidden">
         <button
           onClick={() => setOpen(true)}
-          className="clip-notch-sm border border-gold-400/20 p-2 text-gold-200"
+          className="clip-notch-sm border border-gray-200 p-2 text-gray-700"
           aria-label="القائمة"
         >
           <Menu size={20} />
@@ -195,7 +193,7 @@ export function Sidebar() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
+            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
           </Transition.Child>
           <Transition.Child
             enter="transition-transform duration-250 ease-out"
@@ -205,10 +203,10 @@ export function Sidebar() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <aside className="absolute inset-y-0 right-0 flex w-80 flex-col border-l border-gold-400/15 bg-[rgba(var(--glass),0.95)] px-5 py-6 backdrop-blur-2xl">
+            <aside className="absolute inset-y-0 right-0 flex w-80 flex-col border-l border-gray-200 bg-white px-5 py-6 backdrop-blur-2xl">
               <div className="mb-6 flex items-center justify-between px-1">
                 <Brand />
-                <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-gold-200" aria-label="إغلاق">
+                <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-accent-600" aria-label="إغلاق">
                   <X size={22} />
                 </button>
               </div>

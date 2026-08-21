@@ -141,7 +141,7 @@ export function DischargeManager() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="بحث..."
-            className="w-52 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-zinc-100 outline-none focus:border-gold-400/70"
+            className="w-52 rounded-lg border border-gold-400/20 bg-obsidian-900/60 py-2 pl-8 pr-3 text-sm text-gray-900 outline-none focus:border-gold-400/70"
           />
         </div>
       </div>
@@ -184,8 +184,8 @@ export function DischargeManager() {
                       <div className="font-semibold text-white">{o.nameAr || o.name}</div>
                       <div className="font-mono text-xs text-zinc-400">{o.callsign}</div>
                     </td>
-                    <td className="px-4 py-3 text-zinc-300">{rank?.titleAr || "—"}</td>
-                    <td className="px-4 py-3 text-zinc-300">{dep?.nameAr || o.departmentId}</td>
+                    <td className="px-4 py-3 text-gray-600">{rank?.titleAr || "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{dep?.nameAr || o.departmentId}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end">
                         <Button variant="danger" className="px-3 py-1.5 text-xs" onClick={() => setDischarging(o.id)}>
@@ -257,7 +257,7 @@ export function DischargeManager() {
             </label>
             <div>
               <div className="mb-2 flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2 font-semibold text-zinc-300">
+                <span className="flex items-center gap-2 font-semibold text-gray-600">
                   <ShieldAlert size={15} className="text-rose-300" />
                   الرتب/الرولات المسحوبة من ديسكورد
                 </span>
