@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -34,7 +34,7 @@ function Brand() {
     <Link href="/" className="group flex items-center gap-3">
       <div className="relative flex h-12 w-12 items-center justify-center">
         <div className="clip-hex absolute inset-0 border border-accent-400/50 bg-gradient-to-b from-accent-400/40 to-accent-600/10 shadow-[0_0_22px_rgba(var(--accent-rgb),0.3)]" />
-        <div className="clip-hex absolute inset-[3px] bg-white/90" />
+        <div className="clip-hex absolute inset-[3px] bg-[#0e1320]" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/psa-logo.png"
@@ -44,10 +44,10 @@ function Brand() {
       </div>
       <div className="leading-tight">
         <div className="flex items-center gap-2">
-          <span className="font-display text-lg font-bold tracking-widest text-gray-900">الأمن العام</span>
+          <span className="font-display text-lg font-bold tracking-widest text-slate-50">الأمن العام</span>
           <span className="v100-badge">V300</span>
         </div>
-        <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-accent-600">
+        <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-accent-400">
           <ShieldCheck size={11} />
           P S A
         </div>
@@ -70,25 +70,25 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
             className={cn(
               "group relative flex items-center gap-3 rounded-2xl border px-4 py-3 transition-all duration-200",
               active
-                ? "border-accent-400/40 bg-accent-50 text-accent-700 shadow-[0_0_26px_-12px_rgba(var(--accent-rgb),0.7)]"
-                : "border-transparent text-gray-500 hover:border-gray-200 hover:bg-gray-100 hover:text-gray-900"
+                ? "border-accent-500/40 bg-accent-500/10 text-accent-300 shadow-[0_0_26px_-12px_rgba(var(--accent-rgb),0.7)]"
+                : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-slate-50"
             )}
           >
             <span
               className={cn(
                 "clip-notch-sm flex h-9 w-9 shrink-0 items-center justify-center transition-all",
-                active ? "bg-accent-100 text-accent-600" : "bg-gray-100 text-gray-500 group-hover:text-accent-600"
+                active ? "bg-accent-500/15 text-accent-400" : "bg-white/[0.06] text-slate-400 group-hover:text-accent-400"
               )}
             >
               <item.icon size={17} />
             </span>
             <span className="flex flex-col">
               <span className="text-sm font-semibold">{item.label}</span>
-              <span className="text-[11px] text-gray-400">{item.hint}</span>
+              <span className="text-[11px] text-slate-500">{item.hint}</span>
             </span>
             <span
               className={cn(
-                "absolute inset-y-3 right-0 w-1 rounded-full bg-accent-500 transition-all",
+                "absolute inset-y-3 right-0 w-1 rounded-full bg-accent-500/15 transition-all",
                 active ? "opacity-100" : "opacity-0"
               )}
             />
@@ -114,36 +114,36 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="fixed inset-y-0 right-0 z-40 hidden w-80 flex-col border-l border-gray-200 bg-white/80 px-5 py-6 backdrop-blur-2xl lg:flex">
+      <aside className="fixed inset-y-0 right-0 z-40 hidden w-80 flex-col border-l border-white/10 bg-[#0b0f18]/85 px-5 py-6 backdrop-blur-2xl lg:flex">
         <div className="mb-6 px-1">
           <Brand />
         </div>
         <div className="flex-1 overflow-y-auto scrollbar-thin px-1">
           <NavList />
         </div>
-        <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
-          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+        <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+          <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
             <div className="flex flex-col leading-tight">
-              <span className="font-display text-base font-bold tabular-nums text-gray-900">{timeStr}</span>
-              <span className="text-[10px] uppercase tracking-widest text-gray-400">
+              <span className="font-display text-base font-bold tabular-nums text-slate-50">{timeStr}</span>
+              <span className="text-[10px] uppercase tracking-widest text-slate-500">
                 {now.toLocaleDateString("ar-SA", { weekday: "long" })}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-500" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-500/15" />
               </span>
-              <span className="text-xs font-bold text-accent-600">{onDuty}</span>
+              <span className="text-xs font-bold text-accent-400">{onDuty}</span>
             </div>
           </div>
         </div>
       </aside>
 
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-2xl lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-[#0b0f18]/85 px-4 py-3 backdrop-blur-2xl lg:hidden">
         <button
           onClick={() => setOpen(true)}
-          className="clip-notch-sm border border-gray-200 p-2 text-gray-700"
+          className="clip-notch-sm border border-white/10 p-2 text-slate-200"
           aria-label="القائمة"
         >
           <Menu size={20} />
@@ -155,10 +155,10 @@ export function Sidebar() {
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 right-0 flex w-80 flex-col border-l border-gray-200 bg-white px-5 py-6 backdrop-blur-2xl">
+          <aside className="absolute inset-y-0 right-0 flex w-80 flex-col border-l border-white/10 bg-[#0e1320] px-5 py-6 backdrop-blur-2xl">
             <div className="mb-6 flex items-center justify-between px-1">
               <Brand />
-              <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-accent-600" aria-label="إغلاق">
+              <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-accent-400" aria-label="إغلاق">
                 <X size={22} />
               </button>
             </div>
@@ -171,3 +171,4 @@ export function Sidebar() {
     </>
   );
 }
+

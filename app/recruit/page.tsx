@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { UserPlus, ShieldCheck, BadgeCheck, Users, Radio } from "lucide-react";
 import { Card, Button, SectionTitle } from "@/components/ui";
@@ -12,20 +12,20 @@ export default function RecruitPage() {
 
   return (
     <div>
-      <div className="clip-notch relative mb-10 overflow-hidden border border-gray-200 bg-gradient-to-bl from-accent-50 via-white to-white p-8 md:p-12">
-        <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl" />
+      <div className="clip-notch relative mb-10 overflow-hidden border border-white/10 bg-gradient-to-bl from-accent-500/10 via-[#080a10] to-[#080a10] p-8 md:p-12">
+        <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-accent-500/15 blur-3xl" />
         <div className="relative flex flex-col items-center gap-6 text-center md:flex-row md:text-right">
-          <div className="clip-hex flex h-24 w-24 shrink-0 items-center justify-center border border-accent-400/40 bg-white shadow-lg">
-            <UserPlus className="h-11 w-11 text-accent-600" />
+          <div className="clip-hex flex h-24 w-24 shrink-0 items-center justify-center border border-accent-400/40 bg-[#0e1320] shadow-lg">
+            <UserPlus className="h-11 w-11 text-accent-400" />
           </div>
           <div className="max-w-xl">
-            <div className="clip-notch-sm mb-3 inline-flex items-center gap-2 border border-accent-400/30 bg-accent-50 px-4 py-1.5 text-xs font-semibold tracking-widest text-accent-700">
+            <div className="clip-notch-sm mb-3 inline-flex items-center gap-2 border border-accent-500/30 bg-accent-500/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-accent-300">
               <ShieldCheck size={14} /> انضم إلى قوات الأمن العام
             </div>
-            <h1 className="font-display text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
+            <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-50 md:text-5xl">
               كن جزءاً من الأمن العام
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-gray-500 md:text-base">
+            <p className="mt-3 text-sm leading-relaxed text-slate-400 md:text-base">
               نبحث عن أفراد ملتزمين لحماية النظام على خادم Dash Roleplay. قدّم الآن وابدأ رحلتك المهنية.
             </p>
             <div className="mt-5">
@@ -41,14 +41,15 @@ export default function RecruitPage() {
       <div className="grid gap-4 md:grid-cols-3">
         {steps.map((s, i) => (
           <Card key={i} hover>
-            <div className="clip-hex mb-3 flex h-12 w-12 items-center justify-center border border-accent-400/30 bg-accent-50">
-              <s.icon className="h-6 w-6 text-accent-600" />
+            <div className="clip-hex mb-3 flex h-12 w-12 items-center justify-center border border-accent-500/30 bg-accent-500/10">
+              <s.icon className="h-6 w-6 text-accent-400" />
             </div>
-            <h3 className="font-display text-lg font-bold text-gray-900">{s.title}</h3>
-            <p className="mt-1 text-sm text-gray-500">{s.desc}</p>
+            <h3 className="font-display text-lg font-bold text-slate-50">{s.title}</h3>
+            <p className="mt-1 text-sm text-slate-400">{s.desc}</p>
           </Card>
         ))}
       </div>
     </div>
   );
 }
+

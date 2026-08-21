@@ -66,25 +66,25 @@ export default function HomePage() {
   return (
     <div>
       {/* Command Hero */}
-      <div className="clip-notch relative mb-10 overflow-hidden border border-gray-200 bg-gradient-to-bl from-accent-50 via-white to-white p-8 md:p-12">
-        <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-accent-200/30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -right-10 h-56 w-56 rounded-full bg-accent-300/20 blur-3xl" />
+      <div className="clip-notch relative mb-10 overflow-hidden border border-white/10 bg-gradient-to-bl from-accent-500/10 via-[#080a10] to-[#080a10] p-8 md:p-12">
+        <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-accent-500/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -right-10 h-56 w-56 rounded-full bg-accent-400/10 blur-3xl" />
         <div className="relative flex flex-col items-center gap-8 text-center md:flex-row md:justify-between md:text-right">
           <div className="max-w-xl">
-            <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-accent-400/30 bg-accent-50 px-4 py-1.5 text-xs font-semibold tracking-widest text-accent-700">
+            <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-accent-500/30 bg-accent-500/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-accent-300">
               <ShieldCheck size={14} />
               Ø§Ù„Ù…Ù†ØµØ© Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ù‚ÙˆØ§Øª Ø§Ù„Ø£Ù…Ù† Ø§Ù„Ø¹Ø§Ù…
             </div>
-            <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-6xl">
+            <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-slate-50 md:text-6xl">
               Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ø£Ù…Ù† Ø§Ù„Ø¹Ø§Ù…
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-gray-500 md:text-base">
+            <p className="mt-4 text-sm leading-relaxed text-slate-400 md:text-base">
               Ø§Ù„Ù…Ù†ØµØ© Ø§Ù„Ø¥Ø¯Ø§Ø±ÙŠØ© Ø§Ù„Ù…ÙˆØ­Ø¯Ø© Ù„Ø£Ø®Ø¨Ø§Ø± Ø§Ù„Ù‚ÙŠØ§Ø¯Ø©ØŒ Ø§Ù„Ø£ÙØ±Ø§Ø¯ ÙÙŠ Ø§Ù„Ø®Ø¯Ù…Ø©ØŒ ÙˆØ§Ù„ØªÙˆØ²ÙŠØ¹ Ø­Ø³Ø¨ Ø§Ù„Ø±ØªØ¨.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3 md:justify-start">
               <span className="v100-badge">V300</span>
-              <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-accent-600">
-                <span className="h-1.5 w-1.5 rotate-45 bg-accent-500" />
+              <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.3em] text-accent-400">
+                <span className="h-1.5 w-1.5 rotate-45 bg-accent-500/15" />
                 Command Operations
               </span>
             </div>
@@ -92,7 +92,7 @@ export default function HomePage() {
           <div className="relative flex h-44 w-44 shrink-0 items-center justify-center">
             <div className="absolute inset-0 rounded-full border border-accent-200" />
             <div className="absolute inset-5 rounded-full border border-dashed border-accent-300" />
-            <div className="clip-hex relative flex h-32 w-32 items-center justify-center border border-accent-400/40 bg-white shadow-lg">
+            <div className="clip-hex relative flex h-32 w-32 items-center justify-center border border-accent-400/40 bg-[#0e1320] shadow-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/psa-logo.png" alt="PSA" className="h-24 w-24 rounded-full object-contain" />
             </div>
@@ -106,12 +106,12 @@ export default function HomePage() {
           <SectionTitle icon={Newspaper}>Ø£Ø®Ø¨Ø§Ø± Ø§Ù„Ø£Ù…Ù† Ø§Ù„Ø¹Ø§Ù…</SectionTitle>
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <div className="relative">
-              <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-gray-400 ltr:left-3 rtl:right-3" />
+              <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-slate-500 ltr:left-3 rtl:right-3" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Ø¨Ø­Ø«..."
-                className="w-40 rounded-lg border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-xs text-gray-900 outline-none focus:border-accent-500"
+                className="w-40 rounded-lg border border-white/15 bg-[#0e1320] py-1.5 pl-8 pr-3 text-xs text-slate-50 outline-none focus:border-accent-500"
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -121,8 +121,8 @@ export default function HomePage() {
                   onClick={() => setCat(c.id)}
                   className={`rounded-full border px-3 py-1 text-xs transition-all ${
                     cat === c.id
-                      ? "border-accent-400/60 bg-accent-50 text-accent-700"
-                      : "border-gray-200 text-gray-500 hover:border-accent-400/40 hover:text-accent-600"
+                      ? "border-accent-400/60 bg-accent-500/10 text-accent-300"
+                      : "border-white/10 text-slate-400 hover:border-accent-400/40 hover:text-accent-400"
                   }`}
                 >
                   {c.labelAr}
@@ -158,7 +158,7 @@ export default function HomePage() {
                             <Badge tone={PRIORITY_TONE[n.priority]}>{AR.priority[n.priority]}</Badge>
                           </div>
                           {n.pinned && (
-                            <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-accent-400/40 bg-white/80 px-2 py-1 text-[11px] text-accent-700 backdrop-blur">
+                            <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-accent-400/40 bg-[#0b0f18]/85 px-2 py-1 text-[11px] text-accent-300 backdrop-blur">
                               <Pin size={11} /> Ù…Ø«Ø¨Øª
                             </span>
                           )}
@@ -166,8 +166,8 @@ export default function HomePage() {
                       )}
                       {!n.images?.[0] && !n.image && n.video && (
                         <div className="relative mb-4 flex h-44 items-center justify-center rounded-xl bg-gray-900">
-                          <span className="clip-hex flex h-14 w-14 items-center justify-center border border-accent-400/40 bg-accent-50">
-                            <Play size={24} className="text-accent-600" />
+                          <span className="clip-hex flex h-14 w-14 items-center justify-center border border-accent-500/40 bg-accent-500/10">
+                            <Play size={24} className="text-accent-400" />
                           </span>
                           <div className="absolute right-3 top-3 flex gap-2">
                             <Badge tone="gold">{catLabel(n.category)}</Badge>
@@ -175,24 +175,24 @@ export default function HomePage() {
                           </div>
                         </div>
                       )}
-                      <div className="mb-1.5 flex items-center gap-2 text-[11px] text-gray-400">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-accent-400/30 bg-accent-50 text-[9px] font-bold text-accent-600">
+                      <div className="mb-1.5 flex items-center gap-2 text-[11px] text-slate-500">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-accent-500/30 bg-accent-500/10 text-[9px] font-bold text-accent-400">
                           {n.author.slice(0, 1)}
                         </span>
-                        <span className="font-semibold text-gray-600">{n.author}</span>
+                        <span className="font-semibold text-slate-300">{n.author}</span>
                         <span>Â·</span>
                         <span>{timeAgo(n.publishedAt)}</span>
                       </div>
-                      <h3 className="mb-2 font-display text-lg font-bold leading-snug text-gray-900 transition-colors group-hover:text-accent-600">
+                      <h3 className="mb-2 font-display text-lg font-bold leading-snug text-slate-50 transition-colors group-hover:text-accent-400">
                         {n.titleAr}
                       </h3>
-                      <p className="line-clamp-2 text-sm leading-relaxed text-gray-500">{n.bodyAr}</p>
+                      <p className="line-clamp-2 text-sm leading-relaxed text-slate-400">{n.bodyAr}</p>
                       <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-                        <span className="flex items-center gap-1 rounded-full border border-accent-400/25 bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-600 transition-all group-hover:border-accent-400/60 group-hover:bg-accent-100">
+                        <span className="flex items-center gap-1 rounded-full border border-accent-400/25 bg-accent-500/10 px-3 py-1 text-xs font-semibold text-accent-400 transition-all group-hover:border-accent-400/60 group-hover:bg-accent-500/15">
                           Ø§Ù‚Ø±Ø£ Ø§Ù„Ø®Ø¨Ø±
                           <ChevronLeft size={13} className="rtl:rotate-180 transition-transform group-hover:translate-x-[-2px] group-hover:rtl:translate-x-[2px]" />
                         </span>
-                        <span className="text-xs text-gray-400">Ù…Ø´Ø§Ù‡Ø¯Ø©: {number(n.views)}</span>
+                        <span className="text-xs text-slate-500">Ù…Ø´Ø§Ù‡Ø¯Ø©: {number(n.views)}</span>
                       </div>
                     </Card>
                   </Link>
@@ -205,15 +205,15 @@ export default function HomePage() {
         {/* Sidebar modules */}
         <div className="space-y-6">
           <Card className="text-center">
-            <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-accent-400/30 bg-accent-50">
-              <ShieldCheck className="h-7 w-7 text-accent-600" />
+            <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-accent-500/30 bg-accent-500/10">
+              <ShieldCheck className="h-7 w-7 text-accent-400" />
             </div>
-            <div className="font-display text-5xl font-bold text-gray-900">{onDuty}</div>
-            <div className="mt-1 text-xs uppercase tracking-widest text-gray-500">Ø§Ù„Ø£ÙØ±Ø§Ø¯ ÙÙŠ Ø§Ù„Ø®Ø¯Ù…Ø©</div>
-            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent-400/30 bg-accent-50 px-3 py-1 text-[11px] text-accent-700">
+            <div className="font-display text-5xl font-bold text-slate-50">{onDuty}</div>
+            <div className="mt-1 text-xs uppercase tracking-widest text-slate-400">Ø§Ù„Ø£ÙØ±Ø§Ø¯ ÙÙŠ Ø§Ù„Ø®Ø¯Ù…Ø©</div>
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent-500/30 bg-accent-500/10 px-3 py-1 text-[11px] text-accent-300">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-500" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-500/15" />
               </span>
               Ø§Ù„Ø®Ø¯Ù…Ø© Ø§Ù„Ø¢Ù†
             </span>
@@ -227,9 +227,9 @@ export default function HomePage() {
                 const pct = (count / totalRanked) * 100;
                 return (
                   <div key={r.id} className="flex items-center gap-3">
-                    <span className="w-24 shrink-0 truncate text-xs text-gray-500">{r.titleAr}</span>
+                    <span className="w-24 shrink-0 truncate text-xs text-slate-400">{r.titleAr}</span>
                     <ProgressBar value={pct} className="flex-1" />
-                    <span className="w-6 text-right text-sm font-bold text-accent-600">{count}</span>
+                    <span className="w-6 text-right text-sm font-bold text-accent-400">{count}</span>
                   </div>
                 );
               })}
@@ -240,4 +240,5 @@ export default function HomePage() {
     </div>
   );
 }
+
 

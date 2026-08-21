@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Cairo, Tajawal, Space_Grotesk, Inter } from "next/font/google";
 import { ShieldCheck } from "lucide-react";
 import { StoreProvider } from "@/lib/store";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#3b82f6",
+  themeColor: "#080a10",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -32,22 +32,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Ticker />
             {children}
           </main>
-          <footer className="clip-notch border-t border-gray-200 bg-white/70 py-6 text-center backdrop-blur">
+          <footer className="clip-notch border-t border-white/10 bg-[#0b0f18]/80 py-6 text-center backdrop-blur">
             <div className="mb-3 flex items-center justify-center gap-3 text-accent-500">
               <span className="h-px w-16 bg-gradient-to-l from-accent-400/50 to-transparent" />
               <ShieldCheck size={16} />
               <span className="h-px w-16 bg-gradient-to-r from-accent-400/50 to-transparent" />
             </div>
-            <span className="font-semibold text-gray-900">الأمن العام</span>
-            <span className="mx-2 text-gray-400">—</span>
-            <span className="text-xs text-gray-500">P S A · بوابة الأمن العام · خادم Dash Roleplay</span>
+            <span className="font-semibold text-slate-50">الأمن العام</span>
+            <span className="mx-2 text-slate-500">—</span>
+            <span className="text-xs text-slate-400">P S A · بوابة الأمن العام · خادم Dash Roleplay</span>
             <div className="mt-3 flex items-center justify-center gap-2">
               <span className="v100-badge">V300</span>
             </div>
           </footer>
-          <Toaster theme="light" position="top-center" richColors />
+          <Toaster theme="dark" position="top-center" richColors />
         </StoreProvider>
       </body>
     </html>
   );
 }
+

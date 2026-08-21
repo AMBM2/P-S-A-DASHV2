@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Radio, Hash } from "lucide-react";
 import { Card, Badge, EmptyState, SectionTitle } from "@/components/ui";
@@ -19,18 +19,18 @@ export default function FieldPage() {
             <Card key={c.id} hover className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="clip-notch-sm flex h-9 w-9 items-center justify-center border border-accent-400/30 bg-accent-50 text-accent-600">
+                  <span className="clip-notch-sm flex h-9 w-9 items-center justify-center border border-accent-500/30 bg-accent-500/10 text-accent-300">
                     <Hash size={15} />
                   </span>
-                  <span className="font-display text-lg font-bold text-gray-900">{c.code}</span>
+                  <span className="font-display text-lg font-bold text-slate-50">{c.code}</span>
                 </div>
                 <Badge tone={c.type === "emergency" ? "rose" : c.type === "tactical" ? "amber" : "gold"}>
                   {c.type === "emergency" ? "طوارئ" : c.type === "tactical" ? "تكتيكي" : "عام"}
                 </Badge>
               </div>
               <div>
-                <div className="font-semibold text-gray-900">{c.titleAr}</div>
-                <p className="mt-1 text-sm leading-relaxed text-gray-500">{c.bodyAr}</p>
+                <div className="font-semibold text-slate-50">{c.titleAr}</div>
+                <p className="mt-1 text-sm leading-relaxed text-slate-400">{c.bodyAr}</p>
               </div>
             </Card>
           ))}
@@ -39,3 +39,4 @@ export default function FieldPage() {
     </div>
   );
 }
+

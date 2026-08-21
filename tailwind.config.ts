@@ -1,17 +1,17 @@
 import type { Config } from "tailwindcss";
 
 const accent = {
-  50: "#eff6ff",
-  100: "#dbeafe",
-  200: "#bfdbfe",
-  300: "#93c5fd",
-  400: "#60a5fa",
-  500: "#3b82f6",
-  600: "#2563eb",
-  700: "#1d4ed8",
-  800: "#1e40af",
-  900: "#1e3a8a",
-  950: "#172554",
+  50: "#fbf6e4",
+  100: "#f6ebc7",
+  200: "#eeda94",
+  300: "#e4c45c",
+  400: "#dcb63f",
+  500: "#d4af37",
+  600: "#b28e1e",
+  700: "#8f7019",
+  800: "#785d1a",
+  900: "#664f1a",
+  950: "#3b2c0c",
 };
 
 const config: Config = {
@@ -44,10 +44,10 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: accent[600],
-          hover: accent[500],
-          active: accent[700],
-          foreground: "#ffffff",
+          DEFAULT: accent[500],
+          hover: accent[400],
+          active: accent[600],
+          foreground: "#0b0e14",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -58,7 +58,7 @@ const config: Config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: accent,
-        accentForeground: "#0f172a",
+        accentForeground: "#fdf9ec",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           hover: "hsl(var(--destructive-hover))",

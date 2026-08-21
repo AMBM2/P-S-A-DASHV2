@@ -74,11 +74,11 @@ export default function AdminPage() {
     return (
       <div className="mx-auto mt-16 max-w-md">
         <Card className="text-center">
-          <div className="clip-hex mx-auto mb-4 flex h-16 w-16 items-center justify-center border border-accent-400/40 bg-accent-50">
-            <ShieldCheck className="h-8 w-8 text-accent-600" />
+          <div className="clip-hex mx-auto mb-4 flex h-16 w-16 items-center justify-center border border-accent-500/40 bg-accent-500/10">
+            <ShieldCheck className="h-8 w-8 text-accent-400" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-gray-900">Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</h1>
-          <p className="mt-1 text-sm text-gray-500">Ø³Ø¬Ù‘Ù„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… Ù…Ø¹Ø±Ù‘Ù Discord Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ</p>
+          <h1 className="font-display text-2xl font-bold text-slate-50">Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</h1>
+          <p className="mt-1 text-sm text-slate-400">Ø³Ø¬Ù‘Ù„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… Ù…Ø¹Ø±Ù‘Ù Discord Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ</p>
           <div className="mt-6 text-right">
             <Field label="Ù…Ø¹Ø±Ù‘Ù Discord">
               <Input value={authId} onChange={(e) => setAuthId(e.target.value)} placeholder="Ù…Ø«Ø§Ù„: 123456789012345678" />
@@ -117,12 +117,12 @@ export default function AdminPage() {
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="clip-hex flex h-12 w-12 items-center justify-center border border-accent-400/40 bg-accent-50">
-            <BarChart3 className="h-6 w-6 text-accent-600" />
+          <div className="clip-hex flex h-12 w-12 items-center justify-center border border-accent-500/40 bg-accent-500/10">
+            <BarChart3 className="h-6 w-6 text-accent-400" />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold text-gray-900">Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</h1>
-            <p className="text-xs text-gray-500">Ù…Ø±Ø­Ø¨Ø§Ù‹ {me?.nameAr} Â· {session?.discordId}</p>
+            <h1 className="font-display text-2xl font-bold text-slate-50">Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</h1>
+            <p className="text-xs text-slate-400">Ù…Ø±Ø­Ø¨Ø§Ù‹ {me?.nameAr} Â· {session?.discordId}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -146,10 +146,10 @@ export default function AdminPage() {
           <Card key={s.label}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-display text-3xl font-bold text-gray-900">{number(s.value)}</div>
-                <div className="text-xs text-gray-500">{s.label}</div>
+                <div className="font-display text-3xl font-bold text-slate-50">{number(s.value)}</div>
+                <div className="text-xs text-slate-400">{s.label}</div>
               </div>
-              <span className="clip-notch-sm flex h-9 w-9 items-center justify-center bg-accent-50 text-accent-600">
+              <span className="clip-notch-sm flex h-9 w-9 items-center justify-center bg-accent-500/10 text-accent-300">
                 <s.icon size={16} />
               </span>
             </div>
@@ -165,14 +165,14 @@ export default function AdminPage() {
           {[...news]
             .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
             .map((n) => (
-              <div key={n.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3">
+              <div key={n.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0e1320] p-3">
                 {n.image && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={n.image} alt="" className="h-12 w-16 rounded-lg object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold text-gray-900">{n.titleAr}</div>
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <div className="truncate font-semibold text-slate-50">{n.titleAr}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
                     <Badge tone="gold">{n.category}</Badge>
                     <Badge tone={n.priority === "critical" ? "rose" : n.priority === "high" ? "amber" : "slate"}>
                       {AR.priority[n.priority]}
@@ -206,7 +206,7 @@ export default function AdminPage() {
               </Field>
               <Field label="Ø§Ù„Ø£ÙˆÙ„ÙˆÙŠØ©">
                 <select
-                  className="w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none focus:border-accent-500"
+                  className="w-full rounded-lg border-2 border-white/15 bg-[#0e1320] px-3 py-3 text-sm text-slate-50 outline-none focus:border-accent-500"
                   value={editor.priority}
                   onChange={(e) => setEditor({ ...editor, priority: e.target.value as any })}
                 >
@@ -235,11 +235,11 @@ export default function AdminPage() {
               </Field>
             </div>
             <div className="flex flex-wrap gap-4">
-              <label className="flex items-center gap-2 text-sm text-gray-700">
+              <label className="flex items-center gap-2 text-sm text-slate-200">
                 <input type="checkbox" checked={editor.pinned} onChange={(e) => setEditor({ ...editor, pinned: e.target.checked })} />
                 Ù…Ø«Ø¨Øª
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700">
+              <label className="flex items-center gap-2 text-sm text-slate-200">
                 <input type="checkbox" checked={editor.status === "published"} onChange={(e) => setEditor({ ...editor, status: e.target.checked ? "published" : "draft" })} />
                 Ù…Ù†Ø´ÙˆØ±
               </label>
@@ -256,5 +256,6 @@ export default function AdminPage() {
     </div>
   );
 }
+
 
 

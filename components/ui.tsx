@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,7 +23,7 @@ export function Button({
   const styles: Record<string, string> = {
     primary:
       "relative border border-transparent bg-primary text-primary-foreground font-semibold shadow-md hover:bg-primary-hover hover:shadow-lg active:bg-primary-active",
-    ghost: "text-muted-foreground hover:bg-black/5 hover:text-gray-900",
+    ghost: "text-muted-foreground hover:bg-white/5 hover:text-slate-50",
     outline:
       "border border-primary/40 text-primary hover:border-primary/70 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring/40",
     danger:
@@ -58,7 +58,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "clip-notch relative overflow-hidden border border-gray-200 bg-white p-6 shadow-md",
+        "clip-notch relative overflow-hidden border border-white/10 bg-[#0e1320] p-6 shadow-md",
         hover &&
           "transition-all duration-200 hover:border-primary/40 hover:shadow-lg",
         className
@@ -84,7 +84,7 @@ export function SectionTitle({
       <span className="clip-notch-sm flex h-8 w-8 shrink-0 items-center justify-center border border-primary/30 bg-primary/10 text-primary">
         {Icon ? <Icon size={15} /> : <span className="h-2 w-2 rotate-45 bg-primary" />}
       </span>
-      <h2 className="font-display text-xl font-bold text-gray-900">{children}</h2>
+      <h2 className="font-display text-xl font-bold text-slate-50">{children}</h2>
       <span className="gold-flourish flex-1" />
     </div>
   );
@@ -105,7 +105,7 @@ export function Badge({
     amber: "bg-warning/15 text-warning border-warning/30",
     rose: "bg-destructive/15 text-destructive border-destructive/30",
     green: "bg-success/15 text-success border-success/30",
-    slate: "bg-gray-100 text-gray-600 border-gray-200",
+    slate: "bg-white/[0.06] text-slate-300 border-white/10",
     indigo: "bg-primary/15 text-primary border-primary/30",
   };
   return (
@@ -133,7 +133,7 @@ export function Field({
 }) {
   return (
     <LabelPrimitive.Root className={cn("flex flex-col gap-1.5", className)}>
-      <span className="text-xs font-semibold uppercase tracking-wider text-gray-600">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">{label}</span>
       {children}
     </LabelPrimitive.Root>
   );
@@ -145,7 +145,7 @@ export const Label = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn("text-xs font-semibold uppercase tracking-wider text-gray-600", className)}
+    className={cn("text-xs font-semibold uppercase tracking-wider text-slate-300", className)}
     {...props}
   />
 ));
@@ -153,7 +153,7 @@ Label.displayName = "Label";
 
 /* ============================= INPUT ============================= */
 export const inputClass =
-  "w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition duration-150 focus:border-primary focus:ring-4 focus:ring-primary/10";
+  "w-full rounded-lg border-2 border-white/15 bg-[#0e1320] px-4 py-3 text-sm text-slate-50 placeholder:text-slate-500 outline-none transition duration-150 focus:border-primary focus:ring-4 focus:ring-primary/10";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClass, props.className)} />;
@@ -166,7 +166,7 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
 /* ============================= PROGRESS ============================= */
 export function ProgressBar({ value, className }: { value: number; className?: string }) {
   return (
-    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-gray-200", className)}>
+    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-white/10", className)}>
       <div
         className="h-full rounded-full bg-primary transition-all duration-500"
         style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
@@ -178,7 +178,7 @@ export function ProgressBar({ value, className }: { value: number; className?: s
 /* ============================= EMPTY STATE ============================= */
 export function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center text-sm text-gray-400">
+    <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.04] p-10 text-center text-sm text-slate-500">
       {message}
     </div>
   );
@@ -197,7 +197,7 @@ export const TooltipContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-lg",
+        "z-50 rounded-lg border border-white/10 bg-[#0e1320] px-3 py-1.5 text-xs font-medium text-slate-200 shadow-lg",
         className
       )}
       {...props}
@@ -214,7 +214,7 @@ export const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn("flex gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1", className)}
+    className={cn("flex gap-1 rounded-xl border border-white/10 bg-white/[0.04] p-1", className)}
     {...props}
   />
 ));
@@ -226,7 +226,7 @@ export const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex-1 rounded-lg px-3 py-2 text-sm font-semibold text-gray-500 transition-colors data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm",
+      "flex-1 rounded-lg px-3 py-2 text-sm font-semibold text-slate-400 transition-colors data-[state=active]:bg-accent-500/15 data-[state=active]:text-accent-300 data-[state=active]:shadow-sm",
       className
     )}
     {...props}
@@ -242,7 +242,7 @@ export const Separator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SeparatorPrimitive.Root
     ref={ref}
-    className={cn("bg-gray-200", className)}
+    className={cn("bg-white/10", className)}
     {...props}
   />
 ));
@@ -256,12 +256,12 @@ export const Switch = React.forwardRef<
   <SwitchPrimitive.Root
     ref={ref}
     className={cn(
-      "peer inline-flex h-6 w-11 items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-gray-300",
+      "peer inline-flex h-6 w-11 items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-white/10",
       className
     )}
     {...props}
   >
-    <SwitchPrimitive.Thumb className="pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" />
+    <SwitchPrimitive.Thumb className="pointer-events-none block h-5 w-5 rounded-full bg-[#0e1320] shadow-lg transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" />
   </SwitchPrimitive.Root>
 ));
 Switch.displayName = "Switch";
@@ -302,17 +302,17 @@ export function Modal({
                   exit={{ opacity: 0, scale: 0.96, y: 10 }}
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className={cn(
-                    "clip-notch relative max-h-[88vh] w-full overflow-y-auto border border-gray-200 bg-white p-6 shadow-2xl",
+                    "clip-notch relative max-h-[88vh] w-full overflow-y-auto border border-white/10 bg-[#0e1320] p-6 shadow-2xl",
                     wide ? "max-w-3xl" : "max-w-lg"
                   )}
                 >
                   <div className="mb-4 flex items-center justify-between">
-                    <DialogPrimitive.Title className="font-display text-lg font-bold text-gray-900">
+                    <DialogPrimitive.Title className="font-display text-lg font-bold text-slate-50">
                       {title}
                     </DialogPrimitive.Title>
                     <button
                       onClick={onClose}
-                      className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                      className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-white/[0.06] hover:text-slate-50"
                     >
                       <X size={18} />
                     </button>
@@ -327,3 +327,4 @@ export function Modal({
     </DialogPrimitive.Root>
   );
 }
+

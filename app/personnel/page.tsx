@@ -51,8 +51,8 @@ export default function PersonnelPage() {
               className={cn(
                 "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all",
                 status === s.k
-                  ? "border-accent-400/60 bg-accent-50 text-accent-700"
-                  : "border-gray-200 text-gray-500 hover:border-accent-400/40 hover:text-accent-600"
+                  ? "border-accent-400/60 bg-accent-500/10 text-accent-300"
+                  : "border-white/10 text-slate-400 hover:border-accent-400/40 hover:text-accent-400"
               )}
             >
               <s.icon size={13} /> {s.label} <span className="opacity-70">{counts[s.k as keyof typeof counts]}</span>
@@ -60,12 +60,12 @@ export default function PersonnelPage() {
           ))}
         </div>
         <div className="relative">
-          <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-gray-400 ltr:left-3 rtl:right-3" />
+          <Search size={14} className="absolute top-1/2 -translate-y-1/2 text-slate-500 ltr:left-3 rtl:right-3" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Ø¨Ø­Ø« Ø¨Ø§Ù„Ø§Ø³Ù… / Ø§Ù„Ø±ØªØ¨Ø© / Ø§Ù„Ø±Ù‚Ù…"
-            className="w-64 rounded-lg border border-gray-300 bg-white py-2 pl-8 pr-3 text-sm text-gray-900 outline-none focus:border-accent-500"
+            className="w-64 rounded-lg border border-white/15 bg-[#0e1320] py-2 pl-8 pr-3 text-sm text-slate-50 outline-none focus:border-accent-500"
           />
         </div>
       </div>
@@ -76,17 +76,17 @@ export default function PersonnelPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((o) => (
             <Card key={o.id} hover className="flex items-center gap-4">
-              <div className="clip-hex flex h-14 w-14 shrink-0 items-center justify-center border border-accent-400/30 bg-accent-50 font-display text-lg font-bold text-accent-600">
+              <div className="clip-hex flex h-14 w-14 shrink-0 items-center justify-center border border-accent-500/30 bg-accent-500/10 font-display text-lg font-bold text-accent-400">
                 {o.nameAr.slice(0, 2)}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate font-semibold text-gray-900">{o.nameAr}</div>
-                <div className="truncate text-xs text-gray-500">{getRankTitle(o.rankId)} Â· {getDepartmentTitle(o.departmentId)}</div>
+                <div className="truncate font-semibold text-slate-50">{o.nameAr}</div>
+                <div className="truncate text-xs text-slate-400">{getRankTitle(o.rankId)} Â· {getDepartmentTitle(o.departmentId)}</div>
                 <div className="mt-1 flex items-center gap-2">
                   <Badge tone={o.status === "on-duty" ? "green" : o.status === "suspended" ? "rose" : "slate"}>
                     {AR.status[o.status]}
                   </Badge>
-                  {o.callsign && <span className="text-[11px] text-gray-400">#{o.callsign}</span>}
+                  {o.callsign && <span className="text-[11px] text-slate-500">#{o.callsign}</span>}
                 </div>
               </div>
             </Card>
@@ -96,4 +96,5 @@ export default function PersonnelPage() {
     </div>
   );
 }
+
 

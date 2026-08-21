@@ -3,26 +3,12 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   DESIGN SYSTEM — LibreUIUX "Modern Web App"
-   Light theme · blue-600 primary · Inter + Cairo · white cards · soft shadows
-   (legacy `gold-*` utilities are repointed to the blue scale so existing
-    markup reskins automatically)
+   DESIGN SYSTEM — Gold + Black (Dark)
+   Deep navy-black surfaces · Gold accent scale · Inter + Cairo + Space Grotesk
+   Glassmorphism · Gold glows · Eye-comfort motion reduction
    ========================================================================== */
 :root {
-  color-scheme: light;
-
-  /* ---------- LEGACY ALIASES → BLUE SCALE (LibreUIUX primary) ---------- */
-  --accent-100: #dbeafe;
-  --accent-200: #bfdbfe;
-  --accent-300: #93c5fd;
-  --accent-400: #60a5fa;
-  --accent-500: #3b82f6;
-  --accent-600: #2563eb;
-  --accent-700: #1d4ed8;
-  --accent: #3b82f6;
-  --accent-bright: #60a5fa;
-  --accent-rgb: 59, 130, 246;
-  --accent-bright-rgb: 96, 165, 250;
+  color-scheme: dark;
 
   /* ---------- PRIMITIVE SCALES (4px spacing / radius / shadow / duration) ---------- */
   --space-1: 0.25rem;
@@ -43,11 +29,11 @@
   --radius-2xl: 1.25rem;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.06);
-  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.08);
-  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.1), 0 4px 6px -4px rgb(15 23 42 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.1), 0 8px 10px -6px rgb(15 23 42 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(15 23 42 / 0.22);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.7), 0 8px 10px -6px rgb(0 0 0 / 0.6);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.8);
 
   --duration-fast: 150ms;
   --duration-normal: 200ms;
@@ -59,71 +45,66 @@
   --z-popover: 1300;
   --z-tooltip: 1400;
 
-  /* ---------- SEMANTIC TOKENS (light, Modern Web App) ---------- */
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
+  /* ---------- SEMANTIC TOKENS (dark gold/black) ---------- */
+  --background: 225 29% 5%;
+  --foreground: 60 30% 96%;
 
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card: 225 25% 7%;
+  --card-foreground: 60 30% 96%;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover: 225 25% 7%;
+  --popover-foreground: 60 30% 96%;
 
-  --primary: 217 91% 60%;
-  --primary-hover: 221 83% 53%;
-  --primary-active: 224 76% 48%;
-  --primary-foreground: 0 0% 100%;
+  --primary: 42 92% 54%;
+  --primary-hover: 42 92% 60%;
+  --primary-active: 42 80% 48%;
+  --primary-foreground: 225 29% 5%;
 
-  --secondary: 220 14% 96%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary: 225 20% 12%;
+  --secondary-foreground: 60 30% 96%;
 
-  --muted: 220 14% 96%;
-  --muted-foreground: 220 9% 46%;
+  --muted: 225 20% 12%;
+  --muted-foreground: 60 10% 60%;
 
-  --accent-token: 217 91% 60%;
-  --accent-foreground: 222 47% 11%;
+  --accent-token: 42 92% 54%;
+  --accent-foreground: 225 29% 5%;
 
   --destructive: 0 72% 51%;
   --destructive-hover: 0 70% 45%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive-foreground: 60 30% 96%;
 
   --success: 160 84% 39%;
-  --success-foreground: 0 0% 100%;
+  --success-foreground: 60 30% 96%;
   --warning: 38 92% 50%;
-  --warning-foreground: 222 47% 11%;
+  --warning-foreground: 225 29% 5%;
 
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --ring: 217 91% 60%;
+  --border: 60 20% 18%;
+  --input: 60 20% 18%;
+  --ring: 42 92% 54%;
 
   --radius: 0.75rem;
 
-  /* ---------- LIGHT SURFACES ---------- */
-  --glass: 255, 255, 255;
-  --bg: #f8fafc;
-  --bg-2: #f1f5f9;
-  --bg-800: #ffffff;
-  --bg-700: #f8fafc;
-  --line: rgba(15, 23, 42, 0.08);
-  --line-strong: rgba(15, 23, 42, 0.14);
-}
+  /* ---------- LEGACY GOLD CSS VARS (for existing .gold-* utilities) ---------- */
+  --accent-100: #f6ebc7;
+  --accent-200: #eeda94;
+  --accent-300: #e4c45c;
+  --accent-400: #dcb63f;
+  --accent-500: #d4af37;
+  --accent-600: #b28e1e;
+  --accent-700: #8f7019;
+  --accent: #d4af37;
+  --accent-bright: #dcb63f;
+  --accent-rgb: 212, 175, 55;
+  --accent-bright-rgb: 220, 182, 63;
 
-/* ---------- DARK MODE OVERRIDE (theme switching) ---------- */
-.dark {
-  --background: 222 47% 4%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 7%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 8%;
-  --popover-foreground: 210 40% 98%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-  --accent-token: 217 91% 60%;
-  --accent-foreground: 210 40% 98%;
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
+  /* ---------- DARK SURFACES ---------- */
+  --glass: 16, 20, 31;
+  --bg: #080a10;
+  --bg-2: #0b0e14;
+  --bg-800: #0e1320;
+  --bg-700: #0d121f;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
 }
 
 * { box-sizing: border-box; }
@@ -134,6 +115,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--bg);
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgba(var(--accent-rgb), 0.07), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(var(--accent-rgb), 0.05), transparent 60%);
   color: var(--foreground);
   font-family: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
   overflow-x: hidden;
@@ -141,26 +125,26 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-::selection { background: rgba(var(--accent-rgb), 0.22); color: #0b1220; }
+::selection { background: rgba(var(--accent-rgb), 0.25); color: #0b0e14; }
 
 /* ---------- GEOMETRY ---------- */
 .clip-notch { border-radius: 1rem; }
 .clip-notch-sm { border-radius: 0.7rem; }
 .clip-hex { border-radius: 1rem; clip-path: none; }
 
-/* ---------- SURFACES (light glassmorphism per LibreUIUX) ---------- */
+/* ---------- SURFACES (dark glassmorphism) ---------- */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(16, 20, 31, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
 }
 .glass-strong {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(16, 20, 31, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(16px);
 }
 
-/* ---------- BRAND TEXT (blue gradient) ---------- */
+/* ---------- BRAND TEXT (gold gradient) ---------- */
 .gold-text {
   background: linear-gradient(118deg, var(--accent-300) 0%, var(--accent-500) 50%, var(--accent-700) 100%);
   -webkit-background-clip: text;
@@ -168,18 +152,18 @@ body {
   color: transparent;
 }
 
-/* ---------- GENTLE BLUE GLOWS (kept for legacy usage) ---------- */
+/* ---------- GENTLE GOLD GLOWS ---------- */
 .gold-pulse { animation: goldPulse 4.5s ease-in-out infinite; }
 @keyframes goldPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.18), 0 0 22px rgba(var(--accent-rgb), 0.12); }
-  50% { box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4), 0 0 38px rgba(var(--accent-rgb), 0.22); }
+  0%, 100% { box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.2), 0 0 22px rgba(var(--accent-rgb), 0.12); }
+  50% { box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.45), 0 0 38px rgba(var(--accent-rgb), 0.25); }
 }
-.gold-glow-strong { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.25), 0 0 30px -8px rgba(var(--accent-rgb), 0.32), 0 0 64px -24px rgba(var(--accent-rgb), 0.24); }
+.gold-glow-strong { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.25), 0 0 30px -8px rgba(var(--accent-rgb), 0.35), 0 0 64px -24px rgba(var(--accent-rgb), 0.28); }
 
 /* ---------- DIVIDER (line + diamond) ---------- */
 .gold-flourish { display: flex; align-items: center; gap: 12px; }
 .gold-flourish::before, .gold-flourish::after {
-  content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(15,23,42,0.12), transparent);
+  content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
 }
 .gold-flourish .diamond {
   width: 7px; height: 7px; transform: rotate(45deg);
@@ -190,14 +174,14 @@ body {
 .v100-badge {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 12px; border: 1px solid rgba(var(--accent-rgb), 0.35);
-  border-radius: 9999px; background: rgba(var(--accent-rgb), 0.08);
-  color: var(--accent-700);
+  border-radius: 9999px; background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-300);
   font-family: var(--font-display), sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
 }
 
-/* ---------- SCROLLBARS (light) ---------- */
+/* ---------- SCROLLBARS (dark) ---------- */
 .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.18); border-radius: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -208,7 +192,7 @@ body {
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
 
-/* ---------- FOCUS (uses --ring token) ---------- */
+/* ---------- FOCUS ---------- */
 :focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px hsl(var(--ring) / 0.55), 0 0 0 6px hsl(var(--ring) / 0.18);
@@ -217,17 +201,17 @@ body {
 
 input[type="range"].gold-range { accent-color: var(--accent); }
 
-/* ---------- NATIVE FORM CONTROLS (light) ---------- */
-select option, select optgroup { background-color: #ffffff; color: #0f172a; }
-select option:checked { background-color: rgba(var(--accent-rgb), 0.18); color: var(--accent-700); }
-input, select, textarea { color-scheme: light; }
+/* ---------- NATIVE FORM CONTROLS (dark) ---------- */
+select option, select optgroup { background-color: #10141f; color: #fdf9ec; }
+select option:checked { background-color: rgba(var(--accent-rgb), 0.25); color: var(--accent-300); }
+input, select, textarea { color-scheme: dark; }
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
-  -webkit-text-fill-color: #0f172a; caret-color: #0f172a; border-radius: 0.75rem;
+  -webkit-box-shadow: 0 0 0 1000px #10141f inset;
+  -webkit-text-fill-color: #fdf9ec; caret-color: #d4af37; border-radius: 0.75rem;
 }
 input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):focus,
 select:focus, textarea:focus {
-  outline: none; box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.4);
+  outline: none; box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.5);
 }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); background-color: transparent; }
 

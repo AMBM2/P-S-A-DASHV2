@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { Search, Fingerprint, BadgeCheck } from "lucide-react";
@@ -28,16 +28,16 @@ export default function LookupPage() {
       <SectionTitle icon={Fingerprint}>استعلام ميداني</SectionTitle>
       <Card className="mb-6">
         <div className="relative">
-          <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-gray-400 ltr:left-4 rtl:right-4" />
+          <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-slate-500 ltr:left-4 rtl:right-4" />
           <input
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="أدخل الاسم · الرقم التعريفي · النداء · معرّف Discord"
-            className="w-full rounded-lg border-2 border-gray-300 bg-white py-3.5 pl-10 pr-4 text-sm text-gray-900 outline-none focus:border-accent-500"
+            className="w-full rounded-lg border-2 border-white/15 bg-[#0e1320] py-3.5 pl-10 pr-4 text-sm text-slate-50 outline-none focus:border-accent-500"
           />
         </div>
-        <p className="mt-2 text-xs text-gray-400">تُظهر نتائج فورية لأفراد الأمن العام المسجلين.</p>
+        <p className="mt-2 text-xs text-slate-500">تُظهر نتائج فورية لأفراد الأمن العام المسجلين.</p>
       </Card>
 
       {!q.trim() && <EmptyState message="ابدأ الكتابة للبحث عن فرد" />}
@@ -47,19 +47,19 @@ export default function LookupPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {result.map((o) => (
             <Card key={o.id} hover className="flex items-center gap-4">
-              <div className="clip-hex flex h-14 w-14 shrink-0 items-center justify-center border border-accent-400/30 bg-accent-50 font-display text-lg font-bold text-accent-600">
+              <div className="clip-hex flex h-14 w-14 shrink-0 items-center justify-center border border-accent-500/30 bg-accent-500/10 font-display text-lg font-bold text-accent-400">
                 {o.nameAr.slice(0, 2)}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate font-semibold text-gray-900">{o.nameAr}</div>
-                <div className="truncate text-xs text-gray-500">{o.badge} · #{o.callsign}</div>
+                <div className="truncate font-semibold text-slate-50">{o.nameAr}</div>
+                <div className="truncate text-xs text-slate-400">{o.badge} · #{o.callsign}</div>
                 <div className="mt-1">
                   <Badge tone={o.status === "on-duty" ? "green" : o.status === "suspended" ? "rose" : "slate"}>
                     {AR.status[o.status]}
                   </Badge>
                 </div>
               </div>
-              <div className="text-right text-[11px] text-gray-400">
+              <div className="text-right text-[11px] text-slate-500">
                 <div>{getRankTitle(o.rankId)}</div>
                 <div>{getDepartmentTitle(o.departmentId)}</div>
               </div>
@@ -70,3 +70,4 @@ export default function LookupPage() {
     </div>
   );
 }
+
