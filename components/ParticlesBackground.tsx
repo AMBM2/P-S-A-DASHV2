@@ -14,7 +14,7 @@ function CyberParticles() {
       particles: {
         number: { value: 60, density: { enable: true, area: 1000 } },
         color: { value: ["#c7d2fe", "#a5b4fc", "#e0e7ff", "#67e8f9"] },
-        opacity: { value: { min: 0.1, max: 0.6 } },
+        opacity: { value: { min: 0.08, max: 0.4 } },
         size: { value: { min: 1, max: 2.6 } },
         move: {
           enable: true,
