@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import { Button, Card, Field, Input } from "@/components/ui";
+import { BorderBeam } from "@/components/effects";
 import { cn } from "@/lib/format";
 
 type DiscordRole = {
@@ -126,6 +127,7 @@ export default function RecruitPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10">
       <Card className="relative overflow-hidden">
+        <BorderBeam size={240} duration={9} />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-gold-400 to-transparent" />
         <div className="flex items-center gap-3 border-b border-gold-400/15 p-6">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-gold-300/40 bg-gold-400/10 text-gold-200">

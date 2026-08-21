@@ -94,13 +94,44 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* ============ BASIC ACCENT TEXT (solid, no gradient) ============ */
-.gold-text { color: var(--accent-300); }
+/* ============ BRAND TEXT GRADIENT (gold) ============ */
+.gold-text {
+  background: linear-gradient(118deg, var(--accent-200) 0%, var(--accent-bright) 42%, var(--accent-400) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
-/* ============ DIVIDER (plain line) ============ */
+/* ============ GENTLE GLOWS ============ */
+.gold-pulse { animation: goldPulse 4.5s ease-in-out infinite; }
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.18), 0 0 22px rgba(var(--accent-rgb), 0.12); }
+  50% { box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.4), 0 0 38px rgba(var(--accent-rgb), 0.22); }
+}
+.gold-glow-strong { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.25), 0 0 30px -8px rgba(var(--accent-rgb), 0.32), 0 0 64px -24px rgba(var(--accent-rgb), 0.24); }
+
+@keyframes aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  33% { transform: translate(3%, -2%) scale(1.06); opacity: 0.85; }
+  66% { transform: translate(-3%, 2%) scale(0.97); opacity: 1.05); }
+}
+@keyframes nebulaDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
+  50% { transform: translate(1.5%, -1.5%) scale(1.05); opacity: 0.95; }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.8; }
+}
+
+/* ============ DIVIDER (line + diamond) ============ */
 .gold-flourish { display: flex; align-items: center; gap: 12px; }
 .gold-flourish::before, .gold-flourish::after {
-  content: ""; height: 1px; flex: 1; background: rgba(255, 255, 255, 0.12);
+  content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+}
+.gold-flourish .diamond {
+  width: 7px; height: 7px; transform: rotate(45deg);
+  border: 1px solid rgba(var(--accent-rgb), 0.7); background: rgba(var(--accent-rgb), 0.15);
 }
 
 /* ============ VERSION BADGE ============ */

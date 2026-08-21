@@ -66,7 +66,7 @@ export function Card({
       className={cn(
         "clip-notch relative overflow-hidden border border-gold-400/15 bg-[rgba(var(--glass),0.5)] p-6",
         hover &&
-          "transition-all duration-200 hover:border-gold-300/40",
+          "transition-all duration-200 hover:border-gold-300/40 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_18px_50px_-22px_rgba(var(--accent-rgb),0.28)]",
         className
       )}
     >

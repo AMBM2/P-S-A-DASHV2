@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Atropos from "atropos/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Newspaper, Crown, Pin, Search, Eye, ShieldCheck, MessageSquare, ChevronLeft, Play } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Card, Badge, ProgressBar, EmptyState, SectionTitle } from "@/components/ui";
+import { AuroraBackground, GlowCard, BorderBeam } from "@/components/effects";
 import { timeAgo, number } from "@/lib/format";
 import { AR } from "@/lib/ar";
 import { RANKS } from "@/lib/seed";
@@ -51,6 +53,8 @@ export default function HomePage() {
     <div>
       {/* Command Hero */}
       <div className="clip-notch relative mb-10 overflow-hidden border border-gold-400/15 bg-[rgba(var(--glass),0.5)] p-8 backdrop-blur-xl md:p-12">
+        <AuroraBackground />
+        <BorderBeam size={300} duration={10} />
         <div className="relative flex flex-col items-center gap-8 text-center md:flex-row md:justify-between md:text-right">
           <div className="max-w-xl">
             <div className="clip-notch-sm mb-4 inline-flex items-center gap-2 border border-gold-400/30 bg-gold-400/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-gold-200">
@@ -76,14 +80,29 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Official emblem */}
-          <div className="clip-notch relative flex h-36 w-36 shrink-0 items-center justify-center border border-gold-400/30 bg-gold-400/5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/psa-logo.png"
-              alt="PSA"
-              className="h-28 w-28 rounded-full object-contain"
-            />
+          {/* Official emblem — orbital rings */}
+          <div className="relative flex h-44 w-44 shrink-0 items-center justify-center">
+            <div className="absolute inset-0 rounded-full border border-gold-400/15 animate-[spin_30s_linear_infinite]" />
+            <div className="absolute inset-5 rounded-full border border-dashed border-gold-400/10 animate-[spin_44s_linear_infinite_reverse]" />
+            <Atropos
+              className="relative"
+              rotateXMax={14}
+              rotateYMax={14}
+              shadow={false}
+              highlight={false}
+            >
+              <div
+                data-atropos-offset="5"
+                className="clip-hex relative flex h-32 w-32 items-center justify-center border border-gold-400/30 bg-gold-400/5 gold-glow-strong animate-[goldPulse_4.5s_ease-in-out_infinite]"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/psa-logo.png"
+                  alt="PSA"
+                  className="h-24 w-24 rounded-full object-contain"
+                />
+              </div>
+            </Atropos>
           </div>
         </div>
       </div>
@@ -230,7 +249,7 @@ export default function HomePage() {
 
         {/* Module 2 + 3: On-Duty Counter & Rank Distribution */}
         <div className="space-y-6">
-          <Card className="text-center">
+          <GlowCard intensity={0.5} className="text-center">
             <div className="clip-hex mx-auto mb-3 flex h-14 w-14 items-center justify-center border border-gold-400/30 bg-gold-400/10">
               <ShieldCheck className="h-7 w-7 text-gold-300" />
             </div>
@@ -245,7 +264,7 @@ export default function HomePage() {
               </span>
               {lang === "ar" ? "الخدمة الآن" : "On shift"}
             </span>
-          </Card>
+          </GlowCard>
 
           <Card>
             <SectionTitle icon={Crown}>
