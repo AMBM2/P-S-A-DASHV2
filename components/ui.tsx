@@ -28,19 +28,19 @@ export function Button({
 }) {
   const styles: Record<string, string> = {
     primary:
-      "relative border border-gold-400/40 bg-gold-500 text-white font-semibold shadow-[0_4px_14px_-6px_rgba(var(--accent-rgb),0.5)] hover:bg-gold-400",
-    ghost: "text-zinc-300 hover:bg-white/5 hover:text-gold-200",
+      "relative border border-primary/45 bg-primary text-primary-foreground font-semibold shadow-[0_4px_14px_-6px_hsl(var(--primary)/0.6)] hover:bg-primary/90 hover:border-primary/60 active:bg-primary/80",
+    ghost: "text-muted-foreground hover:bg-white/5 hover:text-primary-foreground",
     outline:
-      "border border-gold-400/35 text-gold-200 hover:border-gold-300/70 hover:bg-gold-400/10 focus-visible:ring-2 focus-visible:ring-gold-300/40",
+      "border border-primary/35 text-primary hover:border-primary/70 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring/40",
     danger:
-      "relative border border-rose-500/40 bg-rose-600 text-white hover:bg-rose-500",
+      "relative border border-destructive/40 bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
     success:
-      "relative border border-emerald-500/40 bg-emerald-600 text-white hover:bg-emerald-500",
+      "relative border border-success/40 bg-success text-success-foreground hover:bg-success/90 active:bg-success/80",
   };
   return (
     <button
       className={cn(
-        "clip-notch-sm inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:ring-4 focus-visible:ring-gold-200/40",
+        "clip-notch-sm inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none outline-none focus-visible:ring-4 focus-visible:ring-ring/40",
         styles[variant],
         className
       )}
@@ -64,9 +64,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "clip-notch relative overflow-hidden border border-gold-400/15 bg-[rgba(var(--glass),0.5)] p-6",
+        "clip-notch relative overflow-hidden border border-border bg-card/55 p-6",
         hover &&
-          "transition-all duration-200 hover:border-gold-300/40 hover:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_18px_50px_-22px_rgba(var(--accent-rgb),0.28)]",
+          "transition-all duration-200 hover:border-primary/40 hover:shadow-[0_0_0_1px_hsl(var(--primary)/0.18),0_18px_50px_-22px_hsl(var(--primary)/0.28)]",
         className
       )}
     >
@@ -87,10 +87,10 @@ export function SectionTitle({
 }) {
   return (
     <div className={cn("mb-4 flex items-center gap-3", className)}>
-      <span className="clip-notch-sm flex h-8 w-8 shrink-0 items-center justify-center border border-gold-400/30 bg-gold-400/10 text-gold-200">
-        {Icon ? <Icon size={15} /> : <span className="h-2 w-2 rotate-45 bg-gold-300" />}
+      <span className="clip-notch-sm flex h-8 w-8 shrink-0 items-center justify-center border border-primary/30 bg-primary/10 text-primary">
+        {Icon ? <Icon size={15} /> : <span className="h-2 w-2 rotate-45 bg-primary" />}
       </span>
-      <h2 className="font-display text-xl font-bold text-zinc-100">{children}</h2>
+      <h2 className="font-display text-xl font-bold text-foreground">{children}</h2>
       <span className="gold-flourish flex-1" />
     </div>
   );
@@ -107,12 +107,12 @@ export function Badge({
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    gold: "bg-gold-400/12 text-gold-200 border-gold-400/25",
-    amber: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-    rose: "bg-rose-500/15 text-rose-300 border-rose-500/30",
-    green: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-    slate: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
-    indigo: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
+    gold: "bg-primary/10 text-primary border-primary/25",
+    amber: "bg-warning/15 text-warning border-warning/30",
+    rose: "bg-destructive/15 text-destructive border-destructive/30",
+    green: "bg-success/15 text-success border-success/30",
+    slate: "bg-muted text-muted-foreground border-border",
+    indigo: "bg-primary/15 text-primary border-primary/30",
   };
   return (
     <span
@@ -151,7 +151,7 @@ export const Label = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn("text-xs font-semibold uppercase tracking-wider text-zinc-300", className)}
+    className={cn("text-xs font-semibold uppercase tracking-wider text-muted-foreground", className)}
     {...props}
   />
 ));
@@ -159,7 +159,7 @@ Label.displayName = "Label";
 
 /* ============================= INPUT / TEXTAREA ============================= */
 export const inputClass =
-  "w-full rounded-[6px] border border-gold-400/20 bg-obsidian-800/80 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)] outline-none transition duration-150 focus:border-gold-300/70 focus:bg-obsidian-800 focus:ring-2 focus:ring-gold-400/30 focus:shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.18),0_0_22px_-8px_rgba(var(--accent-rgb),0.5)]";
+  "w-full rounded-[6px] border border-input bg-obsidian-800/80 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[inset_0_1px_2px_rgba(0,0,0,0.35)] outline-none transition duration-150 focus:border-primary focus:bg-obsidian-800 focus:ring-2 focus:ring-ring/40 focus:shadow-[0_0_0_1px_hsl(var(--primary)/0.18),0_0_22px_-8px_hsl(var(--primary)/0.5)]";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClass, props.className)} />;

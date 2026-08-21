@@ -52,7 +52,7 @@ export default function HomePage() {
   return (
     <div>
       {/* Command Hero */}
-      <div className="clip-notch relative mb-10 overflow-hidden border border-gold-400/15 bg-[rgba(var(--glass),0.5)] p-8 backdrop-blur-xl md:p-12">
+      <div className="clip-notch relative mb-10 overflow-hidden border border-border bg-card/55 p-8 backdrop-blur-xl md:p-12">
         <AuroraBackground />
         <BorderBeam size={300} duration={10} />
         <div className="relative flex flex-col items-center gap-8 text-center md:flex-row md:justify-between md:text-right">
@@ -65,7 +65,7 @@ export default function HomePage() {
             <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight gold-text md:text-6xl">
               {lang === "ar" ? "بوابة الأمن العام" : "Public Security Portal"}
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-zinc-400 md:text-base">
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base">
               {lang === "ar"
                 ? "المنصة الإدارية الموحدة لأخبار القيادة، الأفراد في الخدمة، والتوزيع حسب الرتب."
                 : "The unified administrative platform for command news, on-duty personnel and rank distribution."}

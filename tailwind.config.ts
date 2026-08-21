@@ -63,11 +63,25 @@ const config: Config = {
         sans: ["var(--font-cairo)", "var(--font-tajawal)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "var(--font-cairo)", "sans-serif"],
       },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
       boxShadow: {
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
         gold: "0 0 25px rgba(var(--accent-rgb), 0.15)",
         "gold-lg": "0 0 45px rgba(var(--accent-rgb), 0.25)",
         "gold-glow": "0 4px 30px -4px rgba(var(--accent-rgb), 0.4)",
         brass: "0 18px 50px -22px rgba(var(--accent-rgb), 0.6)",
+      },
+      transitionDuration: {
+        fast: "var(--duration-fast)",
+        normal: "var(--duration-normal)",
+        slow: "var(--duration-slow)",
       },
       keyframes: {
         ticker: {
